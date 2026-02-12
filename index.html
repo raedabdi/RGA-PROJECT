@@ -104,6 +104,8 @@
   .macros-grid { display: flex; justify-content: space-around; margin-top: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
   .macro-item { text-align: center; }
 
+  .extra-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 20px; }
+
   .ar-mode { direction: rtl; }
   .en-mode { direction: ltr; }
   .hidden { display: none; }
@@ -137,7 +139,7 @@
 </div>
 
 <div class="logo-container">
-  <img src="https://i.ibb.co/x8t5vNwX/IMG-4196.png" alt="RGALAB Logo">
+  <img src="https://i.ibb.co/60qHqWcD/IMG-4189.png" alt="RGALAB Logo">
   <h2 id="brand-name" style="margin: 5px 0; letter-spacing: 2px;">RGALAB</h2>
 </div>
 
@@ -169,6 +171,14 @@
   <button class="calc-btn" onclick="processAll()" id="calcBtn">تحليل البيانات</button>
 
   <div id="resultsArea" class="hidden">
+    <div class="extra-card">
+        <div style="text-align:center; margin-bottom:10px; font-size:14px;">💧 سجل الماء: <span id="water-tracker" style="cursor:pointer; font-size:18px;">⬜⬜⬜⬜⬜⬜⬜⬜</span></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:center; font-size:13px;">
+            <div style="background:rgba(255,255,255,0.1); padding:8px; border-radius:10px;">☕ كافيين آمن: <b id="caf-val">--</b></div>
+            <div style="background:rgba(255,255,255,0.1); padding:8px; border-radius:10px;">🏃 عُمرك اللياقي: <b id="fit-val">--</b></div>
+        </div>
+    </div>
+
     <div class="grid-results">
       <div class="res-box">
         <small id="lbl-bmi">مؤشر كتلة الجسم</small>
@@ -297,6 +307,13 @@
 
     if(!w || !h || !a) return;
 
+    // --- حفظ البيانات تلقائياً ---
+    localStorage.setItem('rga_w', w);
+    localStorage.setItem('rga_h', h);
+    localStorage.setItem('rga_a', a);
+    localStorage.setItem('rga_g', g);
+    localStorage.setItem('rga_act', act);
+
     // Challenge Logic
     let startDate = localStorage.getItem('rgashowDate');
     if(!startDate) {
@@ -314,11 +331,13 @@
     let stIndex = bmi < 18.5 ? 0 : bmi < 25 ? 1 : bmi < 30 ? 2 : 3;
     document.getElementById('status-bmi').innerText = trans[lang].status[stIndex];
 
-    // Fitness Age
+    // Fitness Age & Extra Tools
     let fage = a;
     if(bmi > 25) fage += (bmi - 25);
     if(act < 1.4) fage += 5; else fage -= 3;
     document.getElementById('val-fit-age').innerText = Math.round(fage);
+    document.getElementById('fit-val').innerText = Math.round(fage) + " عام";
+    document.getElementById('caf-val').innerText = Math.round(w * 6) + " ملغ";
 
     // Ideal & Water
     let ideal = g === 'male' ? 50 + 2.3 * ((h/2.54) - 60) : 45.5 + 2.3 * ((h/2.54) - 60);
@@ -350,12 +369,37 @@
     document.getElementById('resultsArea').classList.remove('hidden');
   }
 
+  // --- كود استرجاع البيانات المحفوظة وكود عداد الماء ---
+  window.onload = function() {
+    updateTexts();
+    // استرجاع البيانات
+    if(localStorage.getItem('rga_w')) {
+        document.getElementById('weight').value = localStorage.getItem('rga_w');
+        document.getElementById('height').value = localStorage.getItem('rga_h');
+        document.getElementById('age').value = localStorage.getItem('rga_a');
+        document.getElementById('gender').value = localStorage.getItem('rga_g');
+        document.getElementById('activity').value = localStorage.getItem('rga_act');
+        processAll();
+    }
+    renderWater();
+  };
+
+  let waterCups = localStorage.getItem('rga_water_count') || 0;
+  function renderWater() {
+    let html = "";
+    for(let i=1; i<=8; i++) html += (i <= waterCups ? "🟦" : "⬜");
+    document.getElementById('water-tracker').innerHTML = html;
+  }
+  document.getElementById('water-tracker').onclick = function() {
+    waterCups = waterCups >= 8 ? 0 : parseInt(waterCups) + 1;
+    localStorage.setItem('rga_water_count', waterCups);
+    renderWater();
+  };
+
   function shareResults() {
     const text = `RGALAB: My daily calories are ${document.getElementById('res-maintain').innerText}! Check your health at RGALAB.`;
     navigator.clipboard.writeText(text).then(() => alert(lang === 'ar' ? "تم النسخ!" : "Copied!"));
   }
-
-  window.onload = updateTexts;
 </script>
 </body>
 </html>
