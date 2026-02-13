@@ -210,7 +210,11 @@
         <span id="mi-lang">Language 🌐</span>
         <label class="switch"><input type="checkbox" id="langToggle" checked onchange="toggleLanguage()"><span class="slider"></span></label>
     </div>
-    <button onclick="logout()" id="btn-logout" style="background: rgba(255, 87, 34, 0.15); color: #ff5722; font-size: 14px; border: 1px solid rgba(255, 87, 34, 0.5); padding: 12px; cursor: pointer; width: 100%; border-radius: 15px; margin-top: auto;">خروج Logout</button>
+    
+    <div class="menu-item-row" onclick="logout()" style="margin-top: 10px; border: 1px solid rgba(255, 87, 34, 0.3);">
+        <span style="color: #ff5722; font-weight: bold;">Logout تسجيل خروج</span>
+        <span>🚪</span>
+    </div>
 </div>
 
 <div id="shop-modal" class="modal">
@@ -375,7 +379,7 @@
       userNotFound: "عذراً، هذا البريد غير مسجل لدينا.",
       shopTitle: "🛒 متجر المختبر", shopClose: "إغلاق", shopI1: "مظهر النيون ✨", shopI2: "المظهر الذهبي 👑", shopI3: "جدول غذائي مناسب لك 🥗", shopI4: "دليل التدريب Pro 📚",
       unlock: "فتح", get: "احصل", on: "تفعيل", off: "إيقاف", bought: "تم الشراء بنجاح!",
-      editName: "تعديل الاسم", miLb: "المتصدرين 🏆", miShop: "المتجر 🛒", miDark: "الوضع الليلي 🌙", miLang: "اللغة 🌐", logout: "خروج Logout", lbTitle: "🏆 قائمة المتصدرين", lbClose: "إغلاق", nameWait: "يمكنك تغيير اسمك كل 3 أيام فقط"
+      editName: "تعديل الاسم", miLb: "المتصدرين 🏆", miShop: "المتجر 🛒", miDark: "الوضع الليلي 🌙", miLang: "الغة 🌐", logout: "خروج Logout", lbTitle: "🏆 قائمة المتصدرين", lbClose: "إغلاق", nameWait: "يمكنك تغيير اسمك كل 3 أيام فقط"
     },
     en: {
       authLogin: "Sign In", authSignup: "Sign Up", authBtnL: "Login", authBtnS: "Register",
@@ -473,7 +477,7 @@
     document.getElementById('btn-edit-name').innerText = t.editName;
     document.getElementById('mi-lb').innerText = t.miLb; document.getElementById('mi-shop').innerText = t.miShop;
     document.getElementById('mi-dark').innerText = t.miDark; document.getElementById('mi-lang').innerText = t.miLang;
-    document.getElementById('btn-logout').innerText = t.logout;
+    // تم حذف الزر القديم من هنا واستبداله بالخيار الموجود في القائمة
     document.getElementById('lb-title-text').innerText = t.lbTitle; document.getElementById('lb-close-btn').innerText = t.lbClose;
     document.getElementById('shop-title').innerText = t.shopTitle; document.getElementById('shop-close').innerText = t.shopClose;
     document.getElementById('shop-i1').innerHTML = t.shopI1 + "<br><small>1000 XP</small>";
@@ -677,4 +681,3 @@
 </script>
 </body>
 </html>
-
