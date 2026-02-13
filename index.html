@@ -210,7 +210,6 @@
         <span id="mi-lang">Language 🌐</span>
         <label class="switch"><input type="checkbox" id="langToggle" checked onchange="toggleLanguage()"><span class="slider"></span></label>
     </div>
-    
     <div class="menu-item-row" onclick="logout()" style="margin-top: 10px; border: 1px solid rgba(255, 87, 34, 0.3);">
         <span style="color: #ff5722; font-weight: bold;">Logout تسجيل خروج</span>
         <span>🚪</span>
@@ -379,7 +378,7 @@
       userNotFound: "عذراً، هذا البريد غير مسجل لدينا.",
       shopTitle: "🛒 متجر المختبر", shopClose: "إغلاق", shopI1: "مظهر النيون ✨", shopI2: "المظهر الذهبي 👑", shopI3: "جدول غذائي مناسب لك 🥗", shopI4: "دليل التدريب Pro 📚",
       unlock: "فتح", get: "احصل", on: "تفعيل", off: "إيقاف", bought: "تم الشراء بنجاح!",
-      editName: "تعديل الاسم", miLb: "المتصدرين 🏆", miShop: "المتجر 🛒", miDark: "الوضع الليلي 🌙", miLang: "الغة 🌐", logout: "خروج Logout", lbTitle: "🏆 قائمة المتصدرين", lbClose: "إغلاق", nameWait: "يمكنك تغيير اسمك كل 3 أيام فقط"
+      editName: "تعديل الاسم", miLb: "المتصدرين 🏆", miShop: "المتجر 🛒", miDark: "الوضع الليلي 🌙", miLang: "اللغة 🌐", logout: "Logout تسجيل خروج", lbTitle: "🏆 قائمة المتصدرين", lbClose: "إغلاق", nameWait: "يمكنك تغيير اسمك كل 3 أيام فقط"
     },
     en: {
       authLogin: "Sign In", authSignup: "Sign Up", authBtnL: "Login", authBtnS: "Register",
@@ -477,7 +476,6 @@
     document.getElementById('btn-edit-name').innerText = t.editName;
     document.getElementById('mi-lb').innerText = t.miLb; document.getElementById('mi-shop').innerText = t.miShop;
     document.getElementById('mi-dark').innerText = t.miDark; document.getElementById('mi-lang').innerText = t.miLang;
-    // تم حذف الزر القديم من هنا واستبداله بالخيار الموجود في القائمة
     document.getElementById('lb-title-text').innerText = t.lbTitle; document.getElementById('lb-close-btn').innerText = t.lbClose;
     document.getElementById('shop-title').innerText = t.shopTitle; document.getElementById('shop-close').innerText = t.shopClose;
     document.getElementById('shop-i1').innerHTML = t.shopI1 + "<br><small>1000 XP</small>";
@@ -495,7 +493,7 @@
         const fullName = fn + " " + ln;
         auth.createUserWithEmailAndPassword(email, pass).then(u => {
             u.user.updateProfile({ displayName: fullName, photoURL: DEFAULT_AVATAR });
-            db.collection("ranks").doc(u.user.uid).set({ name: fullName, xp: 0, avatar: DEFAULT_AVATAR });
+            db.collection("ranks").doc(u.user.uid).set({ name: fullName, xp: 0, avatar: DEFAULT_AVATAR, streak: 0 });
             u.user.sendEmailVerification(); alert(trans[lang].verifyMsg); auth.signOut();
         }).catch(e => alert(e.message));
     } else { auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message)); }
@@ -517,7 +515,9 @@
     if (lastDate !== today) {
         if (lastDate === new Date(Date.now() - 86400000).toDateString()) streak++;
         else streak = 1;
-        localStorage.setItem('rga_streak', streak); localStorage.setItem('rga_last_date', today);
+        localStorage.setItem('rga_streak', streak); 
+        localStorage.setItem('rga_last_date', today);
+        syncWithDB(); // حفظ الستريك في السحاب عند التحديث
     }
     document.getElementById('streak-num').innerText = streak;
   }
@@ -531,7 +531,8 @@
         db.collection("ranks").doc(user.uid).set({
             name: user.displayName || "Anonymous",
             xp: xp,
-            avatar: userAvatarUrl 
+            avatar: userAvatarUrl,
+            streak: streak // حفظ الستريك في الـ Firestore
         }, { merge: true });
         document.getElementById('myIdDisplay').innerText = user.uid.substring(0,8);
         document.getElementById('menu-user-name').innerText = user.displayName || "User";
@@ -547,16 +548,20 @@
     document.getElementById('xp-fill').style.width = (xp % 100) + "%";
   }
 
-  function openLeaderboard() {
+    function openLeaderboard() {
     document.getElementById('lb-modal').style.display = 'flex';
     const listDiv = document.getElementById('lb-list');
     listDiv.innerHTML = "Loading...";
-    db.collection("ranks").orderBy("xp", "desc").limit(100).get().then(snap => {
+    
+    // التعديل هنا: الترتيب حسب الـ streak بدلاً من الـ xp
+    db.collection("ranks").orderBy("streak", "desc").limit(100).get().then(snap => {
         listDiv.innerHTML = "";
         let i = 1;
         snap.forEach(doc => {
             const data = doc.data();
             const currentPic = data.avatar || DEFAULT_AVATAR;
+            const userStreak = data.streak || 0; // جلب الستريك الخاص بكل مستخدم
+            
             listDiv.innerHTML += `
                 <div class="lb-row">
                     <div class="lb-user">
@@ -564,12 +569,13 @@
                         <img src="${currentPic}" class="lb-pic">
                         <span>${data.name}</span>
                     </div>
-                    <span>${data.xp} XP</span>
+                    <span style="color: #ff5722; font-weight: bold;">🔥 ${userStreak}</span>
                 </div>`;
             i++;
         });
     });
   }
+
 
   function closeLeaderboard() { document.getElementById('lb-modal').style.display = 'none'; }
 
@@ -654,21 +660,29 @@
   }
 
   window.onload = function() {
-    updateTexts(); checkStreak(); renderWater(); renderDays();
+    updateTexts(); renderWater(); renderDays();
     if (localStorage.getItem('rga_privacy_accepted') === 'true') document.getElementById("privacyModal").style.display = "none";
     auth.onAuthStateChanged(user => {
       if(user) { 
           document.getElementById('auth-overlay').classList.add('hidden'); 
           document.getElementById('menuBtn').style.display = "flex";
           db.collection("ranks").doc(user.uid).get().then(doc => {
-              if(doc.exists && doc.data().avatar) {
-                  userAvatarUrl = doc.data().avatar;
+              if(doc.exists) {
+                  const data = doc.data();
+                  userAvatarUrl = data.avatar || DEFAULT_AVATAR;
+                  xp = data.xp || 0;
+                  streak = data.streak || 0; // جلب الستريك من الحساب
+                  
                   localStorage.setItem('rga_avatar', userAvatarUrl);
-              } else {
-                  userAvatarUrl = DEFAULT_AVATAR;
+                  localStorage.setItem('rga_xp', xp);
+                  localStorage.setItem('rga_streak', streak);
+                  
+                  document.getElementById('menu-user-avatar').src = userAvatarUrl;
+                  document.getElementById('menu-user-name').innerText = user.displayName || "User";
+                  document.getElementById('streak-num').innerText = streak;
+                  updateRank();
+                  checkStreak(); // التحقق إذا كان يجب زيادة الستريك لليوم الجديد
               }
-              document.getElementById('menu-user-avatar').src = userAvatarUrl;
-              document.getElementById('menu-user-name').innerText = user.displayName || "User";
           });
       }
       else { document.getElementById('auth-overlay').classList.remove('hidden'); document.getElementById('menuBtn').style.display = "none"; }
