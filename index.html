@@ -709,12 +709,12 @@ img {
   const LIFT_IMG_UP = "https://i.ibb.co/zVkNkjfZ/IMG-4238.png";     
   // ----------------------------------------
 
-  const firebaseConfig = { apiKey: "", authDomain: "rgalab.firebaseapp.com", projectId: "rgalab", storageBucket: "rgalab.firebasestorage.app", messagingSenderId: "882288745140", appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1" };
+  const firebaseConfig = { apiKey: "FIREBASE_API_KEY_PLACEHOLDER", authDomain: "rgalab.firebaseapp.com", projectId: "rgalab", storageBucket: "rgalab.firebasestorage.app", messagingSenderId: "882288745140", appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1" };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  const GROQ_KEY = "";
+  const GROQ_KEY = "GROQ_API_KEY_PLACEHOLDER";
   let chatHistory = [];
   let lang = 'ar';
   let authMode = 'login';
