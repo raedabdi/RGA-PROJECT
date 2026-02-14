@@ -10,7 +10,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Inject Secrets with Node.js
+      - name: Inject Secrets (The Final Fix)
         uses: actions/github-script@v6
         env:
           FB_KEY: ${{ secrets.FIREBASE_KEY }}
@@ -19,7 +19,7 @@ jobs:
           script: |
             const fs = require('fs');
             let html = fs.readFileSync('index.html', 'utf8');
-            // استبدال آمن جداً يتجاهل أي رموز خاصة
+            // هاد السطر بيبدل المفاتيح حتى لو فيها رموز غريبة
             html = html.split('FIREBASE_API_KEY_PLACEHOLDER').join(process.env.FB_KEY);
             html = html.split('GROQ_API_KEY_PLACEHOLDER').join(process.env.GR_KEY);
             fs.writeFileSync('index.html', html);
