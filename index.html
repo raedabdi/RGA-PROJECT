@@ -714,7 +714,7 @@ img {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  const GROQ_KEY = "GQ_AB";
+  const gq_k = "GQ_AB";
   let chatHistory = [];
   let lang = 'ar';
   let authMode = 'login';
@@ -966,7 +966,7 @@ img {
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+            headers: { "Authorization": `Bearer ${gq_k}`, "Content-Type": "application/json" },
             body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: chatHistory, temperature: 0.7 })
         });
         const data = await response.json();
