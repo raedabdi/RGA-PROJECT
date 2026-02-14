@@ -22,10 +22,8 @@ jobs:
             const fs = require('fs');
             let html = fs.readFileSync('index.html', 'utf8');
             
-            // استبدل كلمة 'كلمتك_التي_اخترتها_للفايربيز' بالكلمة التي وضعتها في الـ index
+            // الاستبدال باستخدام كلماتك الخاصة
             html = html.split('FIREBASE_API_KEY_PLACEHOLDE').join(process.env.FB_KEY);
-            
-            // استبدل كلمة 'كلمتك_التي_اخترتها_للجروك' بالكلمة التي وضعتها في الـ index
             html = html.split('GQ_AB').join(process.env.GR_KEY);
             
             fs.writeFileSync('index.html', html);
