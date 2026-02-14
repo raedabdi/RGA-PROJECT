@@ -21,8 +21,13 @@ jobs:
           script: |
             const fs = require('fs');
             let html = fs.readFileSync('index.html', 'utf8');
-            html = html.split('FIREBASE_API_KEY_PLACEHOLDER').join(process.env.FB_KEY);
-            html = html.split('GROQ_API_KEY_PLACEHOLDER').join(process.env.GR_KEY);
+            
+            // استبدل كلمة 'كلمتك_التي_اخترتها_للفايربيز' بالكلمة التي وضعتها في الـ index
+            html = html.split('FIREBASE_API_KEY_PLACEHOLDE').join(process.env.FB_KEY);
+            
+            // استبدل كلمة 'كلمتك_التي_اخترتها_للجروك' بالكلمة التي وضعتها في الـ index
+            html = html.split('GQ_AB').join(process.env.GR_KEY);
+            
             fs.writeFileSync('index.html', html);
 
       - name: Deploy
@@ -31,3 +36,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           cname: rga.best
+          force_orphan: true
