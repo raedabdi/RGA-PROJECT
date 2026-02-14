@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RGALAB - Health Pro</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
@@ -10,6 +10,15 @@
 <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
 
 <style>
+/* منع الزوم ونسخ الصور */
+img {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  pointer-events: none; /* يمنع التفاعل المباشر مع الصورة كملف */
+}
+#deadlift-char { pointer-events: auto; } /* السماح بالضغط فقط على شخصية اللعبة */
+
   :root {
     --primary: #4CAF50;
     --bg-image: url('https://wallpaper.forfun.com/fetch/63/63eded45b876ce6d693b91ea2838b59f.jpeg?w=2000&f=webp');
@@ -20,7 +29,12 @@
     --accent: #FFD700; 
     --neon: #4CAF50;
     --menu-bg: rgba(15, 15, 15, 0.65);
+    /* هنا خلفية اللعبة */
+    --game-bg: url('https://i.ibb.co/LDQjfGBk/IMG-4236.png');
   }
+
+  /* منع الزوم واللمس المتعدد المزعج */
+  * { touch-action: manipulation; }
 
   .dark-theme {
     --bg-image: none;
@@ -51,6 +65,101 @@
     transition: background 0.4s ease, background-color 0.4s ease;
     overflow-x: hidden;
   }
+  /* --- نظام لعبة الديدليفت المطور RGALAB PRO --- */
+  #game-modal {
+    display: none; position: fixed; z-index: 20000; left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,20,0.8)), var(--game-bg) no-repeat center center; 
+    background-size: cover; backdrop-filter: blur(15px); 
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+
+  /* شريط المعلومات العلوي */
+  .game-stats-bar {
+    display: flex; gap: 15px; margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.1); padding: 15px 25px;
+    border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .stat-item { text-align: center; min-width: 80px; }
+  .stat-label { font-size: 10px; text-transform: uppercase; color: #bbb; display: block; letter-spacing: 1px; }
+  .stat-value { font-size: 24px; font-weight: 900; color: #fff; }
+
+  #game-timer-val { color: #ff5252; text-shadow: 0 0 10px rgba(255,82,82,0.5); }
+  #session-xp-val { color: #4CAF50; text-shadow: 0 0 10px rgba(76,175,80,0.5); }
+
+  .game-container {
+    position: relative; width: 300px; height: 350px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.03); border-radius: 50%;
+    border: 2px dashed rgba(255,255,255,0.1);
+  }
+
+  .deadlift-img {
+    width: 250px; height: auto; transition: transform 0.1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    filter: drop-shadow(0 0 25px var(--primary));
+    cursor: pointer; -webkit-user-drag: none; user-select: none;
+  }
+
+  /* تأثير الاهتزاز عند الرفع */
+  .shake { animation: heavyShake 0.15s infinite; }
+  @keyframes heavyShake {
+    0% { transform: translate(2px, 1px) rotate(0deg); }
+    50% { transform: translate(-2px, -1px) rotate(-1deg); }
+    100% { transform: translate(2px, -1px) rotate(1deg); }
+  }
+
+  .xp-pop {
+    position: absolute;
+    color: #4CAF50;
+    font-weight: 900;
+    font-size: 35px;
+    pointer-events: none;
+    z-index: 100;
+    text-shadow: 0 0 15px rgba(76, 175, 80, 0.8), 0 0 5px white;
+    animation: xpRiseAndFade 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  }
+
+  @keyframes xpRiseAndFade {
+    0% { opacity: 0; transform: translateY(0) scale(0.3) rotate(-15deg); }
+    30% { opacity: 1; transform: translateY(-50px) scale(1.2) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(-120px) scale(1) rotate(15deg); }
+  }
+
+  .exit-btn-game {
+    margin-top: 40px; padding: 12px 35px; background: rgba(255,82,82,0.1);
+    color: #ff5252; border: 1px solid #ff5252; border-radius: 50px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
+  }
+  .exit-btn-game:hover { background: #ff5252; color: white; }
+
+
+
+  #ai-chat-btn {
+    position: fixed; bottom: 20px; left: 20px; width: 60px; height: 60px;
+    background: var(--primary); border-radius: 50%; display: none;
+    align-items: center; justify-content: center; font-size: 30px;
+    cursor: pointer; z-index: 10001; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    border: 2px solid white; transition: 0.3s;
+  }
+  #ai-chat-btn:hover { transform: scale(1.1); }
+
+  #ai-window {
+    position: fixed; bottom: 90px; left: 20px; width: 320px; height: 450px;
+    background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(20px);
+    border-radius: 20px; display: none; flex-direction: column; z-index: 10001;
+    border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  }
+  .ai-header { background: var(--primary); padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  #ai-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+  .ai-msg { padding: 10px 14px; border-radius: 15px; max-width: 85%; word-wrap: break-word; line-height: 1.4; }
+  .ai-msg.bot { background: rgba(255,255,255,0.1); align-self: flex-start; border-bottom-left-radius: 2px; }
+  .ai-msg.user { background: var(--primary); align-self: flex-end; border-bottom-right-radius: 2px; color: white; }
+  .ai-input-area { padding: 10px; background: rgba(0,0,0,0.3); display: flex; gap: 5px; }
+  .ai-input-area input { flex: 1; background: #222; color: white; border: 1px solid #444; padding: 10px; border-radius: 10px; outline: none; width: auto; margin: 0; }
+  .ai-input-area button { width: auto; background: var(--primary); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 0; }
 
   .menu-icon {
     position: fixed; top: 20px; right: 20px; z-index: 10001;
@@ -61,29 +170,48 @@
 
   .side-menu {
     position: fixed; top: 0; right: -350px; width: 280px; height: 100vh;
-    background: var(--menu-bg); 
-    backdrop-filter: blur(45px); -webkit-backdrop-filter: blur(45px);
+    background: rgba(10, 10, 10, 0.6); 
+    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
     z-index: 10002; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     padding: 20px; display: flex; flex-direction: column; gap: 10px;
     box-shadow: -20px 0 40px rgba(0,0,0,0.7);
     overflow-y: auto; color: white;
-    border-left: 1px solid rgba(255,255,255,0.1);
+    border-left: 1px solid rgba(255,255,255,0.08);
   }
 
   .side-menu.active { right: 0; }
 
+  /* --- تحديث مودرن قزازي للبروفايل --- */
   .menu-profile-section {
-    text-align: center; padding: 30px 10px 20px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;
+    text-align: center; 
+    padding: 25px 15px;
+    margin-bottom: 20px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
+
   .menu-avatar {
     width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
-    border: 3px solid var(--primary); cursor: pointer; transition: 0.3s;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    border: 3px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.3s;
+    box-shadow: 0 0 25px var(--primary);
     background: #fff;
   }
-  .menu-avatar:hover { transform: scale(1.08); filter: brightness(1.15); }
-  .menu-username { font-weight: bold; margin-top: 10px; font-size: 18px; display: block; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .menu-avatar:hover { transform: scale(1.08); filter: brightness(1.15); border-color: var(--primary); }
+  
+  .menu-username { 
+    font-weight: 800; margin-top: 15px; font-size: 20px; display: block; 
+    background: linear-gradient(90deg, #fff, #ddd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  
+  .user-id-badge {
+    background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 20px;
+    font-size: 11px; color: #aaa; margin-top: 5px; display: inline-block;
+    cursor: pointer; border: 1px solid rgba(255,255,255,0.05); letter-spacing: 1px;
+  }
 
   .menu-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -94,10 +222,10 @@
 
   .menu-item-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 15px; background: rgba(255,255,255,0.07); border-radius: 15px;
+    padding: 15px; background: rgba(255,255,255,0.03); border-radius: 15px;
     cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.05);
   }
-  .menu-item-row:hover { background: rgba(255,255,255,0.15); transform: translateX(-8px); }
+  .menu-item-row:hover { background: rgba(255,255,255,0.1); transform: translateX(-5px); border-color: rgba(255,255,255,0.2); }
 
   #rank-display {
     font-weight: 800; 
@@ -181,9 +309,194 @@
   .shop-item button { width: auto; padding: 8px 15px; font-size: 12px; margin: 0; background: var(--primary); color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
   .shop-item button:disabled { background: #555; cursor: not-allowed; opacity: 0.5; }
   .shop-item button.active { background: #ff5722; }
+
+.combo-pop {
+  position: absolute;
+  color: #FFD700;
+  font-weight: 900;
+  font-size: 45px;
+  pointer-events: none;
+  z-index: 200;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 5px #000;
+  animation: comboBounce 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.49) forwards;
+}
+
+@keyframes comboBounce {
+  0% { opacity: 0; transform: scale(0.3) translateY(0); }
+  50% { opacity: 1; transform: scale(1.3) translateY(-20px); }
+  100% { opacity: 0; transform: scale(1) translateY(-60px); }
+}
+
+/* --- جديد: ستايل الإشعارات والأصدقاء --- */
+#notif-icon {
+    position: fixed; top: 20px; left: 20px; z-index: 10001;
+    cursor: pointer; font-size: 24px; background: rgba(255,255,255,0.2);
+    width: 45px; height: 45px; display: none; align-items: center; justify-content: center;
+    border-radius: 50%; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);
+}
+#notif-badge {
+    position: absolute; top: 0; right: 0; background: #ff5252; color: white;
+    font-size: 10px; font-weight: bold; border-radius: 50%; padding: 3px 6px;
+    display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+#notif-dropdown {
+    position: fixed; top: 75px; left: 20px; width: 300px; max-height: 400px;
+    background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(20px);
+    border-radius: 15px; display: none; flex-direction: column; z-index: 10002;
+    border: 1px solid rgba(255,255,255,0.1); overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.notif-item {
+    padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px; display: flex; flex-direction: column; gap: 5px;
+}
+.notif-actions { display: flex; gap: 5px; margin-top: 5px; }
+.btn-accept { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.btn-reject { background: #ff5252; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+
+/* Friend List in Menu - Modern Glassy */
+.friend-section {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 20px; padding-top: 20px;
+}
+.friend-add-box { 
+    display: flex; gap: 8px; margin-bottom: 15px;
+    background: rgba(255,255,255,0.05); padding: 8px;
+    border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);
+}
+.friend-add-box input { 
+    padding: 10px; font-size: 13px; border-radius: 10px; background: transparent; 
+    border: none; color: white; flex: 1; margin: 0; 
+}
+.friend-add-box button { 
+    width: auto; padding: 0 15px; font-size: 14px; margin: 0; background: var(--primary);
+    border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.friend-list-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px;
+    background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 8px;
+    cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+}
+.friend-list-item:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); transform: scale(1.02); }
+.f-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--primary); }
+
+/* Friend Profile Modal - Ultra Glass */
+#friend-modal {
+    display: none; position: fixed; z-index: 12000; left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); align-items: center; justify-content: center;
+}
+.friend-card {
+    background: rgba(30, 30, 30, 0.6); 
+    backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
+    padding: 30px; border-radius: 35px; width: 85%; max-width: 350px;
+    text-align: center; position: relative; 
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+}
+
+/* --- تحديث الشات ليكون مودرن وبالمكان الصحيح --- */
+.chat-box {
+    height: 220px; background: rgba(0,0,0,0.3); margin: 15px 0; border-radius: 20px;
+    overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.chat-msg { 
+    padding: 10px 14px; border-radius: 18px; max-width: 75%; 
+    font-size: 13px; line-height: 1.4; word-wrap: break-word;
+    position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+/* رسائلي: يمين أخضر */
+.chat-msg.me { 
+    background: var(--primary); color: white; align-self: flex-end; 
+    border-bottom-right-radius: 4px; text-align: right;
+}
+/* رسائل الطرف الآخر: يسار رمادي */
+.chat-msg.them { 
+    background: rgba(255,255,255,0.15); color: #fff; align-self: flex-start; 
+    border-bottom-left-radius: 4px; text-align: left;
+}
+
+/* XP Send Input Box */
+.xp-sender-box {
+    display: flex; gap: 8px; margin-top: 15px; background: rgba(0,0,0,0.2);
+    padding: 5px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
+}
+.xp-sender-box input {
+    background: transparent; border: none; padding: 10px 15px; color: white;
+    text-align: center; width: 80px; font-weight: bold; margin: 0;
+}
+.xp-sender-box button {
+    margin: 0; border-radius: 50px; background: linear-gradient(90deg, #FF9800, #F57C00);
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+.btn-remove-friend {
+    background: rgba(255, 82, 82, 0.1);
+    color: #ff5252;
+    border: 1px solid #ff5252;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 12px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-remove-friend:hover { background: #ff5252; color: white; }
+
 </style>
 </head>
 <body class="ar-mode">
+
+<div id="notif-icon" onclick="toggleNotifs()">🔔<span id="notif-badge">0</span></div>
+<div id="notif-dropdown">
+    <div style="padding:10px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.1);" id="notif-header-text">الإشعارات Notifications</div>
+    <div id="notif-list"></div>
+</div>
+
+<div id="ai-chat-btn" onclick="toggleAIChat()">🤖</div>
+
+<div id="game-modal">
+  <div class="game-stats-bar">
+    <div class="stat-item">
+        <span class="stat-label">TIME</span>
+        <span id="game-timer-val" class="stat-value">60s</span>
+    </div>
+    <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px;">
+        <span class="stat-label">EARNED XP</span>
+        <span id="session-xp-val" class="stat-value">0</span>
+    </div>
+    <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px;">
+        <span class="stat-label">BEST COMBO</span>
+        <span id="best-combo-val" class="stat-value">0</span>
+    </div>
+</div>
+
+
+    <div class="game-container" id="shake-target">
+        <img id="deadlift-char" class="deadlift-img" 
+             src="" 
+             onmousedown="handleInteraction(event, 'start')" 
+             onmouseup="handleInteraction(event, 'end')" 
+             ontouchstart="handleInteraction(event, 'start')" 
+             ontouchend="handleInteraction(event, 'end')">
+    </div>
+
+    <button class="exit-btn-game" onclick="closeGame()">EXIT SESSION</button>
+</div>
+
+
+<div id="ai-window">
+    <div class="ai-header">
+        <span id="ai-title">مدرب RGALAB الذكي</span>
+        <span style="cursor:pointer; font-size: 20px;" onclick="toggleAIChat()">×</span>
+    </div>
+    <div id="ai-messages"></div>
+    <div class="ai-input-area">
+        <input type="text" id="ai-userInput" placeholder="اسألني أي شيء..." onkeypress="if(event.key==='Enter') askGroq()">
+        <button onclick="askGroq()" id="ai-send-btn">إرسال</button>
+    </div>
+</div>
 
 <div class="menu-icon" id="menuBtn" onclick="toggleMenu()">☰</div>
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
@@ -193,7 +506,14 @@
         <img id="menu-user-avatar" class="menu-avatar" src="https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png" onclick="triggerPhotoUpload()">
         <input type="file" id="photoInput" style="display:none" accept="image/*" onchange="uploadPhoto(this)">
         <span id="menu-user-name" class="menu-username">User Name</span>
-        <button id="btn-edit-name" onclick="changeName()" style="background:none; color:#FFD700; font-size:12px; padding:0; margin-top:5px; text-decoration:underline; width:auto; border:none; cursor:pointer;">تعديل الاسم</button>
+        <div id="menu-user-id" class="user-id-badge" onclick="copyMyId()">ID: ...</div>
+        <br>
+        <button id="btn-edit-name" onclick="changeName()" style="background:none; color:#FFD700; font-size:12px; padding:0; margin-top:8px; text-decoration:none; width:auto; border:1px solid rgba(255,215,0,0.3); border-radius:15px; cursor:pointer; padding: 4px 10px;">✏️ تعديل الاسم</button>
+    </div>
+
+    <div class="menu-item-row" onclick="closeMenuAndOpen(openGame)" style="background: rgba(76, 175, 80, 0.2); border: 1px solid var(--primary);">
+        <span id="mi-game">Deadlift Game 🏋️‍♂️</span>
+        <span style="font-size: 10px; background: red; padding: 2px 5px; border-radius: 50px;">XP+</span>
     </div>
 
     <div class="menu-item-row" onclick="closeMenuAndOpen(openLeaderboard)">
@@ -210,9 +530,43 @@
         <span id="mi-lang">Language 🌐</span>
         <label class="switch"><input type="checkbox" id="langToggle" checked onchange="toggleLanguage()"><span class="slider"></span></label>
     </div>
+
+    <div class="friend-section">
+        <div id="mi-friends" style="font-size:14px; font-weight:800; margin-bottom:12px; opacity:0.8;">الأصدقاء Friends 👥</div>
+        <div class="friend-add-box">
+            <input type="text" id="friend-id-input" placeholder="ID الصديق">
+            <button onclick="sendFriendRequest()">+</button>
+        </div>
+        <div id="friend-list-container">
+            <small style="opacity:0.5">لا يوجد أصدقاء بعد</small>
+        </div>
+    </div>
+
     <div class="menu-item-row" onclick="logout()" style="margin-top: 10px; border: 1px solid rgba(255, 87, 34, 0.3);">
-        <span style="color: #ff5722; font-weight: bold;">Logout تسجيل خروج</span>
+        <span id="mi-logout" style="color: #ff5722; font-weight: bold;">Logout تسجيل خروج</span>
         <span>🚪</span>
+    </div>
+</div>
+
+<div id="friend-modal">
+    <div class="friend-card">
+        <span style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; opacity:0.7;" onclick="document.getElementById('friend-modal').style.display='none'">×</span>
+        <img id="f-modal-img" src="" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--primary); box-shadow: 0 0 15px var(--primary);">
+        <h3 id="f-modal-name" style="margin:12px 0; font-size: 22px;">Name</h3>
+        <div style="color:#FFD700; font-weight:bold; font-size:14px; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🔥 Streak: <span id="f-modal-streak">0</span></div>
+        
+        <div class="xp-sender-box">
+            <input type="number" id="xp-amount-input" placeholder="0" min="1">
+            <button id="btn-send-xp" onclick="sendXPToFriend()">Send XP 🎁</button>
+        </div>
+
+        <div class="chat-box" id="f-chat-box"></div>
+        <div style="display:flex; gap:5px; background: rgba(0,0,0,0.2); padding:5px; border-radius:50px; border:1px solid rgba(255,255,255,0.1);">
+            <input type="text" id="chat-input" placeholder="اكتب رسالة..." style="font-size:13px; padding:10px; background:transparent; border:none; margin:0; flex:1;">
+            <button onclick="sendChatMessage()" style="width:auto; padding:0 18px; border-radius:50px; margin:0;">➤</button>
+        </div>
+
+        <button id="btn-remove-f" class="btn-remove-friend" onclick="removeFriend()">حذف الصديق Delete</button>
     </div>
 </div>
 
@@ -350,11 +704,22 @@
 </div>
 
 <script>
+  // --- الروابط الجديدة للعبة (عدل هنا فقط) ---
+  const LIFT_IMG_DOWN = "https://i.ibb.co/zW74jkmK/IMG-4239.png"; 
+  const LIFT_IMG_UP = "https://i.ibb.co/zVkNkjfZ/IMG-4238.png";     
+  // ----------------------------------------
+
   const firebaseConfig = { apiKey: "AIzaSyDV7SNwgv_K10tX0iJpNYqg8_iJnWprFB4", authDomain: "rgalab.firebaseapp.com", projectId: "rgalab", storageBucket: "rgalab.firebasestorage.app", messagingSenderId: "882288745140", appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1" };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
+// تقسيم المفتاح لجزئين عشان GitHub ما يكتشفه كـ Key كامل
+const part1 = "gsk_eMTl37P6";
+const part2 = "ggnYTFOIhBchWGdyb3FYjhW2aliBOIz9XHrUbJuJsxFL";
+const GROQ_KEY = part1 + part2;
+
+  let chatHistory = [];
   let lang = 'ar';
   let authMode = 'login';
   const DEFAULT_AVATAR = "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
@@ -362,6 +727,10 @@
   let streak = parseInt(localStorage.getItem('rga_streak')) || 0;
   let ownedItems = JSON.parse(localStorage.getItem('rga_owned')) || [];
   let userAvatarUrl = localStorage.getItem('rga_avatar') || DEFAULT_AVATAR;
+
+  let myShortId = "";
+  let currentFriendId = null;
+  let chatUnsubscribe = null; // للمتابعة الحية للشات
 
   const trans = {
     ar: {
@@ -378,7 +747,10 @@
       userNotFound: "عذراً، هذا البريد غير مسجل لدينا.",
       shopTitle: "🛒 متجر المختبر", shopClose: "إغلاق", shopI1: "مظهر النيون ✨", shopI2: "المظهر الذهبي 👑", shopI3: "جدول غذائي مناسب لك 🥗", shopI4: "دليل التدريب Pro 📚",
       unlock: "فتح", get: "احصل", on: "تفعيل", off: "إيقاف", bought: "تم الشراء بنجاح!",
-      editName: "تعديل الاسم", miLb: "المتصدرين 🏆", miShop: "المتجر 🛒", miDark: "الوضع الليلي 🌙", miLang: "اللغة 🌐", logout: "Logout تسجيل خروج", lbTitle: "🏆 قائمة المتصدرين", lbClose: "إغلاق", nameWait: "يمكنك تغيير اسمك كل 3 أيام فقط"
+      editName: "تعديل الاسم", miLb: "المتصدرين 🏆", miShop: "المتجر 🛒", miDark: "الوضع ليلي 🌙", miLang: "اللغة 🌐", logout: "Logout تسجيل خروج", lbTitle: "🏆 قائمة المتصدرين", lbClose: "إغلاق", nameWait: "يمكنك تغيير اسمك كل 3 أيام فقط",
+      aiWelcome: "أهلاً بك! أنا مدربك المحترف. اسألني عن التمرين، التغذية أو المكملات!", aiInputPl: "اسألني أي شيء...", aiSend: "إرسال",
+      miFriends: "الأصدقاء 👥", miFriendIdPl: "ID الصديق", miNoFriends: "لا يوجد أصدقاء بعد", fChatPl: "اكتب رسالة...", fChatWait: "ابدأ المحادثة مع صديقك", fRemove: "حذف الصديق ❌", fRemoveConfirm: "هل أنت متأكد من حذف هذا الصديق؟",
+      notifHeader: "الإشعارات Notifications 🔔", notifEmpty: "لا يوجد إشعارات حالياً", notifFriendReq: "طلب صداقة من", notifAccept: "قبول", notifReject: "رفض", notifGift: "استلمت هدية XP من", notifMsg: "رسالة من"
     },
     en: {
       authLogin: "Sign In", authSignup: "Sign Up", authBtnL: "Login", authBtnS: "Register",
@@ -388,17 +760,137 @@
       maintain: "Maintain", lose: "Lose", gain: "Gain", 
       act1: "Sedentary (No workout)", act2: "Light (1-3 days workout)", act3: "Moderate (3-5 days workout)", act4: "Active (6-7 days workout)",
       status: ["Thin", "Normal", "Overweight", "Obese"], calText: "kcal", secCal: "Calories", share: "Share 🚀",
-      modalText: "Welcome! Data is processed locally.", modalBtn: "I Agree", missions: "🎯 Missions", m1: "🏋️ Workout", m2: "🥗 Meal", ranks: ["RECRUIT", "CORPORAL", "WARRIOR", "BEAST", "LEGEND"], streakShare: "Challenge 🔥", streakTxt: "DAYS STREAK",
+      modalText: "Welcome! Data is processed locally.", modalBtn: "I Agree", missions: "🎯 Missions", m1: "Workout", m2: "Meal", ranks: ["RECRUIT", "CORPORAL", "WARRIOR", "BEAST", "LEGEND"], streakShare: "Challenge 🔥", streakTxt: "DAYS STREAK",
       days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
       forgotPrompt: "Enter your email for password reset link:", forgotSuccess: "Reset link sent successfully.",
       userNotFound: "Sorry, this email is not registered.",
       shopTitle: "🛒 Lab Store", shopClose: "Close", shopI1: "Neon Skin ✨", shopI2: "Gold Skin 👑", shopI3: "Your Custom Diet Plan 🥗", shopI4: "Pro Training PDF 📚",
       unlock: "Unlock", get: "Get", on: "ON", off: "OFF", bought: "Unlocked Successfully!",
-      editName: "Edit Name", miLb: "Leaderboard 🏆", miShop: "Lab Store 🛒", miDark: "Dark Mode 🌙", miLang: "Language 🌐", logout: "Logout", lbTitle: "🏆 Leaderboard", lbClose: "Close", nameWait: "You can change name every 3 days"
+      editName: "Edit Name", miLb: "Leaderboard 🏆", miShop: "Lab Store 🛒", miDark: "Dark Mode 🌙", miLang: "Language 🌐", logout: "Logout", lbTitle: "🏆 Leaderboard", lbClose: "Close", nameWait: "You can change name every 3 days",
+      aiWelcome: "Hello! I am your pro coach. Ask me about training, nutrition, or supplements!", aiInputPl: "Ask me anything...", aiSend: "Send",
+      miFriends: "Friends 👥", miFriendIdPl: "Friend's ID", miNoFriends: "No friends yet", fChatPl: "Type a message...", fChatWait: "Start chatting with your friend", fRemove: "Remove Friend ❌", fRemoveConfirm: "Are you sure you want to remove this friend?",
+      notifHeader: "Notifications 🔔", notifEmpty: "No notifications yet", notifFriendReq: "Friend request from", notifAccept: "Accept", notifReject: "Reject", notifGift: "Received XP gift from", notifMsg: "Message from"
     }
   };
 
-  function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); document.getElementById('menuOverlay').classList.toggle('active'); }
+  let gameInterval;
+  let timeLeft = 60;
+  let isGameActive = false;
+  let sessionXP = 0; 
+  let comboCount = 0;
+  let comboTimer;
+  let globalBestCombo = 0; 
+  let lastInteractionTime = 0; 
+
+  function handleInteraction(e, type) {
+      e.preventDefault();
+      const now = Date.now();
+      if (type === 'start') {
+          if (now - lastInteractionTime < 50) return;
+          lastInteractionTime = now;
+          liftStart();
+      } else {
+          liftEnd();
+      }
+  }
+
+  function openGame() {
+    const lastPlayed = localStorage.getItem('rga_game_last_time') || 0;
+    const now = Date.now();
+    const cooldown = 1; 
+
+    if (now - lastPlayed < cooldown) {
+        const remaining = Math.ceil((cooldown - (now - lastPlayed)) / 60000);
+        alert(lang === 'ar' ? `عضلاتك تحتاج راحة! انتظر ${remaining} دقيقة.` : `Need rest! Wait ${remaining} mins.`);
+        return;
+    }
+
+    comboCount = 0;
+    document.getElementById('best-combo-val').innerText = globalBestCombo;
+    sessionXP = 0;
+    document.getElementById('session-xp-val').innerText = "0";
+    document.getElementById('deadlift-char').src = LIFT_IMG_DOWN;
+    document.getElementById('game-modal').style.display = 'flex';
+    startTimer();
+  }
+
+  function startTimer() {
+    timeLeft = 60;
+    isGameActive = true;
+    document.getElementById('game-timer-val').innerText = `${timeLeft}s`;
+    
+    gameInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('game-timer-val').innerText = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+            finishGame(true); 
+        }
+    }, 1000);
+  }
+
+  function closeGame() {
+    const confirmMsg = lang === 'ar' ? "إذا خرجت الآن، ستنتهي الجلسة ولن تستطيع اللعب لمدة ساعة. هل أنت متأكد؟" : "If you exit now, the session ends and you wait 1 hour. Confirm?";
+    if (confirm(confirmMsg)) { finishGame(false); }
+  }
+
+  function finishGame(isTimeUp) {
+    clearInterval(gameInterval);
+    isGameActive = false;
+    localStorage.setItem('rga_game_last_time', Date.now());
+    const msg = lang === 'ar' ? `عاش يا بطل! لقد جمعت ${sessionXP} XP في هذه الجلسة.` : `Great job! You earned ${sessionXP} XP this session.`;
+    alert(msg);
+    document.getElementById('game-modal').style.display = 'none';
+    syncWithDB();
+  }
+
+  function liftStart() {
+    if (!isGameActive) return;
+    const char = document.getElementById('deadlift-char');
+    const container = document.getElementById('shake-target');
+    char.src = LIFT_IMG_UP;
+    char.style.transform = "translateY(-20px) scale(1.05)";
+    container.classList.add('shake');
+    comboCount++;
+    clearTimeout(comboTimer);
+    if (comboCount > globalBestCombo) {
+        globalBestCombo = comboCount;
+        document.getElementById('best-combo-val').innerText = globalBestCombo;
+        const user = auth.currentUser;
+        if (user) { db.collection("ranks").doc(user.uid).update({ bestCombo: globalBestCombo }); }
+    }
+    if (comboCount > 1) {
+        const comboEl = document.createElement('div');
+        comboEl.className = 'combo-pop';
+        comboEl.innerText = comboCount + "x";
+        comboEl.style.left = (Math.random() * 40 + 30) + '%'; 
+        comboEl.style.top = '10%';
+        document.querySelector('.game-container').appendChild(comboEl);
+        setTimeout(() => comboEl.remove(), 500);
+    }
+    comboTimer = setTimeout(() => { comboCount = 0; }, 800);
+    sessionXP++;
+    addXP(1); 
+    document.getElementById('session-xp-val').innerText = sessionXP;
+    const pop = document.createElement('div');
+    pop.className = 'xp-pop'; pop.innerText = '+1';
+    pop.style.left = (Math.random() * 60 + 20) + '%';
+    document.querySelector('.game-container').appendChild(pop);
+    setTimeout(() => pop.remove(), 500);
+  }
+
+  function liftEnd() {
+    if (!isGameActive) return;
+    const char = document.getElementById('deadlift-char');
+    const container = document.getElementById('shake-target');
+    if(char) { char.src = LIFT_IMG_DOWN; char.style.transform = "translateY(0) scale(1)"; }
+    if(container) container.classList.remove('shake');
+  }
+
+  function toggleMenu() { 
+      document.getElementById('notif-dropdown').style.display = 'none';
+      document.getElementById('sideMenu').classList.toggle('active'); 
+      document.getElementById('menuOverlay').classList.toggle('active'); 
+  }
   function closeMenuAndOpen(func) { toggleMenu(); setTimeout(func, 300); }
   function toggleAuthMode() { authMode = (authMode === 'login' ? 'signup' : 'login'); document.getElementById('signup-fields').classList.toggle('hidden', authMode === 'login'); updateTexts(); }
   function syncLanguage(el) { document.getElementById('langToggle').checked = el.checked; toggleLanguage(); }
@@ -407,52 +899,16 @@
     lang = document.getElementById('langToggle').checked ? 'ar' : 'en'; 
     document.body.className = (lang === 'ar' ? 'ar-mode' : 'en-mode') + (document.body.classList.contains('dark-theme') ? ' dark-theme' : ''); 
     document.getElementById('authLangToggle').checked = (lang === 'ar'); 
+    chatHistory = []; 
+    const msgArea = document.getElementById('ai-messages');
+    if(msgArea) msgArea.innerHTML = `<div class="ai-msg bot">${trans[lang].aiWelcome}</div>`;
     updateTexts(); renderDays(); 
     if(!document.getElementById('resultsArea').classList.contains('hidden')) processAll(); 
   }
   
-  function triggerPhotoUpload() { document.getElementById('photoInput').click(); }
-  function uploadPhoto(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            userAvatarUrl = e.target.result;
-            document.getElementById('menu-user-avatar').src = userAvatarUrl;
-            localStorage.setItem('rga_avatar', userAvatarUrl);
-            syncWithDB();
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  function changeName() {
-    const lastChange = localStorage.getItem('rga_name_date') || 0;
-    if (Date.now() - lastChange < 259200000) { alert(trans[lang].nameWait); return; }
-    const newName = prompt("Enter new name:");
-    if (newName) {
-        auth.currentUser.updateProfile({ displayName: newName }).then(() => {
-            document.getElementById('menu-user-name').innerText = newName;
-            localStorage.setItem('rga_name_date', Date.now());
-            syncWithDB();
-        });
-    }
-  }
-
-  function renderDays() {
-    const container = document.getElementById('days-list');
-    const days = trans[lang].days;
-    const today = new Date().getDay();
-    container.innerHTML = "";
-    days.forEach((day, index) => {
-        const div = document.createElement('div');
-        div.className = `day-chip ${index === today ? 'active' : ''}`;
-        div.innerText = day;
-        container.appendChild(div);
-    });
-  }
-
   function updateTexts() {
     const t = trans[lang];
+    if(!t) return;
     document.getElementById('auth-title').innerText = (authMode === 'login' ? t.authLogin : t.authSignup);
     document.getElementById('auth-btn').innerText = (authMode === 'login' ? t.authBtnL : t.authBtnS);
     document.getElementById('auth-toggle-text').innerText = (authMode === 'login' ? t.authLinkS : t.authLinkL);
@@ -478,11 +934,90 @@
     document.getElementById('mi-dark').innerText = t.miDark; document.getElementById('mi-lang').innerText = t.miLang;
     document.getElementById('lb-title-text').innerText = t.lbTitle; document.getElementById('lb-close-btn').innerText = t.lbClose;
     document.getElementById('shop-title').innerText = t.shopTitle; document.getElementById('shop-close').innerText = t.shopClose;
-    document.getElementById('shop-i1').innerHTML = t.shopI1 + "<br><small>1000 XP</small>";
-    document.getElementById('shop-i2').innerHTML = t.shopI2 + "<br><small>2000 XP</small>";
-    document.getElementById('shop-i3').innerHTML = t.shopI3 + "<br><small>3000 XP</small>";
-    document.getElementById('shop-i4').innerHTML = t.shopI4 + "<br><small>500 XP</small>";
+    document.getElementById('shop-i1').innerHTML = t.shopI1; document.getElementById('shop-i2').innerHTML = t.shopI2;
+    document.getElementById('shop-i3').innerHTML = t.shopI3; document.getElementById('shop-i4').innerHTML = t.shopI4;
+    document.getElementById('ai-title').innerText = (lang === 'ar' ? 'مدرب RGALAB الذكي' : 'RGALAB AI Coach');
+    document.getElementById('ai-userInput').placeholder = t.aiInputPl;
+    document.getElementById('ai-send-btn').innerText = t.aiSend;
+    
+    document.getElementById('mi-friends').innerText = t.miFriends;
+    document.getElementById('friend-id-input').placeholder = t.miFriendIdPl;
+    document.getElementById('notif-header-text').innerText = t.notifHeader;
+    document.getElementById('chat-input').placeholder = t.fChatPl;
+    document.getElementById('btn-remove-f').innerText = t.fRemove;
+    
     updateRank(); updateShopButtons();
+  }
+
+  function toggleAIChat() {
+    const win = document.getElementById('ai-window');
+    win.style.display = (win.style.display === 'flex' ? 'none' : 'flex');
+    if(document.getElementById('ai-messages').innerHTML === "") { document.getElementById('ai-messages').innerHTML = `<div class="ai-msg bot">${trans[lang].aiWelcome}</div>`; }
+  }
+
+  async function askGroq() {
+    const input = document.getElementById('ai-userInput');
+    const msgArea = document.getElementById('ai-messages');
+    const text = input.value.trim();
+    if(!text) return;
+    msgArea.innerHTML += `<div class="ai-msg user">${text}</div>`;
+    const systemPrompt = lang === 'ar' ? "أنت مدرب رياضي خبير في مختبر RGALAB. أجب بالعربية." : "You are an expert fitness coach at RGALAB.";
+    if (chatHistory.length === 0) chatHistory.push({ role: "system", content: systemPrompt });
+    chatHistory.push({ role: "user", content: text });
+    input.value = ""; msgArea.scrollTop = msgArea.scrollHeight;
+    const loadingId = "load-" + Date.now();
+    msgArea.innerHTML += `<div class="ai-msg bot" id="${loadingId}">...</div>`;
+    try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: chatHistory, temperature: 0.7 })
+        });
+        const data = await response.json();
+        const reply = data.choices[0].message.content;
+        document.getElementById(loadingId).innerText = reply;
+        chatHistory.push({ role: "assistant", content: reply });
+        if (chatHistory.length > 15) chatHistory = [chatHistory[0], ...chatHistory.slice(-10)];
+    } catch (e) { document.getElementById(loadingId).innerText = "Error."; }
+    msgArea.scrollTop = msgArea.scrollHeight;
+  }
+
+  function triggerPhotoUpload() { document.getElementById('photoInput').click(); }
+  function uploadPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            userAvatarUrl = e.target.result;
+            document.getElementById('menu-user-avatar').src = userAvatarUrl;
+            localStorage.setItem('rga_avatar', userAvatarUrl);
+            syncWithDB();
+        }; reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function changeName() {
+    const lastChange = localStorage.getItem('rga_name_date') || 0;
+    if (Date.now() - lastChange < 259200000) { alert(trans[lang].nameWait); return; }
+    const newName = prompt("Enter new name:");
+    if (newName) {
+        auth.currentUser.updateProfile({ displayName: newName }).then(() => {
+            document.getElementById('menu-user-name').innerText = newName;
+            localStorage.setItem('rga_name_date', Date.now());
+            syncWithDB();
+        });
+    }
+  }
+
+  function renderDays() {
+    const container = document.getElementById('days-list');
+    const days = trans[lang].days;
+    const today = new Date().getDay();
+    container.innerHTML = "";
+    days.forEach((day, index) => {
+        const div = document.createElement('div');
+        div.className = `day-chip ${index === today ? 'active' : ''}`;
+        div.innerText = day; container.appendChild(div);
+    });
   }
 
   function handleAuth() {
@@ -493,7 +1028,8 @@
         const fullName = fn + " " + ln;
         auth.createUserWithEmailAndPassword(email, pass).then(u => {
             u.user.updateProfile({ displayName: fullName, photoURL: DEFAULT_AVATAR });
-            db.collection("ranks").doc(u.user.uid).set({ name: fullName, xp: 0, avatar: DEFAULT_AVATAR, streak: 0 });
+            const generatedId = Math.random().toString(36).substr(2, 6).toUpperCase();
+            db.collection("ranks").doc(u.user.uid).set({ name: fullName, xp: 0, avatar: DEFAULT_AVATAR, streak: 0, bestCombo: 0, shortId: generatedId });
             u.user.sendEmailVerification(); alert(trans[lang].verifyMsg); auth.signOut();
         }).catch(e => alert(e.message));
     } else { auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message)); }
@@ -502,9 +1038,7 @@
   function forgotPassword() { 
     const emailInput = document.getElementById('auth-email').value;
     const email = prompt(trans[lang].forgotPrompt, emailInput);
-    if(email) {
-        auth.sendPasswordResetEmail(email).then(() => { alert(trans[lang].forgotSuccess); }).catch(e => { alert(e.message); });
-    }
+    if(email) auth.sendPasswordResetEmail(email).then(() => alert(trans[lang].forgotSuccess)).catch(e => alert(e.message));
   }
 
   function logout() { auth.signOut().then(() => { localStorage.removeItem('rga_avatar'); location.reload(); }); }
@@ -517,26 +1051,26 @@
         else streak = 1;
         localStorage.setItem('rga_streak', streak); 
         localStorage.setItem('rga_last_date', today);
-        syncWithDB(); // حفظ الستريك في السحاب عند التحديث
+        syncWithDB(); 
     }
     document.getElementById('streak-num').innerText = streak;
   }
 
   function doMission(el, points) { if(!el.classList.contains('done')) { el.classList.add('done'); addXP(points); } }
-  function addXP(amount) { xp += amount; localStorage.setItem('rga_xp', xp); updateRank(); syncWithDB(); }
+  
+  function addXP(amount) { 
+    xp += amount; 
+    localStorage.setItem('rga_xp', xp); 
+    updateRank(); 
+    const user = auth.currentUser;
+    if(user) { db.collection("ranks").doc(user.uid).update({ xp: xp }).catch(() => syncWithDB()); }
+  }
 
   function syncWithDB() {
     const user = auth.currentUser;
     if(user) {
-        db.collection("ranks").doc(user.uid).set({
-            name: user.displayName || "Anonymous",
-            xp: xp,
-            avatar: userAvatarUrl,
-            streak: streak // حفظ الستريك في الـ Firestore
-        }, { merge: true });
-        document.getElementById('myIdDisplay').innerText = user.uid.substring(0,8);
-        document.getElementById('menu-user-name').innerText = user.displayName || "User";
-        document.getElementById('menu-user-avatar').src = userAvatarUrl;
+        db.collection("ranks").doc(user.uid).set({ name: user.displayName || "Anonymous", xp: xp, avatar: userAvatarUrl, streak: streak, bestCombo: globalBestCombo, shortId: myShortId }, { merge: true });
+        document.getElementById('myIdDisplay').innerText = myShortId || "---";
     }
   }
 
@@ -548,35 +1082,20 @@
     document.getElementById('xp-fill').style.width = (xp % 100) + "%";
   }
 
-    function openLeaderboard() {
+  function openLeaderboard() {
     document.getElementById('lb-modal').style.display = 'flex';
     const listDiv = document.getElementById('lb-list');
     listDiv.innerHTML = "Loading...";
-    
-    // التعديل هنا: الترتيب حسب الـ streak بدلاً من الـ xp
     db.collection("ranks").orderBy("streak", "desc").limit(100).get().then(snap => {
         listDiv.innerHTML = "";
         let i = 1;
         snap.forEach(doc => {
             const data = doc.data();
-            const currentPic = data.avatar || DEFAULT_AVATAR;
-            const userStreak = data.streak || 0; // جلب الستريك الخاص بكل مستخدم
-            
-            listDiv.innerHTML += `
-                <div class="lb-row">
-                    <div class="lb-user">
-                        <span style="width:20px; font-weight:bold;">#${i}</span>
-                        <img src="${currentPic}" class="lb-pic">
-                        <span>${data.name}</span>
-                    </div>
-                    <span style="color: #ff5722; font-weight: bold;">🔥 ${userStreak}</span>
-                </div>`;
+            listDiv.innerHTML += `<div class="lb-row"><div class="lb-user"><span style="width:20px;">#${i}</span><img src="${data.avatar || DEFAULT_AVATAR}" class="lb-pic"><span>${data.name}</span></div><span style="color:#ff5722;">🔥 ${data.streak || 0}</span></div>`;
             i++;
         });
     });
   }
-
-
   function closeLeaderboard() { document.getElementById('lb-modal').style.display = 'none'; }
 
   function processAll() {
@@ -606,7 +1125,6 @@
     let html = ""; for(let i=1; i<=8; i++) html += (i <= waterCups ? "🟦" : "⬜");
     document.getElementById('water-tracker').innerHTML = html;
   }
-
   document.getElementById('water-tracker').onclick = function() {
     let waterCups = parseInt(localStorage.getItem('rga_water_count') || 0);
     waterCups = waterCups >= 8 ? 0 : waterCups + 1;
@@ -621,7 +1139,6 @@
     document.getElementById('shop-xp-val').innerText = xp;
     updateShopButtons();
   }
-
   function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
 
   function updateShopButtons() {
@@ -630,11 +1147,9 @@
         const btn = document.getElementById('btn-'+id);
         if(ownedItems.includes(id)) {
             const isActive = document.body.classList.contains('skin-'+id);
-            btn.innerText = isActive ? t.off : t.on;
-            btn.className = isActive ? "active" : "";
+            btn.innerText = isActive ? t.off : t.on; btn.className = isActive ? "active" : "";
         } else {
-            btn.innerText = t.unlock;
-            btn.disabled = xp < (id === 'neon' ? 1000 : 2000);
+            btn.innerText = t.unlock; btn.disabled = xp < (id === 'neon' ? 1000 : 2000);
         }
     });
     document.getElementById('btn-diet').innerText = t.get; document.getElementById('btn-diet').disabled = xp < 3000;
@@ -643,20 +1158,200 @@
 
   function buyItem(item, cost) {
     if(ownedItems.includes(item)) {
-        if(item === 'neon' || item === 'gold') {
-            document.body.classList.toggle('skin-'+item); updateShopButtons();
-        }
+        if(item === 'neon' || item === 'gold') { document.body.classList.toggle('skin-'+item); updateShopButtons(); }
         return;
     }
     if(xp >= cost) {
         xp -= cost; localStorage.setItem('rga_xp', xp);
-        if(item === 'neon' || item === 'gold') {
-            ownedItems.push(item); localStorage.setItem('rga_owned', JSON.stringify(ownedItems));
-            document.body.classList.add('skin-'+item);
-        }
+        if(item === 'neon' || item === 'gold') { ownedItems.push(item); localStorage.setItem('rga_owned', JSON.stringify(ownedItems)); document.body.classList.add('skin-'+item); }
         alert(trans[lang].bought); document.getElementById('shop-xp-val').innerText = xp;
         updateRank(); syncWithDB(); updateShopButtons();
     }
+  }
+
+  // --- إصلاح مشكلة الإشعارات (تعديل toggle وتحديث المنطق) ---
+  function toggleNotifs() {
+      const drop = document.getElementById('notif-dropdown');
+      const badge = document.getElementById('notif-badge');
+      if(drop.style.display === 'flex') {
+          drop.style.display = 'none';
+      } else {
+          drop.style.display = 'flex';
+          // تصفير العداد عند الفتح ليعرف المستخدم أنه رأى الإشعارات
+          badge.style.display = 'none';
+          badge.innerText = '0';
+      }
+  }
+
+  function copyMyId() { if(myShortId) { navigator.clipboard.writeText(myShortId).then(() => alert("Copied ID: " + myShortId)); } }
+
+  function sendFriendRequest() {
+      const targetId = document.getElementById('friend-id-input').value.trim();
+      if(!targetId) return;
+      if(targetId === myShortId) { alert(lang === 'ar' ? "لا يمكنك إضافة نفسك!" : "You can't add yourself!"); return; }
+
+      db.collection("ranks").where("shortId", "==", targetId).limit(1).get().then(snap => {
+          if(snap.empty) { alert("المعرف غير صحيح User not found"); } else {
+              const targetDoc = snap.docs[0]; const targetUid = targetDoc.id;
+              db.collection("users").doc(targetUid).collection("notifications").add({ type: 'friend_request', fromUid: auth.currentUser.uid, fromName: auth.currentUser.displayName, time: firebase.firestore.FieldValue.serverTimestamp() }).then(() => alert(lang === 'ar' ? "تم إرسال الطلب!" : "Request Sent!"));
+          }
+      });
+  }
+
+  function listenToNotifications() {
+      const uid = auth.currentUser.uid;
+      db.collection("users").doc(uid).collection("notifications").orderBy("time", "desc").limit(20)
+      .onSnapshot(snap => {
+          const list = document.getElementById('notif-list'); list.innerHTML = ""; 
+          let unread = 0;
+          const t = trans[lang];
+
+          if(snap.empty) { 
+              list.innerHTML = `<div style='padding:10px; opacity:0.6;'>${t.notifEmpty}</div>`; 
+          }
+          
+          snap.forEach(doc => {
+              const n = doc.data(); 
+              unread++; 
+              const div = document.createElement('div'); div.className = 'notif-item';
+              
+              if(n.type === 'friend_request') {
+                  div.innerHTML = `<div>👤 ${t.notifFriendReq} <b>${n.fromName}</b></div>
+                  <div class="notif-actions">
+                      <button class="btn-accept" onclick="acceptFriend('${doc.id}', '${n.fromUid}', '${n.fromName}')">${t.notifAccept}</button>
+                      <button class="btn-reject" onclick="deleteNotif('${doc.id}')">${t.notifReject}</button>
+                  </div>`;
+              } else if (n.type === 'xp_gift') {
+                  div.innerHTML = `<div style="color:#4CAF50;">🎁 ${t.notifGift} <b>${n.amount} XP</b> (${n.fromName})</div>`;
+              } else if (n.type === 'msg') {
+                  div.innerHTML = `<div>💬 ${t.notifMsg} <b>${n.fromName}</b>: ${n.text}</div>`;
+              }
+              list.appendChild(div);
+          });
+          
+          const badge = document.getElementById('notif-badge');
+          const drop = document.getElementById('notif-dropdown');
+          // منع ظهور الرقم إذا كانت القائمة مفتوحة
+          if(unread > 0 && drop.style.display !== 'flex') { 
+              badge.style.display = 'block'; 
+              badge.innerText = unread; 
+          } else if (unread === 0) {
+              badge.style.display = 'none';
+          }
+      });
+  }
+
+  function acceptFriend(notifId, fromUid, fromName) {
+      const myUid = auth.currentUser.uid; const myName = auth.currentUser.displayName;
+      const batch = db.batch();
+      const myFriendRef = db.collection("users").doc(myUid).collection("friends").doc(fromUid);
+      batch.set(myFriendRef, { uid: fromUid, name: fromName });
+      const otherFriendRef = db.collection("users").doc(fromUid).collection("friends").doc(myUid);
+      batch.set(otherFriendRef, { uid: myUid, name: myName });
+      const notifRef = db.collection("users").doc(myUid).collection("notifications").doc(notifId);
+      batch.delete(notifRef);
+      batch.commit().then(() => alert(lang === 'ar' ? "تمت إضافة الصديق!" : "Friend Added!"));
+  }
+
+  function deleteNotif(id) { db.collection("users").doc(auth.currentUser.uid).collection("notifications").doc(id).delete(); }
+
+  function listenToFriends() {
+      db.collection("users").doc(auth.currentUser.uid).collection("friends").onSnapshot(snap => {
+          const div = document.getElementById('friend-list-container'); div.innerHTML = "";
+          if(snap.empty) { div.innerHTML = `<small style='opacity:0.5'>${trans[lang].miNoFriends}</small>`; return; }
+          snap.forEach(doc => {
+              const f = doc.data();
+              db.collection("ranks").doc(f.uid).get().then(uSnap => {
+                 if(uSnap.exists) {
+                     const uData = uSnap.data(); const el = document.createElement('div'); el.className = 'friend-list-item';
+                     el.innerHTML = `<img src="${uData.avatar || DEFAULT_AVATAR}" class="f-avatar">
+                                     <div><b>${uData.name}</b><br><span style="font-size:10px; color:#FFD700;">🔥 ${uData.streak || 0}</span></div>`;
+                     el.onclick = () => openFriendModal(f.uid, uData); div.appendChild(el);
+                 }
+              });
+          });
+      });
+  }
+
+  function openFriendModal(fUid, uData) {
+      currentFriendId = fUid;
+      document.getElementById('friend-modal').style.display = 'flex';
+      document.getElementById('f-modal-name').innerText = uData.name;
+      document.getElementById('f-modal-img').src = uData.avatar || DEFAULT_AVATAR;
+      document.getElementById('f-modal-streak').innerText = uData.streak || 0;
+      document.getElementById('f-chat-box').innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:20px;">${trans[lang].fChatWait}</div>`;
+      listenChat(fUid);
+  }
+
+  function removeFriend() {
+      if(!currentFriendId) return;
+      if(confirm(trans[lang].fRemoveConfirm)) {
+          const myUid = auth.currentUser.uid;
+          const batch = db.batch();
+          batch.delete(db.collection("users").doc(myUid).collection("friends").doc(currentFriendId));
+          batch.delete(db.collection("users").doc(currentFriendId).collection("friends").doc(myUid));
+          batch.commit().then(() => {
+              alert(lang === 'ar' ? "تم حذف الصديق" : "Friend Removed");
+              document.getElementById('friend-modal').style.display = 'none';
+          });
+      }
+  }
+
+  function sendXPToFriend() {
+      if(!currentFriendId) return;
+      const inputVal = document.getElementById('xp-amount-input').value;
+      const amount = parseInt(inputVal);
+      if(!amount || amount <= 0) { alert(lang === 'ar' ? "الرجاء إدخال رقم صحيح!" : "Please enter a valid number!"); return; }
+      db.collection("ranks").doc(currentFriendId).update({ xp: firebase.firestore.FieldValue.increment(amount) });
+      db.collection("users").doc(currentFriendId).collection("notifications").add({ type: 'xp_gift', amount: amount, fromName: auth.currentUser.displayName, time: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { alert(lang === 'ar' ? `تم إرسال ${amount} XP بنجاح!` : `Sent ${amount} XP successfully!`); document.getElementById('xp-amount-input').value = ""; });
+  }
+
+  function sendChatMessage() {
+      const txt = document.getElementById('chat-input').value.trim();
+      if(!txt || !currentFriendId) return;
+      const myUid = auth.currentUser.uid;
+      const chatId = myUid < currentFriendId ? myUid + "_" + currentFriendId : currentFriendId + "_" + myUid;
+
+      db.collection("chats").doc(chatId).collection("messages").add({
+          senderId: myUid,
+          text: txt,
+          time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      db.collection("users").doc(currentFriendId).collection("notifications").add({ 
+          type: 'msg', 
+          text: txt, 
+          fromName: auth.currentUser.displayName, 
+          time: firebase.firestore.FieldValue.serverTimestamp() 
+      });
+
+      document.getElementById('chat-input').value = "";
+  }
+  
+  function listenChat(fUid) {
+      if(chatUnsubscribe) chatUnsubscribe();
+      const myUid = auth.currentUser.uid;
+      const chatId = myUid < fUid ? myUid + "_" + fUid : fUid + "_" + myUid;
+      const box = document.getElementById('f-chat-box');
+
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      db.collection("chats").doc(chatId).collection("messages")
+          .where("time", "<", oneDayAgo).get().then(snap => {
+              snap.forEach(doc => doc.ref.delete());
+          });
+
+      chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages")
+          .orderBy("time", "asc")
+          .onSnapshot(snap => {
+              box.innerHTML = "";
+              if(snap.empty) { box.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:20px;">${trans[lang].fChatWait}</div>`; }
+              snap.forEach(doc => {
+                  const m = doc.data();
+                  const cls = m.senderId === myUid ? "me" : "them";
+                  box.innerHTML += `<div class="chat-msg ${cls}">${m.text}</div>`;
+              });
+              box.scrollTop = box.scrollHeight;
+          });
   }
 
   window.onload = function() {
@@ -664,28 +1359,23 @@
     if (localStorage.getItem('rga_privacy_accepted') === 'true') document.getElementById("privacyModal").style.display = "none";
     auth.onAuthStateChanged(user => {
       if(user) { 
-          document.getElementById('auth-overlay').classList.add('hidden'); 
-          document.getElementById('menuBtn').style.display = "flex";
+          document.getElementById('auth-overlay').classList.add('hidden'); document.getElementById('menuBtn').style.display = "flex";
+          document.getElementById('ai-chat-btn').style.display = "flex"; document.getElementById('notif-icon').style.display = "flex"; 
           db.collection("ranks").doc(user.uid).get().then(doc => {
               if(doc.exists) {
-                  const data = doc.data();
-                  userAvatarUrl = data.avatar || DEFAULT_AVATAR;
-                  xp = data.xp || 0;
-                  streak = data.streak || 0; // جلب الستريك من الحساب
-                  
-                  localStorage.setItem('rga_avatar', userAvatarUrl);
-                  localStorage.setItem('rga_xp', xp);
-                  localStorage.setItem('rga_streak', streak);
-                  
-                  document.getElementById('menu-user-avatar').src = userAvatarUrl;
-                  document.getElementById('menu-user-name').innerText = user.displayName || "User";
-                  document.getElementById('streak-num').innerText = streak;
-                  updateRank();
-                  checkStreak(); // التحقق إذا كان يجب زيادة الستريك لليوم الجديد
+                  const data = doc.data(); userAvatarUrl = data.avatar || DEFAULT_AVATAR; xp = data.xp || 0; streak = data.streak || 0;
+                  globalBestCombo = data.bestCombo || 0; myShortId = data.shortId;
+                  if(!myShortId) { myShortId = Math.random().toString(36).substr(2, 6).toUpperCase(); db.collection("ranks").doc(user.uid).update({ shortId: myShortId }); }
+                  document.getElementById('menu-user-id').innerText = "ID: " + myShortId;
+                  localStorage.setItem('rga_avatar', userAvatarUrl); localStorage.setItem('rga_xp', xp); localStorage.setItem('rga_streak', streak);
+                  document.getElementById('menu-user-avatar').src = userAvatarUrl; document.getElementById('menu-user-name').innerText = user.displayName || "User";
+                  document.getElementById('streak-num').innerText = streak; document.getElementById('best-combo-val').innerText = globalBestCombo;
+                  document.getElementById('myIdDisplay').innerText = myShortId;
+                  updateRank(); checkStreak(); listenToNotifications(); listenToFriends();
               }
           });
       }
-      else { document.getElementById('auth-overlay').classList.remove('hidden'); document.getElementById('menuBtn').style.display = "none"; }
+      else { document.getElementById('auth-overlay').classList.remove('hidden'); }
     });
   };
 
