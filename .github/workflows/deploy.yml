@@ -19,9 +19,9 @@ jobs:
           script: |
             const fs = require('fs');
             let html = fs.readFileSync('index.html', 'utf8');
-            // استبدال دقيق وآمن للمفاتيح مهما كانت الرموز اللي فيها
-            html = html.replace(/FIREBASE_API_KEY_PLACEHOLDER/g, process.env.FB_KEY);
-            html = html.replace(/GROQ_API_KEY_PLACEHOLDER/g, process.env.GR_KEY);
+            // استبدال آمن جداً يتجاهل أي رموز خاصة
+            html = html.split('FIREBASE_API_KEY_PLACEHOLDER').join(process.env.FB_KEY);
+            html = html.split('GROQ_API_KEY_PLACEHOLDER').join(process.env.GR_KEY);
             fs.writeFileSync('index.html', html);
 
       - name: Deploy to GitHub Pages
