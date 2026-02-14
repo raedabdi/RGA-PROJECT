@@ -379,16 +379,17 @@ img {
 .friend-list-item:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); transform: scale(1.02); }
 .f-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--primary); }
 
-/* --- ✨ نظام الشات الاحترافي الجديد ✨ --- */
+/* --- ✨ نظام الشات الاحترافي الجديد (تحديث قزازي) ✨ --- */
 #friend-modal {
     display: none; position: fixed; z-index: 12000; left: 0; top: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5); align-items: center; justify-content: center;
     backdrop-filter: blur(10px);
 }
 .friend-card {
-    background: rgba(20, 20, 22, 0.6);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    /* ✅ CSS: More glassy effect */
+    background: radial-gradient(circle, rgba(40, 42, 48, 0.5) 0%, rgba(25, 26, 30, 0.4) 100%);
+    backdrop-filter: blur(50px) saturate(220%);
+    -webkit-backdrop-filter: blur(50px) saturate(220%);
     width: 90%; max-width: 380px; height: 75vh; max-height: 600px;
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -397,13 +398,12 @@ img {
     overflow: hidden;
 }
 
-/* ✅ CSS: Header layout adjustments */
 .friend-header {
     padding: 15px;
     display: flex; align-items: center; gap: 12px;
     background: rgba(255,255,255,0.05);
     position: relative;
-    direction: ltr; /* Force LTR for layout */
+    direction: ltr;
 }
 #f-modal-img {
     width: 50px; height: 50px; border-radius: 50%;
@@ -411,16 +411,15 @@ img {
     box-shadow: 0 0 15px var(--primary);
 }
 .friend-info {
-    flex: 1; /* Allow info to take up space */
-    text-align: left; /* Align text to the left */
+    flex: 1;
+    text-align: left;
 }
 .friend-info h3 { margin: 0; font-size: 18px; }
 .friend-info span { color: #FFD700; font-weight: bold; font-size: 12px; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
 
-/* ✅ CSS: Grouped actions on the right */
 .friend-actions {
     display: flex; gap: 10px;
-    margin-left: auto; /* Push actions to the right */
+    margin-left: auto;
 }
 .friend-actions button {
     background: none; border: none; color: rgba(255,255,255,0.6);
@@ -462,7 +461,8 @@ img {
 }
 
 .chat-msg.them {
-    background: rgba(255, 255, 255, 0.15);
+    /* ✅ CSS: More transparent messages */
+    background: rgba(255, 255, 255, 0.1);
     color: #f1f1f1;
     align-self: flex-start;
     text-align: left;
@@ -474,23 +474,22 @@ img {
     background: rgba(0,0,0,0.3);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-/* ✅ CSS: XP sender layout adjustments */
 .xp-sender-box {
     display: flex; gap: 8px; margin-bottom: 8px;
 }
 .xp-sender-box input {
-    flex-grow: 3; /* Make input field larger */
+    flex-grow: 3;
     background: rgba(0,0,0,0.4); border: none; padding: 10px;
     color: white; text-align: left; font-weight: bold; margin: 0;
     border-radius: 10px; font-size: 14px;
 }
 .xp-sender-box button {
-    flex-grow: 1; /* Adjust button size */
+    flex-grow: 1;
     margin: 0; display: flex; align-items: center; justify-content: center; gap: 5px;
     border-radius: 10px; background: linear-gradient(90deg, #FF9800, #F57C00);
     box-shadow: 0 2px 10px rgba(255, 152, 0, 0.3);
     transition: all 0.2s ease;
-    padding: 0 10px; font-size: 13px; /* Smaller font size */
+    padding: 0 10px; font-size: 13px;
 }
 .xp-sender-box button:hover { box-shadow: 0 4px 15px rgba(255, 152, 0, 0.5); transform: translateY(-1px); }
 .xp-sender-box button:disabled { background: #555; cursor: not-allowed; opacity: 0.6; box-shadow: none; transform: none; }
@@ -610,7 +609,6 @@ img {
     </div>
 </div>
 
-<!-- ✅ HTML: Restructured friend-modal -->
 <div id="friend-modal" onclick="document.getElementById('friend-modal').style.display='none'">
     <div class="friend-card" onclick="event.stopPropagation()">
         <div class="friend-header">
@@ -790,14 +788,15 @@ const GROQ_KEY = part1 + part2;
   let authMode = 'login';
   const DEFAULT_AVATAR = "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
 
-  let xp = parseInt(localStorage.getItem('rga_xp')) || 0;
-  let streak = parseInt(localStorage.getItem('rga_streak')) || 0;
+  let xp = 0;
+  let streak = 0;
   let ownedItems = JSON.parse(localStorage.getItem('rga_owned')) || [];
   let userAvatarUrl = localStorage.getItem('rga_avatar') || DEFAULT_AVATAR;
   let myShortId = "";
   let currentFriendId = null;
   let chatUnsubscribe = null; // للمتابعة الحية للشات
   let notifUnsubscribe = null; // للمتابعة الحية للإشعارات
+  let rankUnsubscribe = null; // لمتابعة رصيد المستخدم
 
   const trans = {
     ar: {
@@ -905,7 +904,7 @@ const GROQ_KEY = part1 + part2;
     const msg = lang === 'ar' ? `عاش يا بطل! لقد جمعت ${sessionXP} XP في هذه الجلسة.` : `Great job! You earned ${sessionXP} XP this session.`;
     alert(msg);
     document.getElementById('game-modal').style.display = 'none';
-    syncWithDB();
+    syncWithDB({xp: firebase.firestore.FieldValue.increment(sessionXP)});
   }
 
   function liftStart() {
@@ -921,8 +920,7 @@ const GROQ_KEY = part1 + part2;
     if (comboCount > globalBestCombo) {
         globalBestCombo = comboCount;
         document.getElementById('best-combo-val').innerText = globalBestCombo;
-        const user = auth.currentUser;
-        if (user) { db.collection("ranks").doc(user.uid).update({ bestCombo: globalBestCombo }); }
+        syncWithDB({bestCombo: globalBestCombo});
     }
     if (comboCount > 1) {
         const comboEl = document.createElement('div');
@@ -936,13 +934,12 @@ const GROQ_KEY = part1 + part2;
     comboTimer = setTimeout(() => { comboCount = 0; }, 800);
 
     sessionXP++;
-    addXP(1);
     document.getElementById('session-xp-val').innerText = sessionXP;
     const pop = document.createElement('div');
     pop.className = 'xp-pop'; pop.innerText = '+1';
     pop.style.left = (Math.random() * 60 + 20) + '%';
     document.querySelector('.game-container').appendChild(pop);
-    setTimeout(() => pop.remove(), 500);
+    setTimeout(() => pop.remove(), 800);
   }
 
   function liftEnd() {
@@ -1019,7 +1016,7 @@ const GROQ_KEY = part1 + part2;
     document.getElementById('chat-input').placeholder = t.fChatPl;
 
 
-    updateRank(); updateShopButtons();
+    updateRankDisplay(); updateShopButtons();
   }
 
   function toggleAIChat() {
@@ -1067,7 +1064,7 @@ const GROQ_KEY = part1 + part2;
             userAvatarUrl = e.target.result;
             document.getElementById('menu-user-avatar').src = userAvatarUrl;
             localStorage.setItem('rga_avatar', userAvatarUrl);
-            syncWithDB();
+            syncWithDB({avatar: userAvatarUrl});
         }; reader.readAsDataURL(input.files[0]);
     }
   }
@@ -1080,7 +1077,7 @@ const GROQ_KEY = part1 + part2;
         auth.currentUser.updateProfile({ displayName: newName }).then(() => {
             document.getElementById('menu-user-name').innerText = newName;
             localStorage.setItem('rga_name_date', Date.now());
-            syncWithDB();
+            syncWithDB({name: newName});
         });
     }
   }
@@ -1118,40 +1115,38 @@ const GROQ_KEY = part1 + part2;
     if(email) auth.sendPasswordResetEmail(email).then(() => alert(trans[lang].forgotSuccess)).catch(e => alert(e.message));
   }
 
-  function logout() { auth.signOut().then(() => { localStorage.removeItem('rga_avatar'); location.reload(); }); }
+  function logout() {
+    if(rankUnsubscribe) rankUnsubscribe();
+    if(notifUnsubscribe) notifUnsubscribe();
+    if(chatUnsubscribe) chatUnsubscribe();
+    auth.signOut().then(() => {
+        localStorage.clear();
+        location.reload();
+    });
+  }
 
   function checkStreak() {
     const today = new Date().toDateString();
     const lastDate = localStorage.getItem('rga_last_date');
     if (lastDate !== today) {
-        if (lastDate === new Date(Date.now() - 86400000).toDateString()) streak++;
-        else streak = 1;
-        localStorage.setItem('rga_streak', streak);
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        const newStreak = (lastDate === yesterday) ? streak + 1 : 1;
+        syncWithDB({streak: newStreak});
+        localStorage.setItem('rga_streak', newStreak);
         localStorage.setItem('rga_last_date', today);
-        syncWithDB();
-    }
-    document.getElementById('streak-num').innerText = streak;
-  }
-
-  function doMission(el, points) { if(!el.classList.contains('done')) { el.classList.add('done'); addXP(points); } }
-
-  function addXP(amount) {
-    xp += amount;
-    localStorage.setItem('rga_xp', xp);
-    updateRank();
-    const user = auth.currentUser;
-    if(user) { db.collection("ranks").doc(user.uid).update({ xp: xp }).catch(() => syncWithDB()); }
-  }
-
-  function syncWithDB() {
-    const user = auth.currentUser;
-    if(user) {
-        db.collection("ranks").doc(user.uid).set({ name: user.displayName || "Anonymous", xp: xp, avatar: userAvatarUrl, streak: streak, bestCombo: globalBestCombo, shortId: myShortId }, { merge: true });
-        document.getElementById('myIdDisplay').innerText = myShortId || "---";
     }
   }
 
-  function updateRank() {
+  function doMission(el, points) { if(!el.classList.contains('done')) { el.classList.add('done'); syncWithDB({xp: firebase.firestore.FieldValue.increment(points)}); } }
+
+  function syncWithDB(dataToUpdate) {
+    const user = auth.currentUser;
+    if(user && dataToUpdate) {
+        db.collection("ranks").doc(user.uid).update(dataToUpdate).catch((e) => console.error("Sync error:", e));
+    }
+  }
+
+  function updateRankDisplay() {
     const level = Math.floor(xp / 100) + 1;
     const rankIdx = Math.min(Math.floor((level-1)/2), 4);
     const rLabel = (lang === 'ar' ? "الرتبة: " : "RANK: ");
@@ -1184,6 +1179,7 @@ const GROQ_KEY = part1 + part2;
     const act = parseFloat(document.getElementById('activity').value);
 
     if(!w || !h || !a) return;
+    checkStreak(); // Perform streak check on calculation
     const bmi = (w / ((h/100)**2)).toFixed(1);
     document.getElementById('val-bmi').innerText = bmi;
     document.getElementById('status-bmi').innerText = trans[lang].status[bmi < 18.5 ? 0 : bmi < 25 ? 1 : bmi < 30 ? 2 : 3];
@@ -1199,7 +1195,6 @@ const GROQ_KEY = part1 + part2;
     document.getElementById('res-lose').innerText = (maint - 500) + " " + trans[lang].calText;
     document.getElementById('res-gain').innerText = (maint + 500) + " " + trans[lang].calText;
     document.getElementById('resultsArea').classList.remove('hidden');
-    syncWithDB();
   }
 
   function renderWater() {
@@ -1218,7 +1213,6 @@ const GROQ_KEY = part1 + part2;
 
   function openShop() {
     document.getElementById('shop-modal').style.display = 'flex';
-    document.getElementById('shop-xp-val').innerText = xp;
     updateShopButtons();
   }
   function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
@@ -1243,10 +1237,10 @@ const GROQ_KEY = part1 + part2;
         return;
     }
     if(xp >= cost) {
-        xp -= cost; localStorage.setItem('rga_xp', xp);
         if(item === 'neon' || item === 'gold') { ownedItems.push(item); localStorage.setItem('rga_owned', JSON.stringify(ownedItems)); document.body.classList.add('skin-'+item); }
-        alert(trans[lang].bought); document.getElementById('shop-xp-val').innerText = xp;
-        updateRank(); syncWithDB(); updateShopButtons();
+        syncWithDB({xp: firebase.firestore.FieldValue.increment(-cost)});
+        alert(trans[lang].bought);
+        updateShopButtons();
     }
   }
 
@@ -1417,32 +1411,24 @@ const GROQ_KEY = part1 + part2;
         return;
     }
 
-    button.disabled = true; // تعطيل الزر
+    button.disabled = true;
     const myUid = auth.currentUser.uid;
     const myRankRef = db.collection("ranks").doc(myUid);
     const friendRankRef = db.collection("ranks").doc(currentFriendId);
 
     try {
-        // استخدام Transaction لضمان العمليتين (خصم وإضافة)
         await db.runTransaction(async (transaction) => {
             const myRankDoc = await transaction.get(myRankRef);
             if (!myRankDoc.exists || myRankDoc.data().xp < amount) {
                 throw new Error("Not enough XP");
             }
-            // خصم النقاط مني
             transaction.update(myRankRef, { xp: firebase.firestore.FieldValue.increment(-amount) });
-            // إضافة النقاط للصديق
             transaction.update(friendRankRef, { xp: firebase.firestore.FieldValue.increment(amount) });
         });
 
-        // تحديث الواجهة بعد نجاح العملية
-        xp -= amount;
-        localStorage.setItem('rga_xp', xp);
-        updateRank();
         alert(t.xpSent);
         input.value = "";
 
-        // إرسال إشعار
         db.collection("users").doc(currentFriendId).collection("notifications").add({
             type: 'xp_gift', amount: amount, fromName: auth.currentUser.displayName,
             time: firebase.firestore.FieldValue.serverTimestamp(), read: false
@@ -1452,7 +1438,7 @@ const GROQ_KEY = part1 + part2;
         console.error("XP Transaction failed: ", error);
         alert(t.xpErr);
     } finally {
-        button.disabled = false; // إعادة تفعيل الزر
+        button.disabled = false;
     }
   }
 
@@ -1484,7 +1470,9 @@ const GROQ_KEY = part1 + part2;
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       db.collection("chats").doc(chatId).collection("messages")
           .where("time", "<", oneDayAgo).get().then(snap => {
-              snap.forEach(doc => doc.ref.delete());
+              const batch = db.batch();
+              snap.forEach(doc => batch.delete(doc.ref));
+              batch.commit();
           });
       chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages")
           .orderBy("time", "asc")
@@ -1507,21 +1495,33 @@ const GROQ_KEY = part1 + part2;
       if(user) {
           document.getElementById('auth-overlay').classList.add('hidden'); document.getElementById('menuBtn').style.display = "flex";
           document.getElementById('ai-chat-btn').style.display = "flex"; document.getElementById('notif-icon').style.display = "flex";
-          db.collection("ranks").doc(user.uid).onSnapshot(doc => { // Changed to onSnapshot for real-time XP updates
+          // ✅ Listen to user's rank document in real-time
+          if(rankUnsubscribe) rankUnsubscribe();
+          rankUnsubscribe = db.collection("ranks").doc(user.uid).onSnapshot(doc => {
               if(doc.exists) {
                   const data = doc.data();
                   xp = data.xp || 0;
-                  userAvatarUrl = data.avatar || DEFAULT_AVATAR; streak = data.streak || 0;
-                  globalBestCombo = data.bestCombo || 0; myShortId = data.shortId;
-                  if(!myShortId) { myShortId = Math.random().toString(36).substr(2, 6).toUpperCase(); db.collection("ranks").doc(user.uid).update({ shortId: myShortId }); }
+                  streak = data.streak || 0;
+                  userAvatarUrl = data.avatar || DEFAULT_AVATAR;
+                  globalBestCombo = data.bestCombo || 0;
+                  myShortId = data.shortId;
+                  if(!myShortId) {
+                      myShortId = Math.random().toString(36).substr(2, 6).toUpperCase();
+                      db.collection("ranks").doc(user.uid).update({ shortId: myShortId });
+                  }
                   document.getElementById('menu-user-id').innerText = "ID: " + myShortId;
-                  localStorage.setItem('rga_avatar', userAvatarUrl); localStorage.setItem('rga_xp', xp); localStorage.setItem('rga_streak', streak);
-                  document.getElementById('menu-user-avatar').src = userAvatarUrl; document.getElementById('menu-user-name').innerText = user.displayName || "User";
-                  document.getElementById('streak-num').innerText = streak; document.getElementById('best-combo-val').innerText = globalBestCombo;
+                  localStorage.setItem('rga_avatar', userAvatarUrl);
+                  localStorage.setItem('rga_streak', streak);
+
+                  document.getElementById('menu-user-avatar').src = userAvatarUrl;
+                  document.getElementById('menu-user-name').innerText = user.displayName || "User";
+                  document.getElementById('streak-num').innerText = streak;
+                  document.getElementById('best-combo-val').innerText = globalBestCombo;
                   document.getElementById('myIdDisplay').innerText = myShortId;
-                  updateRank(); checkStreak();
+                  updateRankDisplay();
               }
           });
+          checkStreak();
           listenToNotifications();
           listenToFriends();
       }
