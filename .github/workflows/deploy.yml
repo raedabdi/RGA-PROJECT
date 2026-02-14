@@ -11,9 +11,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Inject Secrets
+        env:
+          FB_KEY: ${{ secrets.FIREBASE_KEY }}
+          GR_KEY: ${{ secrets.MY_GROQ_KEY }}
         run: |
-          sed -i 's|FIREBASE_API_KEY_PLACEHOLDER|${{ secrets.FIREBASE_KEY }}|g' index.html
-          sed -i 's|GROQ_API_KEY_PLACEHOLDER|${{ secrets.MY_GROQ_KEY }}|g' index.html
+          sed -i "s|FIREBASE_API_KEY_PLACEHOLDER|$FB_KEY|g" index.html
+          sed -i "s|GROQ_API_KEY_PLACEHOLDER|$GR_KEY|g" index.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
