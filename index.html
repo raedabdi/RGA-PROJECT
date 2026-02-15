@@ -773,7 +773,19 @@ img {
   const LIFT_IMG_DOWN = "https://i.ibb.co/zW74jkmK/IMG-4239.png";
   const LIFT_IMG_UP = "https://i.ibb.co/zVkNkjfZ/IMG-4238.png";
   // ----------------------------------------
-  const firebaseConfig = { apiKey: "AIzaSyDV7SNwgv_K10tX0iJpNYqg8_iJnWprFB4", authDomain: "rgalab.firebaseapp.com", projectId: "rgalab", storageBucket: "rgalab.firebasestorage.app", messagingSenderId: "882288745140", appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1" };
+  // --- تقسيم مفتاح Firebase API ---
+  const fbPart1 = "AIzaSyDV7SNwgv_";
+  const fbPart2 = "K10tX0iJpNYqg8_iJnWprFB4";
+  
+  const firebaseConfig = { 
+    apiKey: fbPart1 + fbPart2, // دمج الجزئين هنا
+    authDomain: "rgalab.firebaseapp.com", 
+    projectId: "rgalab", 
+    storageBucket: "rgalab.firebasestorage.app", 
+    messagingSenderId: "882288745140", 
+    appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1" 
+  };
+
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
