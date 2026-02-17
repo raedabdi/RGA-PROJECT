@@ -648,6 +648,39 @@
             min-height: 180px;
             margin: 20px 0;
         }
+
+
+
+/* --- ✨ تنسيقات لعبة السكوات الكاملة والصحيحة ✨ --- */
+#squat-bar-container {
+    position: relative;
+    width: 70px;
+    height: 85%;
+    background: rgba(255, 255, 255, 0.1); /* اللون الزجاجي الأصلي */
+    border-radius: 15px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+
+/* فئة لإظهار وميض أحمر عند الخطأ */
+.squat-bar-error {
+    animation: errorFlash 0.3s;
+}
+
+@keyframes errorFlash {
+    0%, 100% {
+        background: rgba(255, 255, 255, 0.1); /* يجب أن يطابق اللون الأصلي */
+    }
+    50% {
+        background: rgba(255, 0, 0, 0.5);   /* وميض أحمر */
+    }
+}
+
+
+
     </style>
 </head>
 <body class="ar-mode">
@@ -684,6 +717,50 @@
         </div>
         <button class="exit-btn-game" onclick="closeGame()">EXIT SESSION</button>
     </div>
+
+
+<!-- ✨✨✨ مودال لعبة السكوات ✨✨✨ -->
+<div id="squat-game-modal" style="display: none; position: fixed; z-index: 20000; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,20,0.8)), var(--game-bg) no-repeat center center; background-size: cover; backdrop-filter: blur(15px); align-items: center; justify-content: center; flex-direction: column;" onclick="handleSquatClick()">
+
+    <div class="game-stats-bar">
+        <div class="stat-item">
+            <span class="stat-label">MISTAKES</span>
+            <span id="squat-mistakes-val" class="stat-value">0 / 5</span>
+        </div>
+        <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px;">
+            <span class="stat-label">EARNED XP</span>
+            <span id="squat-session-xp-val" class="stat-value">0</span>
+        </div>
+    </div>
+
+  <!-- ✨ حاوية اللعبة المطورة (تشبه الديدليفت) ✨ -->
+<div class="game-container" id="squat-game-container" style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+
+
+    <!-- حاوية الشخصية (في الخلف) -->
+    <div id="squat-char-container" style="width: 280px; height: 280px; position: absolute;">
+        <!-- ✅ الصورة الجديدة: قبل السكوات -->
+        <img id="squat-char-before" src="https://i.ibb.co/JWJjKV1B/IMG-4306.png" style="width: 100%; position: absolute; bottom: 0; transition: all 0.2s; pointer-events: none; filter: drop-shadow(0 0 20px var(--primary));">
+        
+        <!-- ✅ الصورة الجديدة: بعد السكوات -->
+        <img id="squat-char-after" src="https://i.ibb.co/h1BjbXB1/IMG-4305.png" style="width: 100%; position: absolute; bottom: 0; opacity: 0; transition: all 0.2s; pointer-events: none; filter: drop-shadow(0 0 20px var(--primary));">
+    </div>
+
+    <!-- حاوية شريط اللعبة (في الأمام بتأثير زجاجي) -->
+<div id="squat-bar-container" style="position: absolute; left: -50px; width: 40px; height: 85%; background: rgba(255, 255, 255, 0.1); border-radius: 15px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); overflow: hidden;">
+
+        <div id="squat-green-zone" style="position: absolute; width: 100%; height: 25%; background: rgba(76, 175, 80, 0.5); top: 37.5%; border-top: 2px solid white; border-bottom: 2px solid white;"></div>
+        <div id="squat-line" style="position: absolute; width: 100%; height: 4px; background: white; top: 0; box-shadow: 0 0 10px white;"></div>
+    </div>
+</div>
+
+    <button class="exit-btn-game" onclick="closeSquatGame()">EXIT CHALLENGE</button>
+</div>
+
+
+
+
+
     <div id="ai-window">
         <div class="ai-header">
             <span id="ai-title">مدرب RGALAB الذكي</span>
@@ -707,6 +784,14 @@
             <button id="btn-edit-name" onclick="changeName()" style="background:none; color:#FFD700; font-size:12px; padding:0; margin-top:8px; text-decoration:none; width:auto; border:1px solid rgba(255,215,0,0.3); border-radius:15px; cursor:pointer; padding: 4px 10px;">✏️ تعديل الاسم</button>
         </div>
         <!-- ✅ REFINED: Menu items -->
+
+<div class="menu-item-row" onclick="closeMenuAndOpen(openSquatGame)" style="background: rgba(76, 175, 80, 0.2); border: 1px solid var(--primary);">
+    <span>Squat Challenge 🦵</span>
+    <span style="font-size: 10px; background: red; padding: 2px 5px; border-radius: 50px;">XP+</span>
+</div>
+
+
+
         <div class="menu-item-row" onclick="closeMenuAndOpen(openPerformanceHub)">
             <span id="mi-hub">📊 مركز الأداء</span>
         </div>
@@ -714,6 +799,13 @@
             <span id="mi-schedule">🗓️ تعديل جدول التمرين</span>
         </div>
         <div class="menu-item-row" onclick="closeMenuAndOpen(openGame)" style="background: rgba(76, 175, 80, 0.2); border: 1px solid var(--primary);">
+
+<!-- ✨ زر تحدي السكوات الجديد ✨ -->
+
+
+
+
+
             <span id="mi-game">Deadlift Game 🏋️‍♂️</span>
             <span style="font-size: 10px; background: red; padding: 2px 5px; border-radius: 50px;">XP+</span>
         </div>
@@ -1167,6 +1259,191 @@
         if(char) { char.src = LIFT_IMG_DOWN; char.style.transform = "translateY(0) scale(1)"; }
         if(container) container.classList.remove('shake');
       }
+
+// --- ✨✨✨ منطق لعبة السكوات ✨✨✨ ---
+
+// متغيرات حالة اللعبة
+let squatScore = 0;
+let squatMistakes = 0;
+let isSquatGameActive = false;
+let squatGameLoop;
+let squatLineSpeed = 2; // السرعة الأولية
+let linePosition = 0;
+let lineDirection = 1;
+
+async function openSquatGame() {
+    // 1. التأكد من أن المستخدم مسجل دخوله
+    const user = auth.currentUser;
+    if (!user) {
+        showToast("الرجاء تسجيل الدخول أولاً");
+        return;
+    }
+
+    try {
+        // 2. قراءة بيانات اللاعب من Firebase
+        const userDoc = await db.collection("ranks").doc(user.uid).get();
+        if (!userDoc.exists) return; // في حال عدم وجود بيانات
+
+        const data = userDoc.data();
+        const lastPlayedTimestamp = data.lastPlayedSquat; // اسم الحقل الجديد في الفايربيس
+
+        if (lastPlayedTimestamp) {
+            const lastPlayedDate = lastPlayedTimestamp.toDate().getTime();
+            const cooldown = 3600000; // ساعة واحدة
+            const timeSincePlayed = Date.now() - lastPlayedDate;
+
+            // 3. التحقق من وقت الانتظار
+            if (timeSincePlayed < cooldown) {
+                const remaining = Math.ceil((cooldown - timeSincePlayed) / 60000);
+                showToast(lang === 'ar' ? `عضلاتك تحتاج راحة! انتظر ${remaining} دقيقة.` : `Your muscles need rest! Wait ${remaining} mins.`);
+                return;
+            }
+        }
+
+        // 4. إذا تم تجاوز التحقق، ابدأ اللعبة كالمعتاد
+        squatScore = 0;
+        squatMistakes = 0;
+        linePosition = 0;
+        lineDirection = 1;
+        squatLineSpeed = 2;
+
+        document.getElementById('squat-session-xp-val').innerText = "0";
+        document.getElementById('squat-mistakes-val').innerText = "0 / 5";
+        document.getElementById('squat-game-modal').style.display = 'flex';
+        startSquatGame();
+
+    } catch (error) {
+        console.error("Error opening squat game:", error);
+        showToast("حدث خطأ، حاول مرة أخرى.");
+    }
+}
+
+
+
+function startSquatGame() {
+    isSquatGameActive = true;
+    gameLoop(); // بدء حلقة اللعبة
+}
+
+function gameLoop() {
+    if (!isSquatGameActive) return;
+
+    const line = document.getElementById('squat-line');
+    const barContainer = document.getElementById('squat-bar-container');
+    const barHeight = barContainer.clientHeight;
+    const lineHeight = line.clientHeight;
+
+    // تحديث موقع الخط
+    linePosition += lineDirection * squatLineSpeed;
+
+    // عكس الاتجاه عند الحواف
+    if (linePosition >= barHeight - lineHeight || linePosition <= 0) {
+        lineDirection *= -1;
+        // ضمان عدم خروج الخط عن الإطار
+        linePosition = Math.max(0, Math.min(linePosition, barHeight - lineHeight));
+    }
+
+    line.style.transform = `translateY(${linePosition}px)`;
+
+    squatGameLoop = requestAnimationFrame(gameLoop); // استمرار الحلقة
+}
+
+function handleSquatClick() {
+    if (!isSquatGameActive) return;
+
+    const line = document.getElementById('squat-line');
+    const greenZone = document.getElementById('squat-green-zone');
+
+    const lineTop = line.getBoundingClientRect().top;
+    const greenZoneTop = greenZone.getBoundingClientRect().top;
+    const greenZoneBottom = greenZone.getBoundingClientRect().bottom;
+
+    // التحقق مما إذا كان الخط داخل المنطقة الخضراء
+    if (lineTop >= greenZoneTop && lineTop <= greenZoneBottom) {
+        // --- نجاح ---
+        squatScore += 10;
+        document.getElementById('squat-session-xp-val').innerText = squatScore;
+
+        // زيادة السرعة (بشكل جنوني مع الوقت)
+        squatLineSpeed += 0.25;
+
+      // تشغيل أنميشن الشخصية مع حركة بسيطة
+const charAfter = document.getElementById('squat-char-after');
+charAfter.style.opacity = 1;
+charAfter.style.transform = 'translateY(10px)'; // تنزيل الصورة قليلاً
+setTimeout(() => {
+    charAfter.style.opacity = 0;
+    charAfter.style.transform = 'translateY(0)'; // إرجاعها لوضعها الطبيعي
+}, 300); // مدة عرض صورة السكوات
+
+
+        // إظهار +XP
+        const pop = document.createElement('div');
+        pop.className = 'xp-pop';
+        pop.innerText = '+10';
+        pop.style.left = '50%';
+        pop.style.transform = 'translateX(-50%)';
+        document.getElementById('squat-bar-container').appendChild(pop);
+        setTimeout(() => pop.remove(), 800);
+
+    } else {
+        // --- خطأ ---
+        squatMistakes++;
+        document.getElementById('squat-mistakes-val').innerText = `${squatMistakes} / 5`;
+        
+        // وميض أحمر
+        const barContainer = document.getElementById('squat-bar-container');
+        barContainer.classList.add('squat-bar-error');
+        setTimeout(() => barContainer.classList.remove('squat-bar-error'), 300);
+
+        if (squatMistakes >= 5) {
+            finishSquatGame(true);
+        }
+    }
+}
+
+function closeSquatGame() {
+    // رسالة جديدة توضح أن النقاط سيتم حفظها
+    const confirmMsg = lang === 'ar' ? "سيتم حفظ نقاطك وإنهاء الجولة. هل أنت متأكد؟" : "Your score will be saved and the round will end. Are you sure?";
+    if (confirm(confirmMsg)) {
+        finishSquatGame(true); // ✅ الأهم: تغييرها إلى true لحفظ النقاط
+    }
+}
+
+
+function finishSquatGame(saveScore = true) { // ستبقى saveScore دائماً true الآن
+    if (!isSquatGameActive) return;
+    isSquatGameActive = false;
+    cancelAnimationFrame(squatGameLoop);
+
+    document.getElementById('squat-game-modal').style.display = 'none';
+
+    // 1. تحضير البيانات للتحديث في Firebase
+    const dataToUpdate = {
+        lastPlayedSquat: firebase.firestore.FieldValue.serverTimestamp() // تسجيل وقت اللعب
+    };
+
+    // 2. التحقق مما إذا كان هناك نقاط لحفظها
+    if (squatScore > 0) {
+        dataToUpdate.xp = firebase.firestore.FieldValue.increment(squatScore);
+        const msg = lang === 'ar' ? `الجولة انتهت! +${squatScore} XP` : `Round over! +${squatScore} XP`;
+        showToast(msg);
+    } 
+    // 3. في حال الخسارة أو الخروج بصفر نقاط
+    else {
+        showToast(lang === 'ar' ? 'حظ أوفر في المرة القادمة!' : 'Better luck next time!');
+    }
+
+    // 4. إرسال التحديثات إلى Firebase دائماً
+    if (auth.currentUser) {
+        syncWithDB(dataToUpdate);
+    }
+}
+
+
+
+
+
       function toggleMenu() {
           document.getElementById('notif-dropdown').style.display = 'none';
           document.getElementById('sideMenu').classList.toggle('active');
@@ -2084,6 +2361,9 @@
             day: '2-digit'
         }).format(dateToFormat);
     }
+
+
+
 </script>
 </body>
 </html>
