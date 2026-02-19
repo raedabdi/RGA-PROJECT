@@ -1617,6 +1617,14 @@ db.collection("users").doc(user.uid).get().then(doc => {
         
         // تشغيل الحساب التلقائي بناءً على الفرق الزمني
         regenStamina(lastRegen);
+        
+        // استدعاء دالة الستريك بمجرد الدخول
+        checkLoginStreak(user.uid);
+        
+        // جلب بيانات المستخدم الأخرى
+        fetchUserData(user.uid);
+    } else {
+        // توجيه لصفحة تسجيل الدخول
     }
 });
 
@@ -1898,5 +1906,55 @@ function triggerPhotoUpload() {
     }
 }
 
+async function checkLoginStreak(userId) {
+    const userRef = db.collection("users").doc(userId);
+    const doc = await userRef.get();
+
+    if (!doc.exists) return;
+
+    const data = doc.data();
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0]; // تاريخ اليوم بصيغة YYYY-MM-DD
+    
+    // جلب آخر تاريخ "دخول" تم فيه تحديث الستريك
+    const lastLoginDate = data.lastLoginStreakDate || "";
+    const currentStreak = data.streak || 0;
+
+    // 1. إذا كان المستخدم قد دخل اليوم بالفعل، لا تفعل شيئاً
+    if (lastLoginDate === todayStr) {
+        console.log("الستريك محدث لليوم بالفعل.");
+        return;
+    }
+
+    const lastDate = new Date(lastLoginDate);
+    const diffTime = now - lastDate;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    let newStreak = currentStreak;
+
+    if (lastLoginDate === "") {
+        // أول دخول للمستخدم
+        newStreak = 1;
+    } else if (diffDays <= 1.9) {
+        // إذا كان الدخول الأخير أمس (أو أقل من يومين)، زِد الستريك
+        newStreak = currentStreak + 1;
+        showToast("🔥 ستريك جديد! أنت مستمر لليوم " + newStreak);
+    } else {
+        // إذا غاب أكثر من يومين، يتم تصفير الستريك
+        newStreak = 1;
+        showToast("💔 انقطع الستريك، بدأنا من جديد!");
+    }
+
+    // تحديث البيانات في فايربيس
+    await userRef.update({
+        streak: newStreak,
+        lastLoginStreakDate: todayStr
+    });
+
+    // تحديث الواجهة إذا كان العداد معروضاً
+    if(document.getElementById('res-streak')) {
+        document.getElementById('res-streak').innerText = newStreak;
+    }
+}
 
 
