@@ -1,1 +1,255 @@
-hu
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لوحة التحكم - RGA Fitness Pro</title>
+    
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        :root {
+            --primary-color: #00f2a7;
+            --secondary-color: #0A1429;
+            --light-navy: #112240;
+            --glass-bg: linear-gradient(145deg, rgba(17, 34, 64, 0.7), rgba(17, 34, 64, 0.4));
+            --slate: #8892b0;
+            --white: #e6f1ff;
+            --font-main: 'Tajawal', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; max-width: 100%; }
+        body { 
+            font-family: var(--font-main); 
+            background-color: var(--secondary-color); 
+            color: var(--slate); 
+            overflow-x: hidden; 
+        }
+
+        #stardust-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .dashboard-layout { display: flex; width: 100%; }
+
+        #sidebar { 
+            width: 260px; height: 100vh; position: fixed; top: 0; right: 0; 
+            background: var(--light-navy); border-left: 1px solid rgba(0, 242, 167, 0.1); 
+            padding: 1.5rem; transition: 0.4s; z-index: 1000; 
+        }
+        #sidebar.collapsed { transform: translateX(100%); }
+        
+        .main-content { width: 100%; padding: 1.5rem; transition: 0.4s; margin-right: 0; }
+        @media (min-width: 768px) { .main-content { margin-right: 260px; width: calc(100% - 260px); } }
+
+        .top-bar { margin-bottom: 2rem; }
+        .header-row { display: flex; align-items: center; gap: 15px; }
+        .top-bar h1 { color: var(--white); font-size: 1.6rem; font-weight: 900; }
+        #welcome-user { color: var(--primary-color); font-size: 1rem; margin-top: 5px; opacity: 0.9; }
+        
+        #menu-toggle { background: none; border: 1px solid var(--slate); color: var(--slate); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .stat-card { background: var(--glass-bg); padding: 1.2rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+        .stat-card h3 { font-size: 0.9rem; color: var(--slate); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 900; color: var(--white); margin: 8px 0; }
+        
+        .progress-bar { background: rgba(0,0,0,0.4); height: 8px; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        .progress-bar-fill { background: var(--primary-color); height: 100%; width: 0%; transition: 1.5s; box-shadow: 0 0 10px var(--primary-color); }
+
+        .toast-msg {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--light-navy); color: var(--primary-color);
+            padding: 12px 25px; border-radius: 30px; border: 1px solid var(--primary-color);
+            z-index: 2000; font-weight: bold; animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 20px; opacity: 1; } }
+    </style>
+</head>
+<body>
+    <canvas id="stardust-canvas"></canvas>
+    <div id="toast-container"></div>
+
+    <div class="dashboard-layout">
+        <aside id="sidebar" class="collapsed">
+            <div style="font-weight:900; font-size:1.8rem; color:white; text-align:center; margin-bottom:2rem;">RGA<span>FIT</span></div>
+
+<nav style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px;">
+    <button id="logout-btn" style="background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--font-main); font-weight: bold; width: 100%; margin-top: 20px;">
+        🚪 تسجيل الخروج
+    </button>
+</nav>
+
+
+        </aside>
+
+        <main class="main-content" id="main-content-area">
+            <header class="top-bar">
+                <div class="header-row">
+                    <button id="menu-toggle">☰</button>
+                    <h1>لوحة التحكم</h1>
+                </div>
+                <div id="welcome-user">مرحباً بك..</div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>المستوى</h3>
+                    <p class="value" id="user-rank">1</p>
+                </div>
+                <div class="stat-card">
+                    <h3>نقاط الخبرة (XP)</h3>
+                    <p class="value"><span id="user-xp">0</span> / <span id="max-xp">1000</span></p>
+                    <div class="progress-bar"><div class="progress-bar-fill" id="xp-fill"></div></div>
+                </div>
+                <div class="stat-card">
+                    <h3>سلسلة الدخول</h3>
+                    <p class="value" id="user-streak">🔥 1 يوم</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV7SNwgv_K10tX0iJpNYqg8_iJnWprFB4",
+            authDomain: "rgalab.firebaseapp.com",
+            projectId: "rgalab",
+            storageBucket: "rgalab.firebasestorage.app",
+            messagingSenderId: "882288745140",
+            appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        function getJordanDate() {
+            return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Amman"}));
+        }
+
+        // عرض البيانات فوراً من الذاكرة إذا وجدت
+        function loadQuickData() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) renderUI(JSON.parse(saved));
+        }
+
+                async function syncUserData(user) {
+            try {
+                // نأخذ البيانات الحالية قبل التحديث للمقارنة
+                const oldDoc = await db.collection('users').doc(user.uid).get();
+                const oldStreak = oldDoc.data()?.streak || 0;
+
+                // 1. تحديد المنطقة والدالة
+                const updateStreakFn = firebase.app().functions('us-central1').httpsCallable('updateStreakOnLogin');
+                
+                // 2. ⭐ السطر الناقص: استدعاء الدالة فعلياً وانتظار النتيجة ⭐
+                const result = await updateStreakFn(); 
+
+                // جلب البيانات الجديدة بعد تحديث السحاب
+                const doc = await db.collection('users').doc(user.uid).get();
+                const data = doc.data();
+                const newStreak = data.streak;
+
+                // المنطق البرمجي للرسائل:
+                if (result && result.data && result.data.updated) {
+                    if (newStreak > oldStreak) {
+                        showToast(`🔥 رائع! زاد الستريك الخاص بك إلى ${newStreak} أيام!`);
+                    } else if (newStreak === 1 && oldStreak > 1) {
+                        showToast("⚠️ للأسف انقطع الستريك! ابدأ من جديد اليوم.");
+                    }
+                }
+
+                // حفظ البيانات في الذاكرة المحلية وتحديث الواجهة
+                localStorage.setItem('currentUser', JSON.stringify(data));
+                renderUI(data);
+
+            } catch (err) { 
+                console.error("خطأ في نظام الستريك:", err);
+                const doc = await db.collection('users').doc(user.uid).get();
+                if(doc.exists) renderUI(doc.data());
+            }
+        }
+
+
+        function renderUI(data) {
+
+    const nameToShow = data.firstName || "بطل"; 
+    document.getElementById('welcome-user').innerText = `سعيد برؤيتك، كابتن ${nameToShow}`;
+    
+    document.getElementById('user-rank').innerText = data.rank || 1;
+    document.getElementById('user-xp').innerText = data.xp || 0;
+    document.getElementById('max-xp').innerText = data.maxXp || 1000;
+    document.getElementById('user-streak').innerText = `🔥 ${data.streak || 1} يوم`;
+    
+    const percent = (data.xp / (data.maxXp || 1000)) * 100;
+    document.getElementById('xp-fill').style.width = percent + "%";
+}
+
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loadQuickData();
+                syncUserData(user);
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Toggle Sidebar
+        const btn = document.getElementById('menu-toggle');
+        const side = document.getElementById('sidebar');
+        btn.onclick = (e) => { e.stopPropagation(); side.classList.toggle('collapsed'); };
+        document.onclick = () => { if (window.innerWidth <= 768) side.classList.add('collapsed'); };
+
+        // Particles
+        const canvas = document.getElementById('stardust-canvas');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            dots = []; for(let i=0; i<30; i++) dots.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4});
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#00f2a7";
+            dots.forEach(d => {
+                d.x+=d.vx; d.y+=d.vy;
+                if(d.x<0 || d.x>canvas.width) d.vx*=-1; if(d.y<0 || d.y>canvas.height) d.vy*=-1;
+                ctx.beginPath(); ctx.arc(d.x, d.y, 0.7, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        window.onresize = init; init(); draw();
+
+
+document.getElementById('logout-btn').onclick = async () => {
+    try {
+        await auth.signOut(); // تسجيل الخروج من Firebase
+        localStorage.removeItem('currentUser'); // مسح البيانات المخزنة مؤقتاً
+        window.location.href = 'index.html'; // العودة لصفحة الدخول
+    } catch (err) {
+        console.error("خطأ أثناء تسجيل الخروج:", err);
+        showToast("حدث خطأ أثناء محاولة تسجيل الخروج");
+    }
+};
+
+
+
+    </script>
+
+
+
+</body>
+</html>
