@@ -2,252 +2,254 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RGA Fitness Pro - ارتقِ بمستواك</title>
-
-
-
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لوحة التحكم - RGA Fitness Pro</title>
+    
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
         :root {
             --primary-color: #00f2a7;
             --secondary-color: #0A1429;
             --light-navy: #112240;
+            --glass-bg: linear-gradient(145deg, rgba(17, 34, 64, 0.7), rgba(17, 34, 64, 0.4));
             --slate: #8892b0;
             --white: #e6f1ff;
             --font-main: 'Tajawal', sans-serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: var(--font-main);
-            background-color: var(--secondary-color);
-            color: var(--slate);
-            line-height: 1.6;
-            overflow-x: hidden;
+        * { margin: 0; padding: 0; box-sizing: border-box; max-width: 100%; }
+        body { 
+            font-family: var(--font-main); 
+            background-color: var(--secondary-color); 
+            color: var(--slate); 
+            overflow-x: hidden; 
         }
-        
-        #stardust-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        .container { max-width: 1100px; margin: auto; padding: 0 1rem; position: relative; z-index: 2; }
-        
-        .glass-card {
-            position: relative;
-            background: linear-gradient(145deg, rgba(17, 34, 64, 0.7), rgba(17, 34, 64, 0.4));
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            transition: all 0.4s ease;
-            overflow: hidden;
+
+        #stardust-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .dashboard-layout { display: flex; width: 100%; }
+
+        #sidebar { 
+            width: 260px; height: 100vh; position: fixed; top: 0; right: 0; 
+            background: var(--light-navy); border-left: 1px solid rgba(0, 242, 167, 0.1); 
+            padding: 1.5rem; transition: 0.4s; z-index: 1000; 
         }
-        .glass-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); }
-
-        #main-header { position: fixed; width: 100%; top: 0; z-index: 1000; padding: 0.75rem 0; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        #main-header .container { display: flex; justify-content: space-between; align-items: center; }
-        #main-header .logo { font-weight: 700; font-size: 1.4rem; color: var(--white); text-decoration: none; }
-        #main-header .logo span { color: var(--primary-color); }
-        .main-nav { display: flex; align-items: center; gap: 5px; }
-        .main-nav a { color: var(--slate); text-decoration: none; padding: 5px 8px; font-weight: 700; transition: color 0.3s ease; white-space: nowrap; font-size: 0.8rem; border-radius: 6px; }
-        .main-nav a:hover { color: var(--primary-color); }
-
-        .btn-primary { display: inline-block; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent; background-color: var(--primary-color); color: var(--secondary-color); border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 242, 167, 0.3); }
-        .btn-primary:hover { background-color: transparent; color: var(--primary-color); box-shadow: 0 0 25px rgba(0, 242, 167, 0.5); transform: translateY(-3px); }
-
-        #hero { padding: 180px 0 120px; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }
-        #hero .container > * { opacity: 0; transform: translateY(20px); animation: fadeIn 0.8s ease-out forwards; }
-        #hero h1 { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; color: var(--white); line-height: 1.2; margin-bottom: 1rem; animation-delay: 0.2s; }
-        #hero h1 span { color: var(--primary-color); display: block; }
-        #hero .subtitle { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; animation-delay: 0.4s; }
-        #hero .cta-buttons { animation-delay: 0.6s; }
+        #sidebar.collapsed { transform: translateX(100%); }
         
-        #stats { padding: 80px 0; background: transparent; }
-        .stats-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        .stat-item { text-align: center; }
-        .stat-item:nth-child(3) { grid-column: 1 / -1; }
-        .stat-number { font-size: 2.8rem; font-weight: 900; color: var(--primary-color); }
-        .stat-label { font-size: 1rem; color: var(--slate); letter-spacing: 1px; }
+        .main-content { width: 100%; padding: 1.5rem; transition: 0.4s; margin-right: 0; }
+        @media (min-width: 768px) { .main-content { margin-right: 260px; width: calc(100% - 260px); } }
 
-        .section { padding: 100px 0; }
-        .section-title { text-align: center; font-size: 2.5rem; font-weight: 900; color: var(--white); margin-bottom: 1rem; }
-        .section-title span { color: var(--primary-color); }
-        .section-subtitle { text-align: center; font-size: 1.1rem; margin-bottom: 4rem; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; }
-        .feature-card .icon { color: var(--primary-color); margin-bottom: 1rem; }
-        .feature-card .icon svg { width: 48px; height: 48px; filter: drop-shadow(0 0 5px var(--primary-color)); }
-        .feature-card h3 { color: var(--white); font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .top-bar { margin-bottom: 2rem; }
+        .header-row { display: flex; align-items: center; gap: 15px; }
+        .top-bar h1 { color: var(--white); font-size: 1.6rem; font-weight: 900; }
+        #welcome-user { color: var(--primary-color); font-size: 1rem; margin-top: 5px; opacity: 0.9; }
         
-        #main-footer { padding: 4rem 0; background: var(--light-navy); text-align: center; }
-        .copyright { margin-top: 2rem; font-size: 0.9rem; }
-        .accordion { max-width: 700px; margin: 0 auto 2rem; text-align: right; }
-        .accordion-item { border-bottom: 1px solid var(--light-navy); }
-        .accordion-header { background: none; border: none; width: 100%; padding: 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; color: var(--white); font-family: var(--font-main); font-size: 1.1rem; cursor: pointer; }
-        .accordion-header .arrow { width: 24px; height: 24px; color: var(--primary-color); transition: transform 0.4s ease; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        .accordion-content p { padding: 0 1rem 1.5rem 1rem; }
-        .accordion-item.active .accordion-header .arrow { transform: rotate(180deg); }
-        .accordion-item.active .accordion-content { max-height: 200px; }
+        #menu-toggle { background: none; border: 1px solid var(--slate); color: var(--slate); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .stat-card { background: var(--glass-bg); padding: 1.2rem; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+        .stat-card h3 { font-size: 0.9rem; color: var(--slate); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 900; color: var(--white); margin: 8px 0; }
         
-        .language-switcher { position: relative; display: inline-block; margin-bottom: 2rem; }
-        .lang-button { background: var(--light-navy); border: 1px solid var(--slate); color: var(--white); padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-family: var(--font-main); }
-        .lang-options { position: absolute; bottom: calc(100% + 10px); left: 50%; background: var(--light-navy); border: 1px solid var(--primary-color); border-radius: 8px; padding: 0.5rem; width: 150px; display: flex; flex-direction: column; gap: 5px; opacity: 0; visibility: hidden; transition: all 0.3s ease; transform: translate(-50%, 10px); }
-        .lang-options.active { opacity: 1; visibility: visible; transform: translateX(-50%); }
-        .lang-options a { color: var(--slate); text-decoration: none; padding: 10px; border-radius: 6px; transition: background-color 0.3s, color 0.3s; text-align: center; }
-        .lang-options a:hover { background-color: var(--primary-color); color: var(--secondary-color); }
-        .lang-button.active .arrow { transform: rotate(180deg); }
+        .progress-bar { background: rgba(0,0,0,0.4); height: 8px; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        .progress-bar-fill { background: var(--primary-color); height: 100%; width: 0%; transition: 1.5s; box-shadow: 0 0 10px var(--primary-color); }
 
-        /* Auth Modal Styles */
-        #auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
-        #auth-modal.active { display: flex; opacity: 1; }
-        .modal-content { width: 100%; max-width: 420px; background: linear-gradient(145deg, rgba(17, 34, 64, 0.8), rgba(17, 34, 64, 0.5)); border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.4s ease; }
-        #auth-modal.active .modal-content { transform: scale(1); }
-        .close-modal-btn { position: absolute; top: 15px; left: 20px; background: none; border: none; font-size: 2rem; color: var(--slate); cursor: pointer; }
-        .tab-switcher { display: flex; border-bottom: 1px solid var(--light-navy); margin-bottom: 2rem; }
-        .tab-btn { background: none; border: none; color: var(--slate); font-size: 1.2rem; font-family: var(--font-main); padding: 0.5rem 1rem; cursor: pointer; flex: 1; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-        .input-group { margin-bottom: 1.5rem; }
-        .input-field { width: 100%; padding: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--slate); border-radius: 8px; color: var(--white); font-family: var(--font-main); font-size: 1rem; text-align: right; }
-        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0, 242, 167, 0.4); }
-        .form-container.hidden { display: none; }
-
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
+        .toast-msg {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--light-navy); color: var(--primary-color);
+            padding: 12px 25px; border-radius: 30px; border: 1px solid var(--primary-color);
+            z-index: 2000; font-weight: bold; animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 20px; opacity: 1; } }
     </style>
 </head>
 <body>
-
-
-
-
-
     <canvas id="stardust-canvas"></canvas>
+    <div id="toast-container"></div>
 
-    <header id="main-header">
-        <div class="container">
-            <a href="#" class="logo">RGA<span>FIT</span></a>
-            <nav class="main-nav">
-                <a href="#features">الميزات</a>
-                <a href="#">الأسعار</a>
-                <a href="#">ليدربورد</a>
-                <a href="#">تواصل معنا</a>
-            </nav>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <aside id="sidebar" class="collapsed">
+            <div style="font-weight:900; font-size:1.8rem; color:white; text-align:center; margin-bottom:2rem;">RGA<span>FIT</span></div>
 
-    <section id="hero">
-        <div class="container">
-            <h1 class="reveal"><span>حوّل لياقتك إلى لعبة</span>ارتقِ بقوتك</h1>
-            <p class="reveal subtitle">انضم إلى ثورة اللياقة البدنية. اكتسب نقاط خبرة، تنافس مع الأصدقاء، وحقق أهدافك بطريقة لم تتخيلها من قبل.</p>
-            <div class="reveal cta-buttons">
-                <a href="#" class="btn-primary" id="start-challenge-btn">ابدأ التحدي الآن</a>
-            </div>
-        </div>
-    </section>
+<nav style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px;">
+    <button id="logout-btn" style="background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--font-main); font-weight: bold; width: 100%; margin-top: 20px;">
+        🚪 تسجيل الخروج
+    </button>
+</nav>
 
-    <section id="stats" class="reveal">
-        <div class="container stats-container">
-            <div class="stat-item"><div class="stat-number" data-target="3000">0</div><div class="stat-label">عضو نشط</div></div>
-            <div class="stat-item"><div class="stat-number" data-target="4500000">0</div><div class="stat-label">كجم تم رفعه</div></div>
-            <div class="stat-item"><div class="stat-number" data-target="97402">0</div><div class="stat-label">تحدي مكتمل</div></div>
-        </div>
-    </section>
 
-    <!-- Features Section - Corrected and Restored -->
-    <section id="features" class="section reveal">
-         <div class="container">
-            <h2 class="section-title"><span>أطلق</span> العنان لقدراتك</h2>
-            <p class="section-subtitle">كل ما تحتاجه للوصول إلى القمة في منصة واحدة متكاملة.</p>
-            <div class="features-grid">
-                <div class="glass-card feature-card">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.125 1.125 0 0 1 0 2.25H5.625a1.125 1.125 0 0 1 0-2.25Z" /></svg></div>
-                    <h3>نظام لعب متكامل</h3>
-                    <p>اجمع نقاط الخبرة (XP)، ارتقِ في المستويات، وأكمل المهام اليومية للحصول على مكافآت.</p>
+        </aside>
+
+        <main class="main-content" id="main-content-area">
+            <header class="top-bar">
+                <div class="header-row">
+                    <button id="menu-toggle">☰</button>
+                    <h1>لوحة التحكم</h1>
                 </div>
-                <div class="glass-card feature-card">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9a9.75 9.75 0 1 0 0-13.5h9a9.75 9.75 0 1 0 0 13.5ZM10.5 14.25h3" /></svg></div>
-                    <h3>تحديات ومنافسات</h3>
-                    <p>تحدى أصدقائك في ألعاب مصغرة، نافس على لوحة الصدارة، وأثبت أنك الأقوى.</p>
-                </div>
-                <div class="glass-card feature-card">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h12A2.25 2.25 0 0 0 20.25 14.25V3M3.75 14.25v-1.5c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125v1.5M3.75 14.25h16.5M13.5 18.75h3.375m-3.375 0h-3.375" /></svg></div>
-                    <h3>تحليلات أداء ذكية</h3>
-                    <p>راقب تقدمك عبر رسوم بيانية تفصيلية وحطم أرقامك القياسية.</p>
-                </div>
-                <div class="glass-card feature-card">
-                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c.152-.22.324-.428.514-.621a3.75 3.75 0 0 1 5.472 0c.19.193.362.401.514.621m-6.5 0a3.75 3.75 0 0 0-5.472 0c-.19.193-.362.401-.514.621M9.75 9.75h4.5m-4.5 3.75h4.5m4.5-4.5v5.714a2.25 2.25 0 0 0 .659 1.591L19 14.5M14.25 3.104c.152-.22.324-.428.514-.621a3.75 3.75 0 0 1 5.472 0c.19.193.362.401.514.621M14.25 9.75h-4.5" /></svg></div>
-                    <h3>مدرب ذكاء اصطناعي</h3>
-                    <p>احصل على إجابات فورية لأسئلتك من مدربك الافتراضي.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+                <div id="welcome-user">مرحباً بك..</div>
+            </header>
 
-    <footer id="main-footer">
-        <div class="container">
-            <div class="accordion">
-                <div class="accordion-item"><button class="accordion-header"><span>سياسة الخصوصية</span><svg class="arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.9 8.7-7.9 8.6-7.9-8.6" /></svg></button><div class="accordion-content"><p>نحن نأخذ خصوصيتك على محمل الجد. يتم تخزين جميع بياناتك بشكل آمن ولا تتم مشاركتها مع أي طرف ثالث.</p></div></div>
-                <div class="accordion-item"><button class="accordion-header"><span>شروط الخدمة</span><svg class="arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.9 8.7-7.9 8.6-7.9-8.6" /></svg></button><div class="accordion-content"><p>باستخدامك للتطبيق، فإنك توافق على عدم استخدام أي وسائل غش. أي حساب يثبت عليه الغش سيتم حظره.</p></div></div>
-            </div>
-            <div class="language-switcher"><div class="lang-options"><a href="#">العربية</a><a href="#">English</a></div><button class="lang-button"><span>Language</span><svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/></svg></button></div>
-            <p class="copyright">&copy; 2026 RGA Fitness Pro. جميع الحقوق محفوظة.</p>
-        </div>
-    </footer>
-    
-    <!-- Auth Modal -->
-<div id="toast-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;"></div>
-
-<div id="auth-modal">
-    <div class="modal-content">
-        <button class="close-modal-btn">&times;</button>
-        <div class="tab-switcher">
-            <button class="tab-btn active" data-form="login">تسجيل الدخول</button>
-            <button class="tab-btn" data-form="signup">تسجيل جديد</button>
-        </div>
-        
-        <div class="form-container" id="login-form">
-            <form id="real-login-form">
-                <div class="input-group">
-                    <input type="email" id="login-email" class="input-field" placeholder="البريد الإلكتروني" required>
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>المستوى</h3>
+                    <p class="value" id="user-rank">1</p>
                 </div>
-                <div class="input-group">
-                    <input type="password" id="login-password" class="input-field" placeholder="كلمة المرور" required>
+                <div class="stat-card">
+                    <h3>نقاط الخبرة (XP)</h3>
+                    <p class="value"><span id="user-xp">0</span> / <span id="max-xp">1000</span></p>
+                    <div class="progress-bar"><div class="progress-bar-fill" id="xp-fill"></div></div>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">الدخول</button>
-                <a href="#" id="forgot-password-link" style="color: var(--slate); font-size: 0.8rem; display: block; margin-top: 10px; text-align: center; text-decoration: none;">نسيت كلمة المرور؟</a>
-            </form>
-        </div>
-
-<div class="form-container hidden" id="signup-form">
-    <form id="real-signup-form">
-        <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
-            <input type="text" id="signup-firstname" class="input-field" placeholder="الاسم الأول" required>
-            <input type="text" id="signup-lastname" class="input-field" placeholder="الاسم الأخير" required>
-        </div>
-        <div class="input-group">
-            <input type="email" id="signup-email" class="input-field" placeholder="البريد الإلكتروني" required>
-        </div>
-        <div class="input-group">
-            <input type="password" id="signup-password" class="input-field" placeholder="كلمة المرور" required>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%;">إنشاء حساب</button>
-    </form>
-</div>
-
+                <div class="stat-card">
+                    <h3>سلسلة الدخول</h3>
+                    <p class="value" id="user-streak">🔥 1 يوم</p>
+                </div>
+            </section>
+        </main>
     </div>
-</div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV7SNwgv_K10tX0iJpNYqg8_iJnWprFB4",
+            authDomain: "rgalab.firebaseapp.com",
+            projectId: "rgalab",
+            storageBucket: "rgalab.firebasestorage.app",
+            messagingSenderId: "882288745140",
+            appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    <script src="main.js"></script>
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        function getJordanDate() {
+            return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Amman"}));
+        }
+
+        // عرض البيانات فوراً من الذاكرة إذا وجدت
+        function loadQuickData() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) renderUI(JSON.parse(saved));
+        }
+
+                async function syncUserData(user) {
+            try {
+                // نأخذ البيانات الحالية قبل التحديث للمقارنة
+                const oldDoc = await db.collection('users').doc(user.uid).get();
+                const oldStreak = oldDoc.data()?.streak || 0;
+
+                // 1. تحديد المنطقة والدالة
+                const updateStreakFn = firebase.app().functions('us-central1').httpsCallable('updateStreakOnLogin');
+                
+                // 2. ⭐ السطر الناقص: استدعاء الدالة فعلياً وانتظار النتيجة ⭐
+                const result = await updateStreakFn(); 
+
+                // جلب البيانات الجديدة بعد تحديث السحاب
+                const doc = await db.collection('users').doc(user.uid).get();
+                const data = doc.data();
+                const newStreak = data.streak;
+
+                // المنطق البرمجي للرسائل:
+                if (result && result.data && result.data.updated) {
+                    if (newStreak > oldStreak) {
+                        showToast(`🔥 رائع! زاد الستريك الخاص بك إلى ${newStreak} أيام!`);
+                    } else if (newStreak === 1 && oldStreak > 1) {
+                        showToast("⚠️ للأسف انقطع الستريك! ابدأ من جديد اليوم.");
+                    }
+                }
+
+                // حفظ البيانات في الذاكرة المحلية وتحديث الواجهة
+                localStorage.setItem('currentUser', JSON.stringify(data));
+                renderUI(data);
+
+            } catch (err) { 
+                console.error("خطأ في نظام الستريك:", err);
+                const doc = await db.collection('users').doc(user.uid).get();
+                if(doc.exists) renderUI(doc.data());
+            }
+        }
+
+
+        function renderUI(data) {
+
+    const nameToShow = data.firstName || "بطل"; 
+    document.getElementById('welcome-user').innerText = `سعيد برؤيتك، كابتن ${nameToShow}`;
+    
+    document.getElementById('user-rank').innerText = data.rank || 1;
+    document.getElementById('user-xp').innerText = data.xp || 0;
+    document.getElementById('max-xp').innerText = data.maxXp || 1000;
+    document.getElementById('user-streak').innerText = `🔥 ${data.streak || 1} يوم`;
+    
+    const percent = (data.xp / (data.maxXp || 1000)) * 100;
+    document.getElementById('xp-fill').style.width = percent + "%";
+}
+
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loadQuickData();
+                syncUserData(user);
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Toggle Sidebar
+        const btn = document.getElementById('menu-toggle');
+        const side = document.getElementById('sidebar');
+        btn.onclick = (e) => { e.stopPropagation(); side.classList.toggle('collapsed'); };
+        document.onclick = () => { if (window.innerWidth <= 768) side.classList.add('collapsed'); };
+
+        // Particles
+        const canvas = document.getElementById('stardust-canvas');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            dots = []; for(let i=0; i<30; i++) dots.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4});
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#00f2a7";
+            dots.forEach(d => {
+                d.x+=d.vx; d.y+=d.vy;
+                if(d.x<0 || d.x>canvas.width) d.vx*=-1; if(d.y<0 || d.y>canvas.height) d.vy*=-1;
+                ctx.beginPath(); ctx.arc(d.x, d.y, 0.7, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        window.onresize = init; init(); draw();
+
+
+document.getElementById('logout-btn').onclick = async () => {
+    try {
+        await auth.signOut(); // تسجيل الخروج من Firebase
+        localStorage.removeItem('currentUser'); // مسح البيانات المخزنة مؤقتاً
+        window.location.href = 'index.html'; // العودة لصفحة الدخول
+    } catch (err) {
+        console.error("خطأ أثناء تسجيل الخروج:", err);
+        showToast("حدث خطأ أثناء محاولة تسجيل الخروج");
+    }
+};
+
+
+
+    </script>
+
+
+
 </body>
 </html>
-
-
