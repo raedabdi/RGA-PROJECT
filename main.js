@@ -2141,14 +2141,55 @@ function finishSquatGame(saveScore = true) {
 }
 
 
-function logHealthyMeal() {
-    const t = translations[currentLang];
-    showToast(`${t.meal_success} +30 XP`);
-    if (typeof addXP === "function") addXP(30);
-    
+async function logHealthyMeal() {
+    const user = auth.currentUser;
+    if (!user) {
+        showToast("يجب تسجيل الدخول أولاً!");
+        return;
+    }
 
+    const t = translations[currentLang || 'ar'];
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    const now = Date.now();
+    const twelveHoursMs = 12 * 60 * 60 * 1000; // 12 ساعة بالملي ثانية
+    const lastMealTime = savedData.lastMealTime || 0;
+
+    const timePassed = now - lastMealTime;
+
+    // 1. فحص إذا كانت الوجبة قيد التجهيز (ضمن الـ 12 ساعة)
+    if (timePassed < twelveHoursMs) {
+        const timeLeftMs = twelveHoursMs - timePassed;
+        const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
+        const minutesLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        const hrText = currentLang === 'en' ? 'h' : 'س';
+        const minText = currentLang === 'en' ? 'm' : 'د';
+        const cooldownPrefix = currentLang === 'en' ? 'Next meal available in' : 'الوجبة القادمة تتوفر بعد';
+
+        showToast(` ${cooldownPrefix} ${hoursLeft}${hrText} و ${minutesLeft}${minText}`);
+        return;
+    }
+
+    // 2. إذا انتهى الوقت أو أول مرة بياكل اليوم (بنعطيه الـ 50 XP)
+    savedData.lastMealTime = now;
+    localStorage.setItem('currentUser', JSON.stringify(savedData));
+
+    // تحديث وقت الوجبة في الفايربيس للحماية من التلاعب
+    try {
+        await db.collection('users').doc(user.uid).update({
+            lastMealTime: now
+        });
+    } catch (e) {
+        console.error("خطأ في حفظ وقت الوجبة:", e);
+    }
+
+    // إعطاء النقاط وتحديث الإحصائيات
+    showToast(`${t.meal_success} +50 XP 🥗`);
+    if (typeof addXP === "function") addXP(50);
     updateStat('meals', 1);
 }
+
 
 
 
