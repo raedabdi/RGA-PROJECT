@@ -2606,31 +2606,73 @@ html, body {
     to { transform: translateY(0); opacity: 1; }
 }
 
-.ios-install-prompt img {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
+/* نافذة تثبيت iOS الاحترافية */
+.ios-install-prompt {
+    position: fixed; /* لضمان بقائها فوق المحتوى وليس بآخره */
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%); /* للتوسيط المثالي */
+    width: 90%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px); /* تأثير الزجاج */
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    z-index: 999999; /* لضمان ظهورها فوق كل شيء */
+    border: 1px solid rgba(255,255,255,0.4);
+    animation: iosSlideIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    direction: rtl; /* لضمان ترتيب الكلام العربي */
+}
+
+@keyframes iosSlideIn {
+    from { transform: translate(-50%, 150%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.ios-install-prompt img.app-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .ios-text {
     flex: 1;
-    color: #333;
+    color: #1c1c1e;
     font-size: 14px;
-    font-family: -apple-system, system-ui, sans-serif;
+    line-height: 1.4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+}
+
+.ios-text strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 3px;
+    color: #000;
+}
+
+.share-icon-img {
+    width: 22px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 4px;
 }
 
 .ios-close-btn {
-    background: none;
+    background: #e5e5ea;
     border: none;
-    font-size: 20px;
-    color: #999;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 18px;
+    color: #8e8e93;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-
-.share-icon {
-    display: inline-block;
-    width: 20px;
-    vertical-align: middle;
-    margin: 0 5px;
-}
-
