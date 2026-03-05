@@ -4527,40 +4527,108 @@ async function dismissNotif(notifId) {
 
 
 // ... دوال الإرسال والرفض للحذف (sendFriendRequest, acceptFriendRequest, rejectFriendRequest, deleteFriend) بتبقى زي ما هي ...
-async function sendFriendRequest(targetUid, targetName, targetPhoto) {
-    const currentUser = auth.currentUser; if (!currentUser) return;
-    const myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const myName = myData.firstName ? `${myData.firstName} ${myData.lastName}` : "User";
-    const myPhoto = myData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
-    try {
-        await db.collection('users').doc(targetUid).collection('notifications').add({
-            type: 'friend_request', senderId: currentUser.uid, senderName: myName, senderPhoto: myPhoto, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        showToast(`✅ Request sent!`);
-        document.getElementById('search-result-container').innerHTML = `<div class="empty-notif" style="color:var(--primary-color);"><i class="fa-solid fa-paper-plane" style="font-size:3rem;"></i><p>Sent successfully!</p></div>`;
-    } catch (error) { showToast("⚠️ Error."); }
-}
+// دالة إرسال طلب الصداقة المحدثة
+window.sendFriendRequest = async function(targetUserId) {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    
+    // منع المستخدم من إرسال طلب لنفسه
+    if (currentUser.uid === targetUserId) {
+        showToast(currentLang === 'en' ? "You can't add yourself!" : "لا يمكنك إرسال طلب لنفسك!");
+        return;
+    }
 
-async function acceptFriendRequest(notifId, senderId, senderName, senderPhoto) {
-    const currentUser = auth.currentUser; if (!currentUser) return;
     try {
-        let myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
-        if(!myFriends.find(f => f.id === senderId)) {
-            myFriends.push({ id: senderId, name: senderName, level: 1, img: senderPhoto });
-            
-            // 1. تحديث اللوكال ستورج
-            localStorage.setItem('myFriends', JSON.stringify(myFriends));
-            
-            // 2. 🔴 التحديث الأهم: الحفظ في الفايربيس عشان ما يختفوا
-            await db.collection('users').doc(currentUser.uid).update({ 
-                myFriendsList: myFriends 
-            });
-            
-            if (document.getElementById('my-friends-list')) renderMyFriends();
+        // 1. جلب بيانات المستخدم الحالي للتحقق من قائمة الأصدقاء
+        const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
+        const currentData = currentUserDoc.data();
+
+        // 2. التحقق إذا كانوا أصدقاء بالفعل
+        if (currentData.friends && currentData.friends.includes(targetUserId)) {
+            showToast(currentLang === 'en' ? "Already friends!" : "أنتم أصدقاء بالفعل!");
+            return;
         }
-        await db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId).delete();
-    } catch (error) { console.error(error); }
-}
+
+        // 3. التحقق إذا كان هناك طلب صداقة مسبق (لتجنب إرسال 20 ألف طلب)
+        const existingRequest = await db.collection('friend_requests')
+            .where('senderId', '==', currentUser.uid)
+            .where('receiverId', '==', targetUserId)
+            .get();
+
+        if (!existingRequest.empty) {
+            showToast(currentLang === 'en' ? "Request already sent!" : "لقد قمت بإرسال طلب مسبقاً!");
+            return;
+        }
+
+        // 4. إنشاء طلب الصداقة في قاعدة البيانات
+        await db.collection('friend_requests').add({
+            senderId: currentUser.uid,
+            senderName: currentData.name || "مستخدم",
+            receiverId: targetUserId,
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 5. إرسال إشعار واحد فقط للشخص الآخر
+        await db.collection('notifications').add({
+            userId: targetUserId, 
+            title: currentLang === 'en' ? "New Friend Request" : "طلب صداقة جديد",
+            body: currentLang === 'en' ? `${currentData.name} sent you a request` : `أرسل لك ${currentData.name} طلب صداقة`,
+            type: "friend_request",
+            read: false,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showToast(currentLang === 'en' ? "Request sent successfully!" : "تم إرسال طلب الصداقة بنجاح!");
+
+    } catch (error) {
+        console.error("Error sending friend request:", error);
+        showToast(currentLang === 'en' ? "Error sending request" : "حدث خطأ أثناء الإرسال");
+    }
+};
+
+
+// دالة قبول طلب الصداقة المحدثة
+window.acceptFriendRequest = async function(requestId, senderId) {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    try {
+        // نستخدم Batch لضمان تحديث الطرفين في نفس اللحظة
+        const batch = db.batch();
+
+        const currentUserRef = db.collection('users').doc(currentUser.uid);
+        const senderUserRef = db.collection('users').doc(senderId);
+        const requestRef = db.collection('friend_requests').doc(requestId);
+
+        // إضافة الصديق للطرفين معاً (يمنع مشكلة الظهور لطرف واحد)
+        batch.update(currentUserRef, {
+            friends: firebase.firestore.FieldValue.arrayUnion(senderId)
+        });
+
+        batch.update(senderUserRef, {
+            friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+        });
+
+        // حذف طلب الصداقة لأنه تم قبوله
+        batch.delete(requestRef);
+
+        // تنفيذ كل العمليات السابقة دفعة واحدة
+        await batch.commit();
+
+        showToast(currentLang === 'en' ? "Friend request accepted!" : "تم قبول الصداقة!");
+        
+        // تحديث الواجهة فوراً
+        if (typeof loadFriends === "function") {
+            loadFriends(); 
+        }
+
+    } catch (error) {
+        console.error("Error accepting friend:", error);
+        showToast(currentLang === 'en' ? "Error accepting request" : "حدث خطأ أثناء قبول الطلب");
+    }
+};
+
 
 async function rejectFriendRequest(notifId) {
     const currentUser = auth.currentUser; if (!currentUser) return;
