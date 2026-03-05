@@ -565,14 +565,107 @@
 
     </div>
 </div>
-
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
-
     <script src="main.js"></script>
+
+    <script>
+    // ==============================================================
+    // 📱 نظام التثبيت الاحترافي الموحد (للآيفون والأندرويد)
+    // ==============================================================
+    let deferredPrompt;
+
+    // 1. التقاط حدث التثبيت في الأندرويد
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        const hasSeenPrompt = localStorage.getItem('premium_prompt_dismissed');
+        if (!hasSeenPrompt) {
+            setTimeout(() => showPremiumInstallPrompt('android'), 1500);
+        }
+    });
+
+    // 2. التحقق من الآيفون
+    function checkIOS() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+        const hasSeenPrompt = localStorage.getItem('premium_prompt_dismissed');
+
+        if (isIOS && !isStandalone && !hasSeenPrompt) {
+            setTimeout(() => showPremiumInstallPrompt('ios'), 1500);
+        }
+    }
+
+    // 3. دالة إظهار النافذة الفخمة
+    function showPremiumInstallPrompt(os) {
+        if(document.getElementById('premium-install-prompt')) return;
+
+        let actionHTML = '';
+        
+        if (os === 'ios') {
+            actionHTML = `
+                <div class="ios-prompt-instructions">
+                    اضغط على 
+                    <svg viewBox="0 0 50 50" width="22" height="22" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 4px; transform: translateY(2px);"><path d="M25 3v26M16 11l9-9 9 9M10 21v18a4 4 0 004 4h22a4 4 0 004-4V21"/></svg>
+                    ثم اختر 
+                    <span style="color: #00f2a7; margin: 0 4px;">"إضافة للشاشة الرئيسية"</span> 
+                    <i class="far fa-plus-square" style="font-size: 1.2rem;"></i>
+                </div>
+            `;
+        } else {
+            actionHTML = `
+                <button onclick="triggerAndroidInstall()" style="width: 100%; padding: 12px; font-size: 1.05rem; font-family: 'Cairo', sans-serif; font-weight: 800; border-radius: 12px; background: #00f2a7; color: #0A1429; border: none; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 15px rgba(0, 242, 167, 0.4); transition: all 0.3s ease;">
+                    <i class="fas fa-download"></i> تثبيت التطبيق الآن
+                </button>
+            `;
+        }
+
+        const promptHTML = `
+            <div class="ios-prompt-overlay" id="premium-install-prompt">
+                <button class="ios-prompt-close" onclick="closePremiumPrompt()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="ios-prompt-header">
+                    <img src="https://i.ibb.co/S49yt4YB/cropped-circle-image.png" alt="RGA Fit" class="ios-prompt-icon">
+                    <div>
+                        <h3 class="ios-prompt-title">تجربة RGA Fit الأقوى</h3>
+                        <p class="ios-prompt-desc">ارتقِ بمستواك وثبّت التطبيق للوصول السريع وتجربة أداء لا مثيل لها.</p>
+                    </div>
+                </div>
+                ${actionHTML}
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', promptHTML);
+    }
+
+    // 4. تفعيل زر التثبيت في الأندرويد
+    window.triggerAndroidInstall = async function() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            closePremiumPrompt();
+        }
+    };
+
+    // 5. إغلاق النافذة بنعومة
+    window.closePremiumPrompt = function() {
+        const prompt = document.getElementById('premium-install-prompt');
+        if (prompt) {
+            prompt.style.transform = 'translate(-50%, 150%)';
+            prompt.style.opacity = '0';
+            setTimeout(() => prompt.remove(), 600);
+        }
+        localStorage.setItem('premium_prompt_dismissed', 'true');
+    };
+
+    document.addEventListener('DOMContentLoaded', checkIOS);
+    </script>
 </body>
 </html>
+
 
