@@ -4524,66 +4524,48 @@ async function dismissNotif(notifId) {
 }
 
 
-// ... دوال الإرسال والرفض للحذف (sendFriendRequest, acceptFriendRequest, rejectFriendRequest, deleteFriend) بتبقى زي ما هي ...
-// دالة إرسال طلب الصداقة المحدثة
-window.sendFriendRequest = async function(targetUserId) {
-    const currentUser = auth.currentUser;
+
+
+window.sendFriendRequest = async function(targetUid, targetName, targetPhoto) {
+    const currentUser = auth.currentUser; 
     if (!currentUser) return;
     
-    // منع المستخدم من إرسال طلب لنفسه
-    if (currentUser.uid === targetUserId) {
-        showToast(currentLang === 'en' ? "You can't add yourself!" : "لا يمكنك إرسال طلب لنفسك!");
+    const myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    let myFriends = myData.myFriendsList || [];
+    
+    // 1. التحقق إذا كانوا أصدقاء بالفعل (من بياناتك المحلية)
+    if (myFriends.find(f => f.id === targetUid)) {
+        showToast(currentLang === 'en' ? "Already friends!" : "أنتم أصدقاء بالفعل!");
         return;
     }
 
     try {
-        // 1. جلب بيانات المستخدم الحالي للتحقق من قائمة الأصدقاء
-        const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
-        const currentData = currentUserDoc.data();
-
-        // 2. التحقق إذا كانوا أصدقاء بالفعل
-        if (currentData.friends && currentData.friends.includes(targetUserId)) {
-            showToast(currentLang === 'en' ? "Already friends!" : "أنتم أصدقاء بالفعل!");
-            return;
-        }
-
-        // 3. التحقق إذا كان هناك طلب صداقة مسبق (لتجنب إرسال 20 ألف طلب)
-        const existingRequest = await db.collection('friend_requests')
-            .where('senderId', '==', currentUser.uid)
-            .where('receiverId', '==', targetUserId)
-            .get();
-
-        if (!existingRequest.empty) {
-            showToast(currentLang === 'en' ? "Request already sent!" : "لقد قمت بإرسال طلب مسبقاً!");
-            return;
-        }
-
-        // 4. إنشاء طلب الصداقة في قاعدة البيانات
-        await db.collection('friend_requests').add({
-            senderId: currentUser.uid,
-            senderName: currentData.name || "مستخدم",
-            receiverId: targetUserId,
-            status: 'pending',
+        const myName = myData.firstName ? `${myData.firstName} ${myData.lastName}` : "User";
+        const myPhoto = myData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
+        
+        // 2. الحل السحري لمنع التكرار (Spam) وتخطي حماية القراءة:
+        // نستخدم ID ثابت للطلب، هيك لو انكبس الزر 100 مرة رح يتحدث نفس الإشعار!
+        const requestDocId = 'freq_' + currentUser.uid;
+        
+        // نستخدم set بدلاً من add عشان نجبره يستخدم الـ ID اللي اخترناه
+        await db.collection('users').doc(targetUid).collection('notifications').doc(requestDocId).set({
+            type: 'friend_request', 
+            senderId: currentUser.uid, 
+            senderName: myName, 
+            senderPhoto: myPhoto, 
+            status: 'pending', 
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-
-        // 5. إرسال إشعار واحد فقط للشخص الآخر
-        await db.collection('notifications').add({
-            userId: targetUserId, 
-            title: currentLang === 'en' ? "New Friend Request" : "طلب صداقة جديد",
-            body: currentLang === 'en' ? `${currentData.name} sent you a request` : `أرسل لك ${currentData.name} طلب صداقة`,
-            type: "friend_request",
-            read: false,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        showToast(currentLang === 'en' ? "Request sent successfully!" : "تم إرسال طلب الصداقة بنجاح!");
-
-    } catch (error) {
-        console.error("Error sending friend request:", error);
-        showToast(currentLang === 'en' ? "Error sending request" : "حدث خطأ أثناء الإرسال");
+        
+        showToast(currentLang === 'ar' ? " تم إرسال الطلب!" : " Request sent!");
+        document.getElementById('search-result-container').innerHTML = `<div class="empty-notif" style="color:var(--primary-color);"><i class="fa-solid fa-paper-plane" style="font-size:3rem;"></i><p>${currentLang === 'ar' ? 'تم الإرسال بنجاح!' : 'Sent successfully!'}</p></div>`;
+        
+    } catch (error) { 
+        console.error("Firebase Error: ", error);
+        showToast("⚠️ حدث خطأ أثناء إرسال الطلب."); 
     }
 };
+
 
 
 // دالة قبول طلب الصداقة المحدثة
