@@ -4540,30 +4540,53 @@ async function sendFriendRequest(targetUid, targetName, targetPhoto) {
         document.getElementById('search-result-container').innerHTML = `<div class="empty-notif" style="color:var(--primary-color);"><i class="fa-solid fa-paper-plane" style="font-size:3rem;"></i><p>Sent successfully!</p></div>`;
     } catch (error) { showToast("⚠️ Error."); }
 }
+
 async function acceptFriendRequest(notifId, senderId, senderName, senderPhoto) {
     const currentUser = auth.currentUser; if (!currentUser) return;
     try {
         let myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
         if(!myFriends.find(f => f.id === senderId)) {
             myFriends.push({ id: senderId, name: senderName, level: 1, img: senderPhoto });
+            
+            // 1. تحديث اللوكال ستورج
             localStorage.setItem('myFriends', JSON.stringify(myFriends));
+            
+            // 2. 🔴 التحديث الأهم: الحفظ في الفايربيس عشان ما يختفوا
+            await db.collection('users').doc(currentUser.uid).update({ 
+                myFriendsList: myFriends 
+            });
+            
             if (document.getElementById('my-friends-list')) renderMyFriends();
         }
         await db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId).delete();
     } catch (error) { console.error(error); }
 }
+
 async function rejectFriendRequest(notifId) {
     const currentUser = auth.currentUser; if (!currentUser) return;
     try { await db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId).delete(); } catch (error) { console.error(error); }
 }
-function deleteFriend(friendName) {
-    if(confirm(`Are you sure? 🗑️`)) {
-        let myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
-        myFriends = myFriends.filter(f => f.name !== friendName);
-        localStorage.setItem('myFriends', JSON.stringify(myFriends));
-        renderMyFriends();
+async function deleteFriend(friendName) {
+    const currentUser = auth.currentUser; if (!currentUser) return;
+    
+    if(confirm(`Are you sure? `)) {
+        try {
+            let myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
+            myFriends = myFriends.filter(f => f.name !== friendName);
+            
+            // 1. تحديث اللوكال ستورج
+            localStorage.setItem('myFriends', JSON.stringify(myFriends));
+            
+            // 2. 🔴 تحديث الفايربيس لإزالة الصديق رسمياً
+            await db.collection('users').doc(currentUser.uid).update({ 
+                myFriendsList: myFriends 
+            });
+            
+            renderMyFriends();
+        } catch (error) { console.error(error); }
     }
 }
+
 
 // ==========================================
 // 💬 نظام الدردشة الفوري (مترجم)
