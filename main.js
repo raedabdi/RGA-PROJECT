@@ -1,36 +1,4 @@
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isStandalone = window.navigator.standalone === true;
 
-// يظهر فقط لمستخدمي آيفون وفقط إذا لم يثبتوا التطبيق بعد
-if (isIOS && !isStandalone) {
-    showIOSPrompt();
-}
-
-function showIOSPrompt() {
-    // التأكد من عدم وجود نافذة سابقة
-    if (document.querySelector('.ios-install-prompt')) return;
-
-    const prompt = document.createElement('div');
-    prompt.className = 'ios-install-prompt';
-    
-    // تأكد من وجود صورة اللوجو في مجلد Photos بالاسم الصحيح
-    prompt.innerHTML = `
-        <img src="Photos/logo.png" class="app-icon" onerror="this.src='https://i.ibb.co/S49yt4YB/cropped-circle-image.png'">
-        <div class="ios-text">
-            <strong>تثبيت RGA Fitness</strong>
-            اضغط على زر المشاركة <img src="https://i.ibb.co/S49yt4YB/cropped-circle-image.png" class="share-icon-img"> 
-            ثم اختر <strong>"Add to Home Screen"</strong> من القائمة.
-        </div>
-        <button class="ios-close-btn" aria-label="Close">&times;</button>
-    `;
-
-    document.body.appendChild(prompt);
-
-    prompt.querySelector('.ios-close-btn').onclick = () => {
-        prompt.style.opacity = '0';
-        setTimeout(() => prompt.remove(), 500);
-    };
-}
 
 
 // تفعيل تأثير النيون للزر المضغوط في الشريط السفلي
