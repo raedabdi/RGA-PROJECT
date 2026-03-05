@@ -4381,12 +4381,21 @@ async function viewPlayerProfile(targetUid) {
 
 
 
+          
+              
+            let currentNotifUnsubscribe = null; // متغير لحفظ المستمع
 let isInitialLoad = true; 
-function listenForNotifications() {
+
+window.listenForNotifications = function() {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    db.collection('users').doc(currentUser.uid).collection('notifications')
+    // 🔴 إيقاف المستمع القديم إذا كان شغال عشان ما يكرر الإشعارات
+    if (currentNotifUnsubscribe) {
+        currentNotifUnsubscribe();
+    }
+
+    currentNotifUnsubscribe = db.collection('users').doc(currentUser.uid).collection('notifications')
       .where('status', '==', 'pending')
       .onSnapshot(snapshot => {
           const badge = document.getElementById('notif-badge');
@@ -4453,16 +4462,11 @@ function listenForNotifications() {
                       </div>`);
 
               } else if (notif.type === 'admin_alert') {
-                  
-
-
-
                   let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
                   if (savedData.isWorkoutPending) {
                       savedData.isWorkoutPending = false;
                       localStorage.setItem('currentUser', JSON.stringify(savedData));
                   }
-
                   body.insertAdjacentHTML('beforeend', `
                       <div class="notif-item" id="${notifId}" style="background: rgba(0, 242, 167, 0.05); border-left: 3px solid var(--primary-color);">
                           <div class="notif-icon"><img src="${notif.senderPhoto}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
@@ -4474,10 +4478,7 @@ function listenForNotifications() {
                               </div>
                           </div>
                       </div>`);
-
-
               } else if (notif.type === 'throne_fall') {
-                  // 🔥 إشعار سقوط العرش (لون ذهبي فخم)
                   let msgText = currentLang === 'en' 
                       ? `🚨 Breaking: ${notif.city}'s throne has fallen! Captain ${notif.newKingName} is the new King with ${notif.newWeight}kg!`
                       : `🚨 عاجل: لقد سقط عرش ${notif.city}! الكابتن (${notif.newKingName}) هو الملك الجديد بوزن ${notif.newWeight}kg!`;
@@ -4492,9 +4493,7 @@ function listenForNotifications() {
                               </div>
                           </div>
                       </div>`);
-              }
-
-              else if (notif.type === 'pending_proof') {
+              } else if (notif.type === 'pending_proof') {
                   body.insertAdjacentHTML('beforeend', `
                       <div class="notif-item" id="${notifId}" style="background: rgba(255, 77, 77, 0.1); border-left: 3px solid #ff4d4d;">
                           <div class="notif-icon" style="background: transparent; font-size: 1.8rem;">🎥</div>
@@ -4507,10 +4506,9 @@ function listenForNotifications() {
                           </div>
                       </div>`);
               }
-
           });
       });
-}
+};
 
 
 
