@@ -27,8 +27,8 @@ self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : { title: 'RGA Fit', body: 'لديك تحدٍ جديد!' };
   const options = {
     body: data.body,
-    icon: 'https://i.ibb.co/b3bJc03/4041155-2.png',
-    badge: 'https://i.ibb.co/b3bJc03/4041155-2.png',
+    icon: 'https://i.ibb.co/ch2FcQwj/IMG-4621.jpg',
+    badge: 'https://i.ibb.co/ch2FcQwj/IMG-4621.jpg',
     vibrate: [100, 50, 100]
   };
   event.waitUntil(self.registration.showNotification(data.title, options));
