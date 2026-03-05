@@ -503,6 +503,36 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage(); 
+// ==========================================
+// 🛡️ نظام حفظ تسجيل الدخول والتوجيه التلقائي
+// ==========================================
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+    // مراقبة حالة المستخدم بشكل دائم
+    firebase.auth().onAuthStateChanged((user) => {
+        // معرفة الصفحة الحالية اللي فاتحها المستخدم
+        const currentPath = window.location.pathname;
+        const isIndexPage = currentPath.endsWith('index.html') || currentPath === '/';
+
+        if (user) {
+            // 🟢 إذا المستخدم مسجل دخول
+            if (isIndexPage) {
+                // إذا كان بصفحة البداية (index)، انقله فوراً للوحة التحكم
+                window.location.replace('dashboard.html');
+            }
+        } else {
+            // 🔴 إذا المستخدم مش مسجل دخول (أو عمل تسجيل خروج)
+            if (!isIndexPage) {
+                // إذا كان بيحاول يدخل لوحة التحكم، رجعه لصفحة البداية
+                window.location.replace('index.html');
+            }
+        }
+    });
+  })
+  .catch((error) => {
+    console.error("Error setting persistence:", error);
+  });
+
 
 const translations = {
     ar: {
