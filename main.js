@@ -5710,3 +5710,60 @@ window.openLegalModal = function(policyType) {
 window.closeLegalModal = function() {
     document.getElementById('legal-modal').classList.remove('active');
 };
+// =========================================
+// 📱 نظام تثبيت التطبيق الفخم لأجهزة الآيفون (iOS)
+// =========================================
+function initIOSInstallPrompt() {
+    // التحقق مما إذا كان الجهاز iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    // التحقق مما إذا كان التطبيق مثبتاً بالفعل (يعمل كـ Standalone)
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+    
+    // التحقق مما إذا كان المستخدم قد أغلق الرسالة مسبقاً
+    const hasSeenPrompt = localStorage.getItem('ios_premium_prompt_dismissed');
+
+    if (isIOS && !isStandalone && !hasSeenPrompt) {
+        // تأخير ظهور الرسالة لثانيتين حتى يحمل الموقع ويكون الظهور فخماً
+        setTimeout(() => {
+            const promptHTML = `
+                <div class="ios-prompt-overlay" id="ios-premium-prompt">
+                    <button class="ios-prompt-close" onclick="closePremiumIOSPrompt()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="ios-prompt-header">
+                        <img src="https://i.ibb.co/S49yt4YB/cropped-circle-image.png" alt="RGA Fit" class="ios-prompt-icon">
+                        <div>
+                            <h3 class="ios-prompt-title">تجربة RGA Fit الأقوى</h3>
+                            <p class="ios-prompt-desc">ارتقِ بمستواك وثبّت التطبيق للوصول السريع وتجربة أداء لا مثيل لها.</p>
+                        </div>
+                    </div>
+                    <div class="ios-prompt-instructions">
+                        اضغط على 
+                        <svg viewBox="0 0 50 50" width="22" height="22" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 4px; transform: translateY(2px);"><path d="M25 3v26M16 11l9-9 9 9M10 21v18a4 4 0 004 4h22a4 4 0 004-4V21"/></svg>
+                        ثم اختر 
+                        <span style="color: #00f2a7; margin: 0 4px;">"إضافة للشاشة الرئيسية"</span> 
+                        <i class="far fa-plus-square" style="font-size: 1.2rem;"></i>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', promptHTML);
+        }, 2000);
+    }
+}
+
+// دالة إغلاق النافذة بنعومة مع حفظ القرار
+window.closePremiumIOSPrompt = function() {
+    const prompt = document.getElementById('ios-premium-prompt');
+    if (prompt) {
+        prompt.style.transform = 'translate(-50%, 150%)';
+        prompt.style.opacity = '0';
+        setTimeout(() => prompt.remove(), 800);
+    }
+    // حفظ القرار في المتصفح عشان ما نزعج الوحش كل مرة يدخل
+    localStorage.setItem('ios_premium_prompt_dismissed', 'true');
+};
+
+// تشغيل النظام بمجرد تحميل الصفحة
+document.addEventListener('DOMContentLoaded', initIOSInstallPrompt);
+
