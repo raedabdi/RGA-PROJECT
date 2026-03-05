@@ -4568,40 +4568,59 @@ window.sendFriendRequest = async function(targetUid, targetName, targetPhoto) {
 
 
 
-// دالة قبول طلب الصداقة المحدثة
-window.acceptFriendRequest = async function(requestId, senderId) {
+// دالة قبول طلب الصداقة (تم الإصلاح ✅)
+window.acceptFriendRequest = async function(notifId, senderId, senderName, senderPhoto) {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
     try {
-        // نستخدم Batch لضمان تحديث الطرفين في نفس اللحظة
+        // 1. جلب بياناتي عشان أضيف نفسي عند الطرف الثاني
+        const myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const myName = myData.firstName ? `${myData.firstName} ${myData.lastName}` : "بطل";
+        const myPhoto = myData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
+        const myLevel = myData.rank || 1;
+
+        // 2. تجهيز كائنات الأصدقاء بنفس الشكل اللي بيقرأه التطبيق
+        const friendForMe = { id: senderId, name: senderName, img: senderPhoto, level: 1 };
+        const friendForThem = { id: currentUser.uid, name: myName, img: myPhoto, level: myLevel };
+
         const batch = db.batch();
 
         const currentUserRef = db.collection('users').doc(currentUser.uid);
         const senderUserRef = db.collection('users').doc(senderId);
-        const requestRef = db.collection('friend_requests').doc(requestId);
+        // تم الإصلاح: مسار الإشعار الصحيح
+        const notifRef = db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId);
 
-        // إضافة الصديق للطرفين معاً (يمنع مشكلة الظهور لطرف واحد)
+        // إضافة الصديق لي
         batch.update(currentUserRef, {
-            friends: firebase.firestore.FieldValue.arrayUnion(senderId)
+            myFriendsList: firebase.firestore.FieldValue.arrayUnion(friendForMe)
         });
 
+        // إضافة الصديق للطرف الآخر
         batch.update(senderUserRef, {
-            friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+            myFriendsList: firebase.firestore.FieldValue.arrayUnion(friendForThem)
         });
 
-        // حذف طلب الصداقة لأنه تم قبوله
-        batch.delete(requestRef);
+        // حذف الإشعار لأن الطلب تم قبوله
+        batch.delete(notifRef);
 
-        // تنفيذ كل العمليات السابقة دفعة واحدة
         await batch.commit();
 
-        showToast(currentLang === 'en' ? "Friend request accepted!" : "تم قبول الصداقة!");
-        
-        // تحديث الواجهة فوراً
-        if (typeof loadFriends === "function") {
-            loadFriends(); 
+        // تحديث اللوكال ستورج
+        let localFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
+        if (!localFriends.find(f => f.id === senderId)) {
+            localFriends.push(friendForMe);
+            localStorage.setItem('myFriends', JSON.stringify(localFriends));
         }
+
+        showToast(currentLang === 'en' ? "Friend request accepted!" : "تم قبول الصداقة! 🤝");
+
+        // إخفاء الإشعار من الشاشة
+        const notifElement = document.getElementById(notifId);
+        if (notifElement) notifElement.remove();
+
+        // تحديث واجهة الأصدقاء
+        if (typeof renderMyFriends === "function") renderMyFriends();
 
     } catch (error) {
         console.error("Error accepting friend:", error);
