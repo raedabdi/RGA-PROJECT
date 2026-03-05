@@ -4219,41 +4219,69 @@ async function searchPlayerByID() {
     }
 }
 
-function renderMyFriends() {
+async function renderMyFriends() {
     const list = document.getElementById('my-friends-list');
-    let myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
+    if (!list) return;
     const t = translations[currentLang || 'ar'];
+    
+    // إظهار اللودينج لحد ما يجيب الأصدقاء من السيرفر
+    list.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--primary-color);"></i></div>`;
+    
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
 
-    if (myFriends.length === 0) {
-        list.innerHTML = `
-            <div class="empty-notif" style="margin-top: 30px;">
-                <i class="fa-solid fa-user-group" style="font-size: 3.5rem; opacity: 0.15; color: var(--slate);"></i>
-                <p style="margin-top: 15px; font-size: 1.1rem; color: white;">${t.no_friends_yet}</p>
-                <p style="font-size: 0.85rem; color: var(--slate); max-width: 250px; text-align: center;">${t.search_heroes_msg}</p>
-            </div>`;
-        return;
-    }
+    try {
+        // 🔴 السر هون: بنجيب قائمة الأصدقاء من الفايربيس مباشرة!
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        let myFriends = [];
+        
+        if (doc.exists && doc.data().myFriendsList) {
+            myFriends = doc.data().myFriendsList;
+            localStorage.setItem('myFriends', JSON.stringify(myFriends)); // مزامنة مع اللوكال
+        } else {
+            // ترحيل البيانات القديمة إذا كانت موجودة باللوكال بس مش بالفايربيس
+            myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
+            if (myFriends.length > 0) {
+                await db.collection('users').doc(currentUser.uid).update({ myFriendsList: myFriends });
+            }
+        }
 
-    list.innerHTML = myFriends.map(f => `
-        <div class="friend-card" style="animation: fadeIn 0.4s;">
-            <div class="friend-info" style="cursor: pointer; transition: 0.3s;" onclick="viewPlayerProfile('${f.id}')">
-                <img src="${f.img}">
-                <div>
-                    <h4>${f.name}</h4>
-                    <p>Level ${f.level} 🔥</p>
+        if (myFriends.length === 0) {
+            list.innerHTML = `
+                <div class="empty-notif" style="margin-top: 30px;">
+                    <i class="fa-solid fa-user-group" style="font-size: 3.5rem; opacity: 0.15; color: var(--slate);"></i>
+                    <p style="margin-top: 15px; font-size: 1.1rem; color: white;">${t.no_friends_yet}</p>
+                    <p style="font-size: 0.85rem; color: var(--slate); max-width: 250px; text-align: center;">${t.search_heroes_msg}</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = myFriends.map(f => `
+            <div class="friend-card" style="animation: fadeIn 0.4s;">
+                <div class="friend-info" style="cursor: pointer; transition: 0.3s;" onclick="viewPlayerProfile('${f.id}')">
+                    <img src="${f.img}">
+                    <div>
+                        <h4>${f.name}</h4>
+                        <p>Level ${f.level} 🔥</p>
+                    </div>
+                </div>
+                <div class="friend-actions">
+                    <button class="chat-action-btn" onclick="openChat('${f.id}', '${f.name}', '${f.img}')">
+                        <i class="fa-solid fa-message"></i> ${t.chat_btn}
+                    </button>
+                    <button class="delete-friend-btn" onclick="deleteFriend('${f.name}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
             </div>
-            <div class="friend-actions">
-                <button class="chat-action-btn" onclick="openChat('${f.id}', '${f.name}', '${f.img}')">
-                    <i class="fa-solid fa-message"></i> ${t.chat_btn}
-                </button>
-                <button class="delete-friend-btn" onclick="deleteFriend('${f.name}')">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
+        `).join('');
+
+    } catch (error) {
+        console.error("خطأ في جلب الأصدقاء:", error);
+        list.innerHTML = `<p style="text-align:center; color:#ff4d4d;">حدث خطأ في تحميل الأصدقاء</p>`;
+    }
 }
+
 
 
 
