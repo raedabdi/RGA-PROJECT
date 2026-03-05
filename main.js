@@ -1,3 +1,53 @@
+// تسجيل الـ Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Service Worker Registered'));
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // إظهار نافذة صغيرة للمستخدم (Toast أو Modal) تخبره بإضافة التطبيق
+    showInstallPromotion();
+});
+
+function showInstallPromotion() {
+    // يمكنك هنا إظهار زر "أضف للشاشة الرئيسية" في موقعك
+    const installBtn = document.createElement('button');
+    installBtn.innerHTML = " تثبيت RGA Fit كـ تطبيق";
+    installBtn.className = "btn-primary";
+    installBtn.style.cssText = "position:fixed; bottom:100px; left:50%; transform:translateX(-50%); z-index:99999;";
+    document.body.appendChild(installBtn);
+
+    installBtn.onclick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            }
+            installBtn.remove();
+        }
+    };
+}
+
+// طلب إذن الإشعارات
+async function requestNotificationPermission() {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+        console.log('Notification permission granted.');
+    }
+}
+
+// دليل مستخدمي آيفون
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS && !window.navigator.standalone) {
+    alert("لتثبيت التطبيق على آيفون: اضغط على زر 'مشاركة' (Share) ثم اختر 'إضافة للشاشة الرئيسية' (Add to Home Screen) 📲");
+}
+
+
 // تفعيل تأثير النيون للزر المضغوط في الشريط السفلي
 window.activateBottomNav = function(clickedItem) {
     const navItems = document.querySelectorAll('.bottom-nav .nav-item');
