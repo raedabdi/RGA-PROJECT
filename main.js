@@ -5929,48 +5929,30 @@ window.closeLegalModal = function() {
 };
 
 
-// كود طلب الإشعارات مع نظام كشف الأعطال والتأكد من نشاط الـ SW
-async function requestNotificationPermission() {
-    if (!messaging) {
-        alert("❌ جهازك أو متصفحك لا يدعم الإشعارات.");
-        return;
-    }
 
+// الكود النهائي النظيف لطلب الإشعارات
+async function requestNotificationPermission() {
+    if (!messaging) return;
     try {
-        alert("خطوة 1: جاري طلب الإذن من المتصفح...");
         const permission = await Notification.requestPermission();
-        
         if (permission === 'granted') {
-            alert("خطوة 2: المتصفح وافق! جاري تسجيل ملف الخلفية (SW)...");
             const registration = await navigator.serviceWorker.register('/sw.js');
-            
-            // 🔥 هذا السطر السحري الجديد! ننتظر حتى يصبح الملف "نشطاً" (Active) قبل طلب التوكن
             await navigator.serviceWorker.ready;
             
-            alert("خطوة 3: ملف الخلفية نشط الآن! جاري الاتصال بسيرفر جوجل لتوليد التوكن...");
             const token = await messaging.getToken({ 
                 vapidKey: 'BDskkDNXkSMGBNlDiNpCNGdAMnoBbglgvzsuBGEe6t4syoS-k97sJOKbIrPYK_vUDkL6tv8d34Bj_nPm-G_cTJM', 
                 serviceWorkerRegistration: registration 
             });
             
             if (token) {
-                alert("خطوة 4: تم جلب التوكن بنجاح! جاري الحفظ في الداتا بيس لحسابك...");
                 const user = auth.currentUser;
                 if (user) {
                     await db.collection('users').doc(user.uid).update({ fcmToken: token });
-                    alert("✅ اكتملت العملية! التوكن الآن موجود في الفايربيس.");
-                } else {
-                    alert("❌ خطأ: لم يتم العثور على حساب مسجل الدخول للحفظ فيه.");
+                    showToast("🔔 تم تفعيل الإشعارات بنجاح!");
                 }
-            } else {
-                alert("❌ خطأ: سيرفر جوجل لم يرسل التوكن.");
             }
-        } else {
-            alert("⚠️ لقد تم رفض إذن الإشعارات من إعدادات الهاتف أو المتصفح.");
         }
     } catch (error) {
-        alert("🚨 توقفت العملية بسبب خطأ: " + error.message);
-        console.error('تفاصيل الخطأ: ', error);
+        console.error('خطأ في الإشعارات: ', error);
     }
 }
-
