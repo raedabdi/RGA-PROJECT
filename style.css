@@ -2066,52 +2066,43 @@ html, body {
     box-shadow: 0 0 10px var(--primary-color);
 }
 
-/* Cropper Modal - الإصلاح الذهبي للطبقات 🌟 */
-#cropper-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(10, 20, 41, 0.98); /* لون أغمق ليكون أوضح */
-    backdrop-filter: blur(15px);
-    z-index: 999999 !important; /* هذا الرقم الخيالي سيجبره على الظهور فوق الشريط السفلي وكل شيء آخر */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: env(safe-area-inset-bottom); /* لدعم شاشات الآيفون الجديدة */
+
+
+
+
+/* جعل إطار القص دائري تماماً مع توهج نيون فخم */
+.cropper-view-box {
+    border-radius: 50% !important;
+    outline: 3px solid var(--primary-color) !important; /* لون النيون الأخضر */
+    box-shadow: 0 0 25px rgba(0, 242, 167, 0.5), inset 0 0 15px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* حاوية الصورة أثناء القص */
+.cropper-face {
+    border-radius: 50% !important;
+}
+
+/* إخفاء كل الخطوط والمربعات والنقاط المزعجة (تنظيف الشاشة) */
+.cropper-dashed,
+.cropper-line,
+.cropper-point,
+.cropper-center,
+.cropper-bg {
+    display: none !important;
+}
+
+/* تعتيم الخلفية حول الدائرة ليكون التركيز على الوجه فقط */
+.cropper-modal {
+    background-color: rgba(10, 20, 41, 0.85) !important;
+    backdrop-filter: blur(5px);
+}
+
+/* تكبير مساحة العمل لتكون مريحة للأصابع */
 .cropper-container {
-    width: 90%;
-    max-height: 50vh; /* تصغير الارتفاع قليلاً لترك مساحة واسعة للأزرار */
-    margin-bottom: 30px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 242, 167, 0.2);
+    width: 100%;
+    height: 55vh; /* أخذنا مساحة ممتازة من الشاشة */
+    background: transparent !important;
 }
 
-#image-to-crop {
-    max-width: 100%;
-    display: block;
-}
-
-/* تنسيق أزرار الحفظ والإلغاء لتبدو فخمة ومناسبة للموبايل */
-.cropper-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-    width: 90%; /* أخذ مساحة جيدة لسهولة الكبس */
-    max-width: 350px;
-}
-
-.cropper-actions button {
-    flex: 1; /* جعل الزرين بنفس الحجم */
-    padding: 15px !important;
-    font-size: 1.1rem !important;
-}
 
 
 /* --- 5. Animations & Media Queries --- */
