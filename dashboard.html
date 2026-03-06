@@ -194,18 +194,46 @@
 
 
 
+    <!-- Cropper Modal (نافذة قص الصورة مترجمة ذاتياً) -->
     <div id="cropper-modal">
-        <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-main); font-weight: 900;">تعديل الصورة الشخصية</h3>
+        <h3 id="crop-title" style="color: white; margin-bottom: 20px; font-family: var(--font-main); font-weight: 900;">تعديل الصورة الشخصية</h3>
         <div class="cropper-container">
             <img id="image-to-crop" src="">
         </div>
         
-
         <div class="cropper-actions">
             <button id="crop-save-btn" class="btn-primary">حفظ الصورة</button>
             <button id="crop-cancel-btn" class="btn-primary" style="background: transparent; border-color: #ff4d4d; color: #ff4d4d; box-shadow: none;">إلغاء</button>
         </div>
     </div>
+
+    <!-- سكريبت صغير مخفي لترجمة النافذة لحظة ظهورها -->
+    <script>
+        // مراقبة فتح النافذة لترجمتها فوراً
+        const originalCropperObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === "style") {
+                    const modal = document.getElementById('cropper-modal');
+                    if (modal.style.display === 'flex') {
+                        const isEn = (localStorage.getItem('lang') || 'ar') === 'en';
+                        document.getElementById('crop-title').innerText = isEn ? 'Edit Profile Picture' : 'تعديل الصورة الشخصية';
+                        document.getElementById('crop-save-btn').innerText = isEn ? 'Save Photo' : 'حفظ الصورة';
+                        document.getElementById('crop-cancel-btn').innerText = isEn ? 'Cancel' : 'إلغاء';
+                    }
+                }
+            });
+        });
+        
+        // تفعيل المراقبة بمجرد تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            const cropModal = document.getElementById('cropper-modal');
+            if (cropModal) {
+                originalCropperObserver.observe(cropModal, { attributes: true });
+            }
+        });
+    </script>
+
+
 
 
     <!-- استدعاء الخط الرياضي الفخم -->
