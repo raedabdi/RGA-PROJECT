@@ -1701,14 +1701,27 @@ preloadHeavyCovers();
                 imageToCrop.src = event.target.result;
                 cropperModal.style.display = 'flex';
                 if (cropper) cropper.destroy();
+                
+                // 🌟 الإعدادات الجديدة (حركة انستغرام السلسة) 🌟
                 cropper = new Cropper(imageToCrop, {
-                    aspectRatio: 1, viewMode: 1, dragMode: 'move',
-                    guides: false, center: true, cropBoxMovable: true, cropBoxResizable: true
+                    aspectRatio: 1,             // نسبة 1:1 لتناسب الدائرة
+                    viewMode: 1,                // منع خروج الصورة عن الإطار
+                    dragMode: 'move',           // تحريك الصورة نفسها بدل المربع
+                    autoCropArea: 0.8,          // حجم الدائرة ياخذ 80% من الشاشة
+                    restore: false,
+                    guides: false,              // إخفاء الشبكة المزعجة
+                    center: false,              // إخفاء علامة الزائد بالمنتصف
+                    highlight: false,
+                    cropBoxMovable: false,      // إقفال الدائرة في المنتصف (لا تتحرك)
+                    cropBoxResizable: false,    // منع تغيير حجم الدائرة (الزوم يكون للصورة)
+                    toggleDragModeOnDblclick: false,
+                    background: false           // إخفاء خلفية المربعات
                 });
             };
             reader.readAsDataURL(file);
         });
     }
+
 
 // الكود الجديد والمطور لحفظ صورة البروفايل (رفعها لـ Firebase Storage)
 const cropSaveBtn = document.getElementById('crop-save-btn');
