@@ -391,7 +391,9 @@ window.deleteAdminMessage = async function(docId) {
 };
 
 
-async function approveWorkout(docId) {
+
+        
+        async function approveWorkout(docId) {
     const t = translations[currentLang || 'ar'];
     if(!confirm(t.confirm_approve)) return;
     try {
@@ -399,7 +401,7 @@ async function approveWorkout(docId) {
         const docRef = db.collection('pending_workouts').doc(docId);
         const data = (await docRef.get()).data();
 
-        // 1. تحديث بيانات المستخدم
+        // 1. جلب بيانات المستخدم الذي رفع الفيديو
         const userRef = db.collection('users').doc(data.userId);
         const userSnap = await userRef.get();
         let userData = userSnap.data();
@@ -407,9 +409,19 @@ async function approveWorkout(docId) {
         let workouts = userData.workouts || [];
         workouts.unshift({ date: data.date, type: data.type, details: data.details });
 
+        // 2. فحص هل هناك وزن جديد أعلى من وزنه القديم؟
         let maxW = userData.stats?.maxWeight || 0;
-        data.details.forEach(ex => { if(parseFloat(ex.weight) > maxW) maxW = parseFloat(ex.weight); });
+        let isNewPR = false;
+        
+        data.details.forEach(ex => { 
+            let exWeight = parseFloat(ex.weight);
+            if(exWeight > maxW) {
+                maxW = exWeight;
+                isNewPR = true;
+            }
+        });
 
+        // 3. تحديث بيانات المستخدم
         await userRef.update({
             workouts: workouts,
             isWorkoutPending: false,
@@ -417,14 +429,17 @@ async function approveWorkout(docId) {
             xp: firebase.firestore.FieldValue.increment(50)
         });
 
-        // 2. إرسال إشعار وحذف الفيديو والطلب
-                // 2. إرسال إشعار وحذف الفيديو والطلب
+        // 4. إرسال إشعار موافقة للاعب نفسه
         await userRef.collection('notifications').add({
-            type: 'admin_alert', // <--- غيرناها هون
+            type: 'admin_alert',
             senderId: 'admin', senderName: t.admin_name, senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
             text: t.admin_notif_approve, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
+        // 🚨 الخطوة السحرية: إذا كسر رقمه الشخصي، نفحص هل كسر عرش مدينته؟
+        if (isNewPR && userData.city) {
+            await checkThroneUsurperFromAdmin(maxW, userData.city, userData.firstName, data.userId);
+        }
 
         try { await storage.refFromURL(data.videoUrl).delete(); } catch(err) {}
         await docRef.delete();
@@ -436,6 +451,63 @@ async function approveWorkout(docId) {
         showToast(t.approve_fail); 
     }
 }
+
+// دالة إطلاق إنذار سقوط العرش (تعمل بصمت في الخلفية بعد موافقة الآدمن)
+async function checkThroneUsurperFromAdmin(newWeight, city, newKingName, newKingId) {
+    try {
+        // 1. جلب الملك السابق للمدينة (بناءً على الأوزان قبل هذا اللاعب)
+        const snapshot = await db.collection('users')
+            .where('city', '==', city)
+            .orderBy('stats.maxWeight', 'desc')
+            .limit(2) // نجيب أعلى 2 عشان نتاكد
+            .get();
+
+        let previousKingId = null;
+        let previousKingWeight = 0;
+
+        snapshot.forEach(doc => {
+            // نبحث عن أعلى وزن للاعب "غير" اللاعب الحالي اللي اعتمدنا وزنه للتو
+            if (doc.id !== newKingId && !previousKingId) {
+                previousKingId = doc.id;
+                previousKingWeight = doc.data().stats?.maxWeight || 0;
+            }
+        });
+
+        // 2. إذا لم يكن هناك ملك سابق، أو وزنه أقل من الوزن الجديد.. إذن العرش سقط! 👑
+        if (!previousKingId || newWeight > previousKingWeight) {
+            
+            // جلب كل أبطال المدينة لإبلاغهم
+            const cityUsersSnap = await db.collection('users').where('city', '==', city).get();
+            const batch = db.batch(); 
+            let count = 0;
+            
+            cityUsersSnap.forEach(userDoc => {
+                // نرسل الإنذار للجميع (باستثناء الملك الجديد نفسه)
+                if (userDoc.id !== newKingId) { 
+                    const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
+                    batch.set(notifRef, {
+                        type: 'throne_fall',
+                        newKingName: newKingName || 'بطل مجهول',
+                        newWeight: newWeight,
+                        city: city,
+                        status: 'pending',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    count++;
+                }
+            });
+
+            // إطلاق الإنذار الشامل للمدينة
+            if (count > 0) {
+                await batch.commit(); 
+                console.log(`تم إرسال إنذار سقوط العرش لـ ${count} لاعبين في مدينة ${city}`);
+            }
+        }
+    } catch (error) {
+        console.error("خطأ في فحص العرش:", error);
+    }
+}
+
 
 async function rejectWorkout(docId) {
     const t = translations[currentLang || 'ar'];
