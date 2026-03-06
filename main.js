@@ -1640,11 +1640,7 @@ checkAndShowOnboarding();
 
 
 preloadHeavyCovers(); 
-
-            const savedData = localStorage.getItem('currentUser');
-            if (savedData) renderUI(JSON.parse(savedData));
-            syncUserData(user);
-            listenForNotifications(); 
+          
                         const savedData = localStorage.getItem('currentUser');
             if (savedData) renderUI(JSON.parse(savedData));
             syncUserData(user);
