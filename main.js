@@ -5930,7 +5930,8 @@ window.closeLegalModal = function() {
 
 
 
-// الكود النهائي النظيف لطلب الإشعارات
+
+// كود طلب الإشعارات وتحديث التوكن (النسخة المدمرة للأعطال)
 async function requestNotificationPermission() {
     if (!messaging) return;
     try {
@@ -5939,20 +5940,42 @@ async function requestNotificationPermission() {
             const registration = await navigator.serviceWorker.register('/sw.js');
             await navigator.serviceWorker.ready;
             
-            const token = await messaging.getToken({ 
+            // 1. جلب التوكن الجديد النظيف
+            const currentToken = await messaging.getToken({ 
                 vapidKey: 'BDskkDNXkSMGBNlDiNpCNGdAMnoBbglgvzsuBGEe6t4syoS-k97sJOKbIrPYK_vUDkL6tv8d34Bj_nPm-G_cTJM', 
                 serviceWorkerRegistration: registration 
             });
             
-            if (token) {
+            if (currentToken) {
                 const user = auth.currentUser;
                 if (user) {
-                    await db.collection('users').doc(user.uid).update({ fcmToken: token });
-                    showToast("🔔 تم تفعيل الإشعارات بنجاح!");
+                    const userRef = db.collection('users').doc(user.uid);
+                    const userDoc = await userRef.get();
+                    const savedToken = userDoc.data()?.fcmToken;
+                    
+                    // 2. إذا التوكن القديم مختلف عن الجديد، بنعمل "فورمات" للحقل!
+                    if (!savedToken || savedToken !== currentToken) {
+                        
+                        // 🔥 الخطوة السحرية: مسح الحقل القديم بالكامل (كأنك مسحته بيدك)
+                        await userRef.update({
+                            fcmToken: firebase.firestore.FieldValue.delete()
+                        });
+
+                        // الانتظار نصف ثانية لضمان إتمام المسح من سيرفرات جوجل
+                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                        // 🔥 الخطوة السحرية 2: إنشاء الحقل من جديد بالتوكن الصالح 100%
+                        await userRef.set({
+                            fcmToken: currentToken.trim() // trim لمنع أي مسافات مخفية
+                        }, { merge: true });
+
+                        console.log("تم مسح التوكن القديم وتوليد واحد جديد بنجاح!");
+                        showToast("🔔 تم تفعيل نظام الإشعارات!");
+                    }
                 }
             }
         }
     } catch (error) {
-        console.error('خطأ في الإشعارات: ', error);
+        console.error('خطأ في تفعيل الإشعارات: ', error);
     }
 }
