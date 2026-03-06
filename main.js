@@ -5929,36 +5929,45 @@ window.closeLegalModal = function() {
 };
 
 
-// دالة طلب إذن الإشعارات الآمنة
+// كود طلب الإشعارات مع نظام كشف الأعطال (للموبايل)
 async function requestNotificationPermission() {
-    // إذا كان المتصفح لا يدعم الإشعارات، نوقف العملية بدون أخطاء
     if (!messaging) {
-        showToast("عذراً، جهازك أو متصفحك لا يدعم الإشعارات حالياً.");
+        alert("❌ جهازك أو متصفحك لا يدعم الإشعارات.");
         return;
     }
 
     try {
+        alert("خطوة 1: جاري طلب الإذن من المتصفح...");
         const permission = await Notification.requestPermission();
+        
         if (permission === 'granted') {
+            alert("خطوة 2: المتصفح وافق! جاري تسجيل ملف الخلفية (SW)...");
             const registration = await navigator.serviceWorker.register('/sw.js');
             
-            // ⚠️ تذكر وضع الـ VAPID Key الخاص بك هنا
+            alert("خطوة 3: جاري الاتصال بسيرفر جوجل لتوليد التوكن (قد يأخذ ثواني)...");
             const token = await messaging.getToken({ 
                 vapidKey: 'BDskkDNXkSMGBNlDiNpCNGdAMnoBbglgvzsuBGEe6t4syoS-k97sJOKbIrPYK_vUDkL6tv8d34Bj_nPm-G_cTJM', 
                 serviceWorkerRegistration: registration 
             });
             
             if (token) {
+                alert("خطوة 4: تم جلب التوكن بنجاح! جاري الحفظ في الداتا بيس لحسابك...");
                 const user = auth.currentUser;
                 if (user) {
                     await db.collection('users').doc(user.uid).update({ fcmToken: token });
-                    console.log("تم تفعيل الإشعارات بنجاح!");
+                    alert("✅ اكتملت العملية! التوكن الآن موجود في الفايربيس.");
+                } else {
+                    alert("❌ خطأ: لم يتم العثور على حساب مسجل الدخول للحفظ فيه.");
                 }
+            } else {
+                alert("❌ خطأ: سيرفر جوجل لم يرسل التوكن.");
             }
         } else {
-            console.log("المستخدم رفض الإشعارات.");
+            alert("⚠️ لقد تم رفض إذن الإشعارات من إعدادات الهاتف أو المتصفح.");
         }
     } catch (error) {
-        console.error('خطأ أثناء طلب الإشعارات: ', error);
+        // هذا السطر سيكشف لنا السر إذا كان هناك خطأ برمجي أو مشكلة في المفاتيح!
+        alert("🚨 توقفت العملية بسبب خطأ: " + error.message);
+        console.error('تفاصيل الخطأ: ', error);
     }
 }
