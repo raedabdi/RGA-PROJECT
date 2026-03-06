@@ -1645,6 +1645,17 @@ preloadHeavyCovers();
             if (savedData) renderUI(JSON.parse(savedData));
             syncUserData(user);
             listenForNotifications(); 
+                        const savedData = localStorage.getItem('currentUser');
+            if (savedData) renderUI(JSON.parse(savedData));
+            syncUserData(user);
+            listenForNotifications(); 
+            
+
+
+            if (Notification.permission === 'granted' && typeof requestNotificationPermission === 'function') {
+                requestNotificationPermission();
+            }
+
         } else {
             window.location.href = 'index.html';
         }
@@ -5612,16 +5623,28 @@ document.addEventListener('click', function() {
 
 
 // دالة تسجيل الخروج من البروفايل
+// دالة تسجيل الخروج من البروفايل (الآمنة)
 window.logoutFromProfile = async function() {
     const t = translations[currentLang || 'ar'];
     const confirmMsg = currentLang === 'en' ? "Are you sure you want to logout?" : "متأكد إنك بدك تسجل خروج يا وحش؟";
     
     if(confirm(confirmMsg)) {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                // 🔥 الخطوة السحرية: مسح التوكن من الحساب القديم حتى لا تصله إشعارات وهو مسجل خروج
+                await db.collection('users').doc(user.uid).update({
+                    fcmToken: firebase.firestore.FieldValue.delete()
+                });
+            } catch(e) { console.error("Error removing token", e); }
+        }
+
         await auth.signOut();
         localStorage.removeItem('currentUser');
         window.location.href = 'index.html';
     }
 };
+
 // ==========================================
 // 🔄 دالة التنقل في مجتمع الأبطال
 // ==========================================
