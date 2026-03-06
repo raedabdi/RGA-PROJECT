@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rga-fit-v4'; // تغيير رقم النسخة لتحديث الكاش
+const CACHE_NAME = 'rga-fit-v7'; 
 const ASSETS = [
   '/',
   '/index.html',
@@ -8,22 +8,19 @@ const ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-// تثبيت التطبيق وتخزين الملفات الأساسية
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting(); // إجبار المتصفح على استخدام النسخة الجديدة فوراً
+  self.skipWaiting(); // مهم جداً للآيفون لتحديث الكود فوراً
 });
 
-// التعامل مع الطلبات في حالة عدم وجود إنترنت
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((res) => res || fetch(e.request))
   );
 });
 
-// تفعيل السيرفيس وركر الجديد وحذف الكاش القديم
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -36,18 +33,14 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  self.clients.claim(); // السيطرة على كل الصفحات المفتوحة فوراً
+  self.clients.claim(); // السيطرة على المتصفح فوراً
 });
 
-// ------------------------------------------------------------------
-// إعدادات إشعارات الفايربيس (Firebase Cloud Messaging) في الخلفية
-// ------------------------------------------------------------------
-
-// استيراد مكتبات الفايربيس (تأكد من نفس الإصدار 10.8.0)
+// استيراد مكتبات الفايربيس 
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
-// نفس بيانات مشروعك بالضبط
+// بيانات مشروعك للفايربيس
 firebase.initializeApp({
     apiKey: "AIzaSyDV7SNwgv_K10tX0iJpNYqg8_iJnWprFB4",
     authDomain: "rgalab.firebaseapp.com",
@@ -61,13 +54,11 @@ const messaging = firebase.messaging();
 
 // استقبال الإشعارات والتطبيق مغلق
 messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  
   const notificationTitle = payload.notification.title || 'إشعار جديد';
   const notificationOptions = {
-    body: payload.notification.body || 'لديك رسالة جديدة في التطبيق',
+    body: payload.notification.body || 'لديك تنبيه في التطبيق',
     icon: payload.notification.icon || 'https://i.ibb.co/ch2FcQwj/IMG-4621.jpg',
-    badge: 'https://i.ibb.co/b3bJc03/4041155-2.png', // أيقونة صغيرة بيضاء (يُفضل أن تكون شفافة)
+    badge: 'https://i.ibb.co/b3bJc03/4041155-2.png',
     vibrate: [200, 100, 200]
   };
 
