@@ -192,17 +192,21 @@
 
     </div> <!-- نهاية dashboard-layout -->
 
-    <!-- Cropper Modal (نافذة قص الصورة) -->
+
+
     <div id="cropper-modal">
-        <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-main);">تعديل الصورة الشخصية</h3>
+        <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-main); font-weight: 900;">تعديل الصورة الشخصية</h3>
         <div class="cropper-container">
             <img id="image-to-crop" src="">
         </div>
-        <div style="display: flex; gap: 15px; margin-top: 20px;">
-            <button id="crop-save-btn" class="btn-primary" style="padding: 10px 30px;">حفظ الصورة</button>
-            <button id="crop-cancel-btn" class="btn-primary" style="padding: 10px 30px; background: transparent; border-color: #ff4d4d; color: #ff4d4d; box-shadow: none;">إلغاء</button>
+        
+
+        <div class="cropper-actions">
+            <button id="crop-save-btn" class="btn-primary">حفظ الصورة</button>
+            <button id="crop-cancel-btn" class="btn-primary" style="background: transparent; border-color: #ff4d4d; color: #ff4d4d; box-shadow: none;">إلغاء</button>
         </div>
     </div>
+
 
     <!-- استدعاء الخط الرياضي الفخم -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
