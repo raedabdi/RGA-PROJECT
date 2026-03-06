@@ -4120,21 +4120,8 @@ document.addEventListener('click', function(event) {
 
 
 // ==========================================
-// 👥 نظام مجتمع الأبطال (البحث، الإضافة، الدردشة)
+// 👥 نظام مجتمع الأبطال (البحث، الإضافة، المتصدرين)
 // ==========================================
-
-// ==========================================
-// 👥 نظام مجتمع الأبطال (البحث، الإضافة، الدردشة) - النسخة النهائية
-// ==========================================
-
-// ==========================================
-// 👥 نظام مجتمع الأبطال (البحث، الإضافة، الأصدقاء)
-// ==========================================
-
-// ==========================================
-// 👥 نظام مجتمع الأبطال (مترجم)
-// ==========================================
-
 function openFriendsCenter() {
     if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('collapsed');
     const mainContent = document.getElementById('main-content-area');
@@ -4155,57 +4142,26 @@ function openFriendsCenter() {
         </header>
         
         <section class="performance-container" style="animation: fadeIn 0.5s;">
-            <div class="performance-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px;">
-                <button id="tab-btn-search" class="perf-tab-btn active-tab" onclick="switchFriendsTab('search')">${t.search_id}</button>
-                <button id="tab-btn-myfriends" class="perf-tab-btn" onclick="switchFriendsTab('myfriends')">${t.my_friends}</button>
+            <!-- الأزرار العلوية -->
+            <div class="performance-tabs" style="display: flex; gap: 5px; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px; overflow-x: auto;">
+                
+                <!-- زر الأصدقاء هو الأساسي والمفعل (active-tab) -->
+                <button id="tab-btn-myfriends" class="perf-tab-btn active-tab" onclick="switchFriendsTab('myfriends')">${t.my_friends}</button>
+                
+                <!-- زر لوحة المتصدرين -->
+                <button id="tab-btn-leaderboard" class="perf-tab-btn" onclick="switchFriendsTab('leaderboard')">${t.leaderboard ? t.leaderboard.replace(' ', '') : 'المتصدرين'}</button>
+                
+                <!-- زر البحث -->
+                <button id="tab-btn-search" class="perf-tab-btn" onclick="switchFriendsTab('search')">${t.search_id}</button>
             </div>
 
-            <div id="friends-tab-search" class="perf-tab-content" style="display: block;">
-                <div class="search-bar-container">
-                    <input type="text" id="friend-search-input" class="search-input" placeholder="${t.search_placeholder}" autocomplete="off">
-                    <button class="btn-primary" onclick="searchPlayerByID()" style="padding: 12px 25px;"><i class="fa-solid fa-magnifying-glass"></i> ${t.search_btn}</button>
-                </div>
-                <div id="search-result-container">
-                    <div class="empty-notif"><i class="fa-solid fa-id-card"></i><p>${t.enter_id_msg}</p></div>
-                </div>
-            </div>
-
-            <div id="friends-tab-myfriends" class="perf-tab-content" style="display: none;">
+            <!-- 1. تبويب الأصدقاء (يظهر أولاً display: block) -->
+            <div id="friends-tab-myfriends" class="perf-tab-content" style="display: block;">
                 <div id="my-friends-list"></div>
             </div>
-        </section>
-    `;
-    document.getElementById('back-to-dash-btn').onclick = backToDashboard;
-    renderMyFriends();
-}
 
-function openFriendsCenter() {
-    if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('collapsed');
-    const mainContent = document.getElementById('main-content-area');
-    if (!mainContent) return;
-
-    if (!mainContent.dataset.originalContent) {
-        mainContent.dataset.originalContent = mainContent.innerHTML;
-    }
-
-    const t = translations[currentLang || 'ar'];
-
-    mainContent.innerHTML = `
-        <header class="top-bar" style="margin-bottom: 20px;">
-            <div class="header-row">
-                <button id="back-to-dash-btn" class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem;">${t.back}</button>
-                <h1 style="margin: 0 15px;">${t.friends_center}</h1>
-            </div>
-        </header>
-        
-        <section class="performance-container" style="animation: fadeIn 0.5s;">
-            <div class="performance-tabs" style="display: flex; gap: 5px; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px; overflow-x: auto;">
-                <button id="tab-btn-leaderboard" class="perf-tab-btn active-tab" onclick="switchFriendsTab('leaderboard')">${t.leaderboard ? t.leaderboard.replace(' ', '') : 'المتصدرين'}</button>
-                <button id="tab-btn-search" class="perf-tab-btn" onclick="switchFriendsTab('search')">${t.search_id}</button>
-                <button id="tab-btn-myfriends" class="perf-tab-btn" onclick="switchFriendsTab('myfriends')">${t.my_friends}</button>
-            </div>
-
-            <div id="friends-tab-leaderboard" class="perf-tab-content" style="display: block;">
+            <!-- 2. تبويب لوحة المتصدرين (مخفي بالبداية display: none) -->
+            <div id="friends-tab-leaderboard" class="perf-tab-content" style="display: none;">
                 <div id="leaderboard-list" style="display: flex; flex-direction: column; gap: 15px;">
                     <div style="text-align:center; padding: 40px;">
                         <i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--primary-color);"></i>
@@ -4213,6 +4169,7 @@ function openFriendsCenter() {
                 </div>
             </div>
 
+            <!-- 3. تبويب البحث (مخفي بالبداية) -->
             <div id="friends-tab-search" class="perf-tab-content" style="display: none;">
                 <div class="search-bar-container">
                     <input type="text" id="friend-search-input" class="search-input" placeholder="${t.search_placeholder}" autocomplete="off">
@@ -4223,15 +4180,18 @@ function openFriendsCenter() {
                 </div>
             </div>
 
-            <div id="friends-tab-myfriends" class="perf-tab-content" style="display: none;">
-                <div id="my-friends-list"></div>
-            </div>
         </section>
     `;
+    
     document.getElementById('back-to-dash-btn').onclick = backToDashboard;
+    
+    // استدعاء دالة رسم الأصدقاء مباشرة لأنها الشاشة الافتراضية
     renderMyFriends();
-    loadLeaderboardData(); // استدعاء بيانات المتصدرين فوراً
+    
+    // استدعاء دالة المتصدرين في الخلفية لتكون جاهزة عند الكبس عليها بدون تأخير
+    loadLeaderboardData(); 
 }
+
 
 
 async function searchPlayerByID() {
