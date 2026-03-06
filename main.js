@@ -5929,7 +5929,7 @@ window.closeLegalModal = function() {
 };
 
 
-// كود طلب الإشعارات مع نظام كشف الأعطال (للموبايل)
+// كود طلب الإشعارات مع نظام كشف الأعطال والتأكد من نشاط الـ SW
 async function requestNotificationPermission() {
     if (!messaging) {
         alert("❌ جهازك أو متصفحك لا يدعم الإشعارات.");
@@ -5944,7 +5944,10 @@ async function requestNotificationPermission() {
             alert("خطوة 2: المتصفح وافق! جاري تسجيل ملف الخلفية (SW)...");
             const registration = await navigator.serviceWorker.register('/sw.js');
             
-            alert("خطوة 3: جاري الاتصال بسيرفر جوجل لتوليد التوكن (قد يأخذ ثواني)...");
+            // 🔥 هذا السطر السحري الجديد! ننتظر حتى يصبح الملف "نشطاً" (Active) قبل طلب التوكن
+            await navigator.serviceWorker.ready;
+            
+            alert("خطوة 3: ملف الخلفية نشط الآن! جاري الاتصال بسيرفر جوجل لتوليد التوكن...");
             const token = await messaging.getToken({ 
                 vapidKey: 'BDskkDNXkSMGBNlDiNpCNGdAMnoBbglgvzsuBGEe6t4syoS-k97sJOKbIrPYK_vUDkL6tv8d34Bj_nPm-G_cTJM', 
                 serviceWorkerRegistration: registration 
@@ -5966,8 +5969,8 @@ async function requestNotificationPermission() {
             alert("⚠️ لقد تم رفض إذن الإشعارات من إعدادات الهاتف أو المتصفح.");
         }
     } catch (error) {
-        // هذا السطر سيكشف لنا السر إذا كان هناك خطأ برمجي أو مشكلة في المفاتيح!
         alert("🚨 توقفت العملية بسبب خطأ: " + error.message);
         console.error('تفاصيل الخطأ: ', error);
     }
 }
+
