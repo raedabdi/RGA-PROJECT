@@ -2067,13 +2067,78 @@ html, body {
 }
 
 
+/* ==========================================
+   📸 نظام قص الصورة الاحترافي (Instagram Style)
+   ========================================== */
 
+/* 1. النافذة السوداء التي تغطي الشاشة (Overlay) */
+#cropper-modal {
+    display: none; /* مخفية بشكل افتراضي */
+    position: fixed; /* تثبيت فوق الشاشة */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 20, 41, 0.98); /* لون أغمق ليكون أوضح */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px); /* لدعم سفاري */
+    z-index: 999999 !important; /* فوق الشريط السفلي وكل شيء آخر */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom);
+}
 
+/* 2. عنوان النافذة */
+#cropper-modal h3 {
+    color: white;
+    margin-bottom: 20px;
+    font-family: var(--font-main);
+    font-weight: 900;
+    text-align: center;
+}
 
-/* جعل إطار القص دائري تماماً مع توهج نيون فخم */
+/* 3. حاوية الصورة أثناء القص */
+.cropper-container {
+    width: 90%;
+    max-width: 400px; /* لا تجعلها تأخذ الشاشة كلها في الكمبيوتر */
+    height: 55vh; /* أخذنا مساحة ممتازة من الشاشة للموبايل */
+    margin-bottom: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 242, 167, 0.2);
+    background: transparent !important;
+}
+
+#image-to-crop {
+    max-width: 100%;
+    display: block;
+}
+
+/* 4. تنسيق أزرار الحفظ والإلغاء لتبدو فخمة ومناسبة للموبايل */
+.cropper-actions {
+    display: flex;
+    flex-direction: row; /* ترتيبها جنب بعض */
+    gap: 15px;
+    width: 90%;
+    max-width: 400px;
+    justify-content: center;
+}
+
+.cropper-actions button {
+    flex: 1; /* جعل الزرين بنفس الحجم تماماً */
+    padding: 12px !important;
+    font-size: 1rem !important;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-main);
+}
+
+/* 5. جعل إطار القص دائري تماماً مع توهج نيون فخم */
 .cropper-view-box {
     border-radius: 50% !important;
-    outline: 3px solid var(--primary-color) !important; /* لون النيون الأخضر */
+    outline: 3px solid var(--primary-color) !important;
     box-shadow: 0 0 25px rgba(0, 242, 167, 0.5), inset 0 0 15px rgba(0, 0, 0, 0.5) !important;
 }
 
@@ -2081,7 +2146,7 @@ html, body {
     border-radius: 50% !important;
 }
 
-/* إخفاء كل الخطوط والمربعات والنقاط المزعجة (تنظيف الشاشة) */
+/* 6. إخفاء كل الخطوط والمربعات والنقاط المزعجة (تنظيف الشاشة) */
 .cropper-dashed,
 .cropper-line,
 .cropper-point,
@@ -2090,18 +2155,6 @@ html, body {
     display: none !important;
 }
 
-/* تعتيم الخلفية حول الدائرة ليكون التركيز على الوجه فقط */
-.cropper-modal {
-    background-color: rgba(10, 20, 41, 0.85) !important;
-    backdrop-filter: blur(5px);
-}
-
-/* تكبير مساحة العمل لتكون مريحة للأصابع */
-.cropper-container {
-    width: 100%;
-    height: 55vh; /* أخذنا مساحة ممتازة من الشاشة */
-    background: transparent !important;
-}
 
 
 
