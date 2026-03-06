@@ -2066,7 +2066,7 @@ html, body {
     box-shadow: 0 0 10px var(--primary-color);
 }
 
-/* Cropper Modal */
+/* Cropper Modal - الإصلاح الذهبي للطبقات 🌟 */
 #cropper-modal {
     display: none;
     position: fixed;
@@ -2074,17 +2074,23 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
+    background: rgba(10, 20, 41, 0.98); /* لون أغمق ليكون أوضح */
+    backdrop-filter: blur(15px);
+    z-index: 999999 !important; /* هذا الرقم الخيالي سيجبره على الظهور فوق الشريط السفلي وكل شيء آخر */
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom); /* لدعم شاشات الآيفون الجديدة */
 }
 
+/* حاوية الصورة أثناء القص */
 .cropper-container {
     width: 90%;
-    max-height: 70vh;
-    margin-bottom: 20px;
+    max-height: 50vh; /* تصغير الارتفاع قليلاً لترك مساحة واسعة للأزرار */
+    margin-bottom: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 242, 167, 0.2);
 }
 
 #image-to-crop {
@@ -2092,10 +2098,19 @@ html, body {
     display: block;
 }
 
-/* CropperJS library overrides */
-.cropper-view-box,
-.cropper-face {
-    border-radius: 50%;
+/* تنسيق أزرار الحفظ والإلغاء لتبدو فخمة ومناسبة للموبايل */
+.cropper-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    width: 90%; /* أخذ مساحة جيدة لسهولة الكبس */
+    max-width: 350px;
+}
+
+.cropper-actions button {
+    flex: 1; /* جعل الزرين بنفس الحجم */
+    padding: 15px !important;
+    font-size: 1.1rem !important;
 }
 
 
