@@ -4260,6 +4260,7 @@ async function searchPlayerByID() {
     }
 }
 
+// دالة عرض الأصدقاء (النسخة الحية Real-time المحدثة)
 async function renderMyFriends() {
     const list = document.getElementById('my-friends-list');
     if (!list) return;
@@ -4272,20 +4273,8 @@ async function renderMyFriends() {
     if (!currentUser) return;
 
     try {
-        // 🔴 السر هون: بنجيب قائمة الأصدقاء من الفايربيس مباشرة!
         const doc = await db.collection('users').doc(currentUser.uid).get();
-        let myFriends = [];
-        
-        if (doc.exists && doc.data().myFriendsList) {
-            myFriends = doc.data().myFriendsList;
-            localStorage.setItem('myFriends', JSON.stringify(myFriends)); // مزامنة مع اللوكال
-        } else {
-            // ترحيل البيانات القديمة إذا كانت موجودة باللوكال بس مش بالفايربيس
-            myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
-            if (myFriends.length > 0) {
-                await db.collection('users').doc(currentUser.uid).update({ myFriendsList: myFriends });
-            }
-        }
+        let myFriends = doc.data()?.myFriendsList || [];
 
         if (myFriends.length === 0) {
             list.innerHTML = `
@@ -4297,34 +4286,55 @@ async function renderMyFriends() {
             return;
         }
 
-        list.innerHTML = myFriends.map(f => `
-            <div class="friend-card" style="animation: fadeIn 0.4s;">
-                <div class="friend-info" style="cursor: pointer; transition: 0.3s;" onclick="viewPlayerProfile('${f.id}')">
-                    <img src="${f.img}">
-                    <div>
-                        <h4>${f.name}</h4>
-                        <p>Level ${f.level} 🔥</p>
-                    </div>
-                </div>
-                <div class="friend-actions">
-                    <button class="chat-action-btn" onclick="openChat('${f.id}', '${f.name}', '${f.img}')">
-                        <i class="fa-solid fa-message"></i> ${t.chat_btn}
-                    </button>
-                    <button class="delete-friend-btn" onclick="deleteFriend('${f.name}')">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        // 🔥 السحر هنا: جلب أحدث صورة واسم ومستوى لكل صديق من الداتا بيس مباشرة!
+        let friendsHTML = '';
+        
+        // نستخدم Promise.all عشان نجيب بيانات كل الأصدقاء بنفس الوقت (أسرع بكثير)
+        const friendsDataPromises = myFriends.map(async (friend) => {
+            try {
+                // نجيب الداتا الطازجة تبعت هاد الصديق
+                const friendDoc = await db.collection('users').doc(friend.id).get();
+                if (friendDoc.exists) {
+                    const freshData = friendDoc.data();
+                    const freshName = freshData.firstName ? `${freshData.firstName} ${freshData.lastName}` : friend.name;
+                    const freshImg = freshData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
+                    const freshLevel = freshData.rank || 1;
+                    
+                    return `
+                        <div class="friend-card" style="animation: fadeIn 0.4s;">
+                            <div class="friend-info" style="cursor: pointer; transition: 0.3s;" onclick="viewPlayerProfile('${friend.id}')">
+                                <img src="${freshImg}">
+                                <div>
+                                    <h4>${freshName}</h4>
+                                    <p>Level ${freshLevel} 🔥</p>
+                                </div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="chat-action-btn" onclick="openChat('${friend.id}', '${freshName}', '${freshImg}')">
+                                    <i class="fa-solid fa-message"></i> ${t.chat_btn}
+                                </button>
+                                <button class="delete-friend-btn" onclick="deleteFriend('${friend.id}')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) { console.error("Error fetching friend data", e); }
+            return '';
+        });
+
+        // استنّي كل الداتا تيجي، وبعدين اعرضها
+        const friendsResults = await Promise.all(friendsDataPromises);
+        friendsHTML = friendsResults.join('');
+        
+        list.innerHTML = friendsHTML;
 
     } catch (error) {
         console.error("خطأ في جلب الأصدقاء:", error);
         list.innerHTML = `<p style="text-align:center; color:#ff4d4d;">حدث خطأ في تحميل الأصدقاء</p>`;
     }
 }
-
-
-
 
 async function viewPlayerProfile(targetUid) {
     const t = translations[currentLang || 'ar'];
@@ -4674,26 +4684,31 @@ async function rejectFriendRequest(notifId) {
     const currentUser = auth.currentUser; if (!currentUser) return;
     try { await db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId).delete(); } catch (error) { console.error(error); }
 }
-async function deleteFriend(friendName) {
+async function deleteFriend(friendId) {
     const currentUser = auth.currentUser; if (!currentUser) return;
+    const t = translations[currentLang || 'ar'];
     
-    if(confirm(`Are you sure? `)) {
+    if(confirm(currentLang === 'en' ? "Remove this hero from your friends?" : "متأكد إنك بدك تحذف هالبطل من أصدقائك؟")) {
         try {
-            let myFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
-            myFriends = myFriends.filter(f => f.name !== friendName);
+            // سحب قائمة الأصدقاء من الداتا بيس
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            let myFriends = doc.data()?.myFriendsList || [];
             
-            // 1. تحديث اللوكال ستورج
-            localStorage.setItem('myFriends', JSON.stringify(myFriends));
+            // تصفية القائمة (حذف اللي الآي دي تبعه بيطابق)
+            myFriends = myFriends.filter(f => f.id !== friendId);
             
-            // 2. 🔴 تحديث الفايربيس لإزالة الصديق رسمياً
+            // تحديث الداتا بيس
             await db.collection('users').doc(currentUser.uid).update({ 
                 myFriendsList: myFriends 
             });
             
+            // إعادة رسم الشاشة
             renderMyFriends();
+            showToast(currentLang === 'en' ? "Friend removed" : "تم حذف الصديق");
         } catch (error) { console.error(error); }
     }
 }
+
 
 
 // ==========================================
