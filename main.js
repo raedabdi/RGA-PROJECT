@@ -4817,20 +4817,42 @@ function closeChat() {
 }
 
 async function sendMessage() {
-    const currentUser = auth.currentUser; const input = document.getElementById('chat-input'); const msgText = input.value.trim();
+    const currentUser = auth.currentUser; 
+    const input = document.getElementById('chat-input'); 
+    const msgText = input.value.trim();
+    
     if (!msgText || !currentUser || !currentChatId) return;
     input.value = ''; 
-    const myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const myName = myData.firstName ? `${myData.firstName} ${myData.lastName}` : "User";
+    
     try {
+        // 1. جلب الصورة والاسم المحدثين مباشرة من السيرفر (لضمان أحدث صورة)
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        const userData = userDoc.data();
+        const myName = userData.firstName ? `${userData.firstName} ${userData.lastName}` : "User";
+        const myPhoto = userData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
+
+        // 2. إرسال الرسالة للدردشة
         await db.collection('chats').doc(currentChatId).collection('messages').add({
-            senderId: currentUser.uid, text: msgText, timestamp: firebase.firestore.FieldValue.serverTimestamp() 
+            senderId: currentUser.uid, 
+            text: msgText, 
+            timestamp: firebase.firestore.FieldValue.serverTimestamp() 
         });
+        
+        // 3. إطلاق الإشعار للطرف الآخر (مع الصورة القصيرة الحقيقية)
         await db.collection('users').doc(currentTargetId).collection('notifications').add({
-            type: 'message', senderId: currentUser.uid, senderName: myName, senderPhoto: myData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png", text: msgText, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            type: 'message', 
+            senderId: currentUser.uid, 
+            senderName: myName, 
+            senderPhoto: myPhoto, // هنا السر!
+            text: msgText, 
+            status: 'pending', 
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-    } catch (error) { console.error(error); }
+    } catch (error) { 
+        console.error(error); 
+    }
 }
+
 
 function handleChatEnter(e) { if (e.key === 'Enter') sendMessage(); }
 
