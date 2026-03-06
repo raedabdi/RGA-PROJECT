@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+
+
+
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>RGA Fitness Pro - لوحة التحكم</title>
+
+    <!-- Unified Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CropperJS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    
+    <link rel="icon" href="https://i.ibb.co/b3bJc03/4041155-2.png" type="image/png">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+<body>
+    <!-- Background Animation Canvas -->
+    <canvas id="stardust-canvas"></canvas>
+
+    <div class="dashboard-layout">
+<nav id="sidebar" class="collapsed" style="display: none;"></nav>
+
+
+
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div id="main-content-area">
+                
+<header class="top-bar">
+    <div class="header-row" style="justify-content: space-between;">
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="top-nav-icon-btn" onclick="openStore()" title="متجر الأغلفة" style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(255, 215, 0, 0.15); border: 1px solid #FFD700; color: #FFD700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);">
+                <i class="fa-solid fa-store"></i>
+            </button>
+
+            <div class="hide-on-mobile"> 
+                <h1>لوحة التحكم</h1>
+                <p id="welcome-user">سعيد برؤيتك، كابتن</p>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="top-nav-icon-btn" onclick="startSpotlightTour()" title="جولة تعريفية" style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-lightbulb"></i>
+            </button>
+
+            <button class="top-nav-icon-btn" onclick="openCityMonster()" title="وحش المدينة" style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span class="hide-on-mobile">الخريطة</span>
+            </button>
+
+            <button class="top-nav-icon-btn" onclick="openAchievements()" title="غرفة الجوائز" style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-medal"></i>
+            </button>
+
+            <div class="notification-container">
+                <button id="notif-btn" class="notif-btn" onclick="toggleNotifications(event)" style="width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-badge" id="notif-badge" style="display: none;">0</span> 
+                </button>
+                
+                <div id="notif-dropdown" class="notif-dropdown">
+                    <div class="notif-header">
+                        <h4 data-translate="notifications">الإشعارات </h4>
+                        <span class="mark-read" data-translate="mark_read">تحديد كـ مقروء</span>
+                    </div>
+                    <div id="notif-body" class="notif-body"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</header>
+
+
+
+                
+
+
+
+
+                <section class="profile-section ">
+                    <div style="position: relative; display: inline-block;">
+                        <img id="user-photo" src="https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png" alt="User Avatar">
+                        <label for="upload-photo" class="upload-label" title="تغيير الصورة">📸</label>
+                        <input type="file" id="upload-photo" accept="image/*" style="display: none;">
+                    </div>
+                    <p id="user-id-display">معرف اللاعب: ...</p>
+                </section>
+
+                <!-- Stats Grid -->
+                <section class="stats-grid" style="animation-delay: 0.2s;">
+                    <!-- Level Card -->
+                    <div class="stat-card glass-card">
+                        <h3>المستوى</h3>
+                        <div class="value" id="user-rank">1</div>
+                        <p style="font-size: 0.8rem; opacity: 0.7;" data-translate="level_promo">استمر بالتمرين للترقية!</p>
+                    </div>
+
+                    <!-- XP Card -->
+                    <div class="stat-card glass-card">
+                        <h3>نقاط الخبرة</h3>
+                        <div class="value"><span id="user-xp">0</span> <span style="font-size: 1rem; opacity:0.7;">/ <span id="max-xp">1000</span></span></div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" id="xp-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Streak Card -->
+                    <div class="stat-card glass-card">
+                        <h3>سلسلة الدخول</h3>
+                        <div class="value" id="user-streak" style="color: #ff9f43;">🔥 1 يوم</div>
+                        <p style="font-size: 0.8rem; opacity: 0.7;" data-translate="streak_promo">سجل دخول يومياً لمضاعفة النقاط</p>
+                    </div>
+
+                    <div class="stat-card glass-card">
+                        <h3 data-translate="daily_tasks">مهام اليوم</h3>
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                            <button class="btn-primary" onclick="openWorkoutModal()" style="padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;" data-translate="log_workout">سجل تمرينك</button>
+                            <button class="btn-primary" onclick="logHealthyMeal()" style="padding: 12px; font-size: 0.95rem; background: rgba(76, 175, 80, 0.1); border-color: #4CAF50; color: #4CAF50; box-shadow: none; display: flex; align-items: center; justify-content: center; gap: 8px;" data-translate="log_meal">وجبة صحية</button>
+                        </div>
+                    </div>
+<div class="stat-card glass-card" style="border: 1px solid #ff9f43; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: space-between;" onclick="openGameSelection()">
+    <div>
+        <h3 style="color: #ff9f43; font-weight: 900; font-size: 1.2rem; margin-bottom: 5px;">
+            <i class="fa-solid fa-gamepad"></i> <span data-translate="challenges_title">التحديات</span>
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--slate);" data-translate="challenges_desc">العب، اجمع نقاط، ونافس الوحوش</p>
+    </div>
+    <i class="fa-solid fa-circle-play" style="font-size: 2.8rem; color: #ff9f43; opacity: 0.9;"></i>
+</div>
+
+
+
+
+                </section>
+
+            </div> <!-- نهاية main-content-area -->
+
+
+
+        </main> 
+
+
+
+<nav class="bottom-nav hide-on-desktop">
+    <a href="#" class="nav-item active" onclick="activateBottomNav(this); backToDashboard();">
+
+        <i class="fa-solid fa-house"></i>
+        <span data-translate="nav_home">الرئيسية</span>
+    </a>
+    
+    <a href="#" class="nav-item" onclick="activateBottomNav(this); openPerformanceCenter()">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span data-translate="nav_performance">الأداء</span>
+    </a>
+    
+    <div class="nav-item-center">
+        <button class="nav-fab" onclick="startLiveWorkout()">
+            <i class="fa-solid fa-bolt"></i>
+        </button>
+    </div>
+
+    <a href="#" class="nav-item" onclick="activateBottomNav(this); openFriendsCenter()">
+        <i class="fa-solid fa-user-group"></i>
+        <span data-translate="nav_community">مجتمع الأبطال</span>
+    </a>
+    
+    <a href="#" class="nav-item" onclick="activateBottomNav(this); openProfile()">
+        <i class="fa-solid fa-user"></i>
+        <span data-translate="nav_profile">بروفايل</span>
+    </a>
+</nav>
+
+
+
+    </div> <!-- نهاية dashboard-layout -->
+
+    <!-- Cropper Modal (نافذة قص الصورة) -->
+    <div id="cropper-modal">
+        <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-main);">تعديل الصورة الشخصية</h3>
+        <div class="cropper-container">
+            <img id="image-to-crop" src="">
+        </div>
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button id="crop-save-btn" class="btn-primary" style="padding: 10px 30px;">حفظ الصورة</button>
+            <button id="crop-cancel-btn" class="btn-primary" style="padding: 10px 30px; background: transparent; border-color: #ff4d4d; color: #ff4d4d; box-shadow: none;">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- استدعاء الخط الرياضي الفخم -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- ✨ نافذة اختيار الألعاب الفخمة (نسخة الموبايل المدمجة) ✨ -->
+    <div id="game-selection-modal" style="display: none; position: fixed; z-index: 25000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(10, 20, 41, 0.95); backdrop-filter: blur(15px); flex-direction: column; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box;">
+        
+        <h2 class="game-selection-title" data-translate="choose_challenge">اختر التحدي 🏆</h2>
+        <p class="game-selection-subtitle" data-translate="challenge_subtitle">ارتقِ بأدائك وحطم أرقامك القياسية!</p>
+        
+        <div class="game-cards-compact-container">
+            
+            <div class="game-choice-card-compact" onclick="closeGameSelection(); openGame();">
+                <div class="game-icon-pro">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14"/><path d="M18 5v14"/><path d="M2 15h4"/><path d="M2 9h4"/><path d="M18 15h4"/><path d="M18 9h4"/><path d="M6 12h12"/></svg>
+                </div>
+                <div class="game-card-content">
+                    <h3 data-translate="deadlift_title">ديدليفت</h3>
+                    <p data-translate="deadlift_desc">ارفع بسرعة واجمع النقاط</p>
+                </div>
+
+            </div>
+
+            <div class="game-choice-card-compact" onclick="closeGameSelection(); openSquatGame();">
+                <div class="game-icon-pro">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <div class="game-card-content">
+                    <h3 data-translate="squat_title">سكوات</h3>
+                    <p data-translate="squat_desc">توازن بدقة بالمنطقة الخضراء</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <button onclick="closeGameSelection()" class="close-game-selection-btn" data-translate="cancel_return">إلغاء والعودة</button>
+    </div>
+
+
+
+    <div id="game-modal" style="display: none; position: fixed; z-index: 20000; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,20,0.8)), url('https://i.ibb.co/LDQjfGBk/IMG-4236.png') no-repeat center center; background-size: cover; backdrop-filter: blur(15px); align-items: center; justify-content: center; flex-direction: column;">
+        <div class="game-stats-bar" style="display: flex; gap: 15px; margin-bottom: 30px; background: rgba(255, 255, 255, 0.1); padding: 15px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
+            <div class="stat-item" style="text-align: center;">
+                <span class="stat-label" style="font-size: 10px; color: #bbb; display: block;" data-translate="time">TIME</span>
+                <span id="game-timer-val" class="stat-value" style="font-size: 24px; font-weight: 900; color: #ff5252;">60s</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px; text-align: center;">
+                <span class="stat-label" style="font-size: 10px; color: #bbb; display: block;" data-translate="earned_xp">EARNED XP</span>
+                <span id="session-xp-val" class="stat-value" style="font-size: 24px; font-weight: 900; color: #4CAF50;">0</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px; text-align: center;">
+                <span class="stat-label" style="font-size: 10px; color: #bbb; display: block;" data-translate="best_combo">BEST COMBO</span>
+                <span id="best-combo-val" class="stat-value" style="font-size: 24px; font-weight: 900; color: #fff;">0</span>
+            </div>
+        </div>
+        <div class="game-container" id="shake-target" style="position: relative; width: 300px; height: 350px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 2px dashed rgba(255,255,255,0.1);">
+            <img id="deadlift-char" class="deadlift-img" src="" style="width: 250px; cursor: pointer; filter: drop-shadow(0 0 25px #00f2a7);" onmousedown="handleInteraction(event, 'start')" onmouseup="handleInteraction(event, 'end')" ontouchstart="handleInteraction(event, 'start')" ontouchend="handleInteraction(event, 'end')">
+        </div>
+        <button class="exit-btn-game" onclick="closeGame()" style="margin-top: 40px; padding: 12px 35px; background: rgba(255,82,82,0.1); color: #ff5252; border: 1px solid #ff5252; border-radius: 50px; font-weight: bold; cursor: pointer;" data-translate="exit_session">EXIT SESSION</button>
+    </div>
+
+    <div id="squat-game-modal" style="display: none; position: fixed; z-index: 20000; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,20,0.8)), url('https://i.ibb.co/LDQjfGBk/IMG-4236.png') no-repeat center center; background-size: cover; backdrop-filter: blur(15px); align-items: center; justify-content: center; flex-direction: column;" onclick="handleSquatClick()">
+        <div class="game-stats-bar" style="display: flex; gap: 15px; margin-bottom: 30px; background: rgba(255, 255, 255, 0.1); padding: 15px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
+            <div class="stat-item" style="text-align: center;">
+                <span class="stat-label" style="font-size: 10px; color: #bbb; display: block;" data-translate="mistakes">MISTAKES</span>
+                <span id="squat-mistakes-val" class="stat-value" style="font-size: 24px; font-weight: 900; color: #fff;">0 / 5</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left:15px; text-align: center;">
+                <span class="stat-label" style="font-size: 10px; color: #bbb; display: block;" data-translate="earned_xp">EARNED XP</span>
+                <span id="squat-session-xp-val" class="stat-value" style="font-size: 24px; font-weight: 900; color: #4CAF50;">0</span>
+            </div>
+        </div>
+        <div class="game-container" id="squat-game-container" style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px; width: 300px; height: 350px; position: relative;">
+            <div id="squat-char-container" style="width: 280px; height: 280px; position: absolute; left: 10px;">
+                <img id="squat-char-before" src="https://i.ibb.co/JWJjKV1B/IMG-4306.png" style="width: 100%; position: absolute; bottom: 0; transition: all 0.2s; pointer-events: none; filter: drop-shadow(0 0 20px #00f2a7);">
+                <img id="squat-char-after" src="https://i.ibb.co/h1BjbXB1/IMG-4305.png" style="width: 100%; position: absolute; bottom: 0; opacity: 0; transition: all 0.2s; pointer-events: none; filter: drop-shadow(0 0 20px #00f2a7);">
+            </div>
+            <div id="squat-bar-container" style="position: absolute; left: -20px; width: 40px; height: 85%; background: rgba(255, 255, 255, 0.1); border-radius: 15px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); overflow: hidden;">
+                <div id="squat-green-zone" style="position: absolute; width: 100%; height: 25%; background: rgba(76, 175, 80, 0.5); top: 37.5%; border-top: 2px solid white; border-bottom: 2px solid white;"></div>
+                <div id="squat-line" style="position: absolute; width: 100%; height: 4px; background: white; top: 0; box-shadow: 0 0 10px white;"></div>
+            </div>
+        </div>
+        <button class="exit-btn-game" onclick="closeSquatGame()" style="margin-top: 40px; padding: 12px 35px; background: rgba(255,82,82,0.1); color: #ff5252; border: 1px solid #ff5252; border-radius: 50px; font-weight: bold; cursor: pointer;" data-translate="exit_challenge">EXIT CHALLENGE</button>
+    </div>
+
+
+
+
+
+
+
+<div id="workout-modal" class="modal-overlay" style="z-index: 25000;">
+    <div class="modal-content" style="max-width: 500px; padding: 2rem; position: relative;">
+        <button class="close-modal-btn" onclick="closeWorkoutModal()">&times;</button>
+        
+        <h2 style="color: white; margin-bottom: 20px; text-align: center; font-weight: 900;" data-translate="workout_title">تسجيل التمرين</h2>
+
+        <datalist id="smart-exercises">
+            <option value="ديدليفت (Deadlift)"></option>
+            <option value="سكوات (Squat)"></option>
+            <option value="بنش برس (Bench Press)"></option>
+            <option value="تجميع دمبلز صدر (Dumbbell Press)"></option>
+            <option value="سحب ظهر (Lat Pulldown)"></option>
+            <option value="تجديف ظهر (Barbell Row)"></option>
+            <option value="ضغط أكتاف (Shoulder Press)"></option>
+            <option value="رفرفة جانبي (Lateral Raise)"></option>
+            <option value="بايسبس بار (Barbell Curl)"></option>
+            <option value="ترايسبس حبل (Triceps Pushdown)"></option>
+            <option value="ليج بريس (Leg Press)"></option>
+        </datalist>
+
+        
+        <div id="workout-step-1">
+            <p style="text-align: center; margin-bottom: 20px; color: var(--slate);" data-translate="select_split">اختر نظام تمرينك اليوم:</p>
+            <div class="workout-types-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                <button class="workout-type-btn" onclick="selectWorkoutSplit('bro')" data-translate="split_bro">عضلة مفردة (Bro Split)</button>
+                <button class="workout-type-btn" onclick="selectWorkoutSplit('ppl')" data-translate="split_ppl">دفع / سحب / أرجل (PPL)</button>
+                <button class="workout-type-btn" onclick="selectWorkoutSplit('full')" data-translate="split_full">شامل (Full Body)</button>
+            </div>
+        </div>
+
+        <div id="workout-step-2" style="display: none;">
+            <button onclick="backToStep1()" style="background:none; border:none; color:var(--slate); margin-bottom:15px; cursor:pointer; font-family: var(--font-main); font-weight: bold; font-size: 0.9rem;" data-translate="back">رجوع</button>
+            <p style="text-align: center; margin-bottom: 20px; color: var(--slate);" data-translate="select_muscle">حدد العضلة المستهدفة:</p>
+            <div id="dynamic-muscle-grid" class="workout-types-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                </div>
+        </div>
+
+        <div id="workout-step-3" style="display: none;">
+            <button onclick="backToStep2()" style="background:none; border:none; color:var(--slate); margin-bottom:15px; cursor:pointer; font-family: var(--font-main); font-weight: bold; font-size: 0.9rem;" data-translate="back">رجوع</button>
+            
+            <h3 id="selected-workout-type" style="color: var(--primary-color); text-align: center; margin-bottom: 20px; font-weight: 900;"></h3>
+            
+
+<button id="template-btn" class="btn-primary" onclick="loadWorkoutTemplate()" style="width: 100%; background: rgba(0, 242, 167, 0.1); border: 1px dashed var(--primary-color); color: var(--primary-color); padding: 8px; margin-bottom: 15px; font-size: 0.85rem; display: none;">
+     تعبئة قالب جاهز 
+</button>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 35px; gap: 8px; margin-bottom: 10px; color: var(--slate); font-size: 0.75rem; text-align: center; font-weight: bold;">
+                <span data-translate="ex_name" style="text-align: right;">التمرين</span>
+                <span data-translate="ex_reps">العدات</span>
+                <span data-translate="ex_weight">الوزن</span>
+                <span></span>
+            </div>
+
+            <div id="exercises-container" style="max-height: 250px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; margin-bottom: 15px;">
+                </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-primary" onclick="addExerciseRow()" style="width: 100%;" data-translate="add_exercise">إضافة تمرين آخر</button>
+                <button class="btn-primary" onclick="saveWorkout()" data-translate="save_workout">حفظ وإنهاء (+50 XP)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    <div id="spotlight-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99998; pointer-events: auto;">
+        <div id="spotlight-highlight" style="position: absolute; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(10, 20, 41, 0.85); transition: all 0.4s ease-in-out;"></div>
+    </div>
+    
+    <div id="spotlight-tooltip" style="display: none; position: fixed; z-index: 99999; width: 320px; max-width: 90vw; background: var(--light-navy); border: 1px solid var(--primary-color); border-radius: 15px; padding: 20px; color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); transition: all 0.4s ease-in-out;">
+        <h3 id="spotlight-title" style="color: var(--primary-color); margin-bottom: 10px; font-weight: 900;"></h3>
+        <p id="spotlight-text" style="color: var(--slate); font-size: 0.9rem; margin-bottom: 15px; line-height: 1.6;"></p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="endSpotlightTour()" style="background: transparent; border: none; color: var(--slate); cursor: pointer; font-weight: bold; padding: 5px;">تخطي</button>
+            <button id="spotlight-next" class="btn-primary" style="padding: 6px 15px; font-size: 0.9rem;">التالي ❯</button>
+        </div>
+    </div>
+
+<button class="live-workout-fab" onclick="startLiveWorkout()">
+    <i class="fa-solid fa-bolt"></i> <span data-translate="live_workout_btn">تمرين لايف</span>
+</button>
+
+<div id="live-workout-overlay">
+    <div class="live-header">
+        <button class="close-live-btn" onclick="confirmExitLive()">&times;</button>
+        <h2 style="color: var(--primary-color); margin: 0; font-weight: 900;" data-translate="live_focus_title">تمرين لايف ⚡</h2>
+        <div id="live-timer" style="color: var(--slate); font-weight: bold;">00:00</div>
+    </div>
+
+    <div class="live-content">
+        <div class="input-group">
+            <input type="text" id="live-ex-name" list="smart-exercises" class="input-field live-input" placeholder="اسم التمرين" spellcheck="false">
+        </div>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <input type="number" id="live-ex-weight" class="input-field live-input" placeholder="الوزن (kg)" inputmode="decimal">
+            <input type="number" id="live-ex-reps" class="input-field live-input" placeholder="العدات" inputmode="numeric">
+        </div>
+        <button class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; margin-bottom: 20px;" onclick="logLiveSet()">
+            <i class="fa-solid fa-plus"></i> <span data-translate="log_set">تسجيل الجولة</span>
+        </button>
+
+        <div id="live-sets-log" style="max-height: 150px; overflow-y: auto; margin-bottom: 20px;">
+            </div>
+    </div>
+
+    <button class="btn-primary" style="background: transparent; border-color: #ff4d4d; color: #ff4d4d; margin-top: auto;" onclick="finishLiveWorkout()">
+        <i class="fa-solid fa-flag-checkered"></i> <span data-translate="finish_live">إنهاء التمرين</span>
+    </button>
+
+    <div id="rest-timer-overlay" style="display: none;">
+        <h3 style="color: var(--slate); margin-bottom: 10px;" data-translate="rest_time">وقت الراحة</h3>
+        <div id="rest-countdown" style="font-size: 5rem; font-weight: 900; color: var(--primary-color); text-shadow: 0 0 20px rgba(0,242,167,0.5);">90</div>
+        <button class="btn-primary" style="margin-top: 30px; background: rgba(255,255,255,0.1); border: none; color: white;" onclick="skipRest()">
+            <span data-translate="skip_rest">تخطي الراحة </span>
+        </button>
+    </div>
+</div>
+
+<input type="file" id="hidden-proof-upload" accept="video/*" style="display: none;">
+
+    <div id="live-summary-overlay">
+        <div class="summary-card">
+<h2 style="color: var(--primary-color); font-weight: 900; margin-bottom: 5px;" data-translate="live_summary_title">تمرين أسطوري! </h2>
+
+<p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 25px;" data-translate="live_summary_subtitle">عاش يا وحش، النتيجة بتحكي عنك</p>
+
+            
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <span id="sum-time">00:00</span>
+<p data-translate="live_duration">المدة</p>
+
+                </div>
+                <div class="stat-box">
+                    <span id="sum-volume">0</span>
+<p data-translate="live_volume">الحجم (kg)</p>
+
+                </div>
+                <div class="stat-box">
+                    <span id="sum-sets">0</span>
+<p data-translate="live_sets">الجولات</p>
+
+                </div>
+            </div>
+
+            <div class="xp-reward-box">+50 XP</div>
+            
+<button class="btn-primary" style="width: 100%; padding: 12px; font-size: 1.1rem;" onclick="closeLiveSummary()" data-translate="live_continue">استمرار ❯</button>
+
+        </div>
+    </div>
+
+
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+
+
+
+
+
+    <!-- CropperJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+    <!-- Unified JavaScript File (ملف الجافاسكربت الموحد) -->
+    <script src="main.js"></script>
+</body>
+</html>
