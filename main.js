@@ -1710,26 +1710,59 @@ preloadHeavyCovers();
         });
     }
 
-    const cropSaveBtn = document.getElementById('crop-save-btn');
-    if (cropSaveBtn) {
-        cropSaveBtn.onclick = async () => {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
-            const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-            try {
+// الكود الجديد والمطور لحفظ صورة البروفايل (رفعها لـ Firebase Storage)
+const cropSaveBtn = document.getElementById('crop-save-btn');
+if (cropSaveBtn) {
+    cropSaveBtn.onclick = async () => {
+        if (!cropper) return;
+        
+        // 1. إظهار حالة التحميل (لأن الرفع يحتاج ثانية أو اثنتين)
+        const originalText = cropSaveBtn.innerText;
+        cropSaveBtn.innerText = currentLang === 'en' ? 'Uploading...' : 'جاري الرفع...';
+        cropSaveBtn.disabled = true;
+
+        try {
+            // الحصول على الصورة كـ Blob (ملف حقيقي) بدل Base64 النصي
+            cropper.getCroppedCanvas({ width: 300, height: 300 }).toBlob(async (blob) => {
+                if (!blob) throw new Error("فشل توليد الصورة");
+
                 const user = auth.currentUser;
-                await db.collection('users').doc(user.uid).update({ photoURL: base64Image });
-                document.getElementById('user-photo').src = base64Image;
+                // 2. إنشاء مسار للصورة في التخزين السحابي باسم اللاعب
+                const storageRef = storage.ref(`profile_pictures/${user.uid}.jpg`);
+                
+                // 3. رفع الملف للسيرفر
+                await storageRef.put(blob);
+                
+                // 4. الحصول على الرابط القصير (URL)
+                const downloadURL = await storageRef.getDownloadURL();
+
+                // 5. حفظ الرابط القصير في الداتا بيس
+                await db.collection('users').doc(user.uid).update({ photoURL: downloadURL });
+                
+                // 6. تحديث واجهة المستخدم فوراً
+                document.getElementById('user-photo').src = downloadURL;
                 const saved = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                saved.photoURL = base64Image;
+                saved.photoURL = downloadURL;
                 localStorage.setItem('currentUser', JSON.stringify(saved));
+                
                 cropperModal.style.display = 'none';
-                showToast("✅ تم تحديث الصورة بنجاح!");
-            } catch (err) {
-                showToast("⚠️ فشل حفظ الصورة");
-            }
-        };
-    }
+                showToast(currentLang === 'en' ? " Photo updated!" : " تم تحديث الصورة بنجاح");
+                
+                // إرجاع الزر لوضعه الطبيعي
+                cropSaveBtn.innerText = originalText;
+                cropSaveBtn.disabled = false;
+                if (cropper) cropper.destroy();
+            }, 'image/jpeg', 0.8);
+            
+        } catch (err) {
+            console.error("خطأ في رفع الصورة:", err);
+            showToast(currentLang === 'en' ? "⚠️ Failed to save photo" : "⚠️ فشل حفظ الصورة");
+            cropSaveBtn.innerText = originalText;
+            cropSaveBtn.disabled = false;
+        }
+    };
+}
+
     
     const cropCancelBtn = document.getElementById('crop-cancel-btn');
     if (cropCancelBtn) {
