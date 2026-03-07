@@ -2831,19 +2831,19 @@ if (typeof addXP === "function") addXP(50, 'workout');
 // ==========================================
 window.addXP = async function(amount, actionType = 'game') {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+        console.error("❌ اللاعب غير مسجل دخول.");
+        return;
+    }
 
     try {
-        // 1. المناداة على الدالة الآمنة في السيرفر (هي من ستقوم بالفحص والإضافة)
+        // المناداة على الدالة في السيرفر
         const secureXPCall = firebase.functions().httpsCallable('secureAddXP');
-        
-        // نرسل نوع العملية والرقم (السيرفر سيقوم بفلترتها)
         const result = await secureXPCall({ actionType: actionType, amount: amount });
         
         const xpAddedByServer = result.data.xpAdded;
 
         if (xpAddedByServer > 0) {
-            // 2. تحديث الشاشة والـ LocalStorage فقط بناءً على ما وافق عليه السيرفر
             let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
             const oldLevel = savedData.rank || 1;
             
@@ -2855,7 +2855,6 @@ window.addXP = async function(amount, actionType = 'game') {
             
             if (typeof renderUI === "function") renderUI(savedData);
 
-            // تحديث إحصائيات الأوسمة (ضروري جداً لتعمل الأوسمة بشكل صحيح)
             if (typeof updateStat === "function") {
                 updateStat('xpTotal', savedData.xp, true);
                 if (savedData.rank > oldLevel) {
@@ -2863,7 +2862,6 @@ window.addXP = async function(amount, actionType = 'game') {
                 }
             }
 
-            // إشعار الترقية إذا ارتفع مستواه
             if (savedData.rank > oldLevel) {
                 setTimeout(() => {
                     const t = translations[currentLang || 'ar'];
@@ -2873,10 +2871,10 @@ window.addXP = async function(amount, actionType = 'game') {
         }
 
     } catch (error) {
-        console.error("تم رفض العملية أو هناك خطأ في الاتصال بالسيرفر:", error);
+        console.error("🛑 تم الرفض من السيرفر!");
+        console.error(error.message);
     }
 };
-
 
 
 // ==========================================
