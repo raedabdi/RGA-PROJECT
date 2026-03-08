@@ -1549,20 +1549,22 @@ const tabBtns = document.querySelectorAll('#auth-modal .tab-btn');
                 
                 // 2. إرسال إيميل التحقق فوراً
                 await userCredential.user.sendEmailVerification();
+
                 
-                // 3. حفظ بيانات المستخدم في قاعدة البيانات
-                const newShortID = generateShortID(); // 🔥 إنشاء المعرف فوراً
+                          // 3. حفظ بيانات المستخدم في قاعدة البيانات
+                const newShortID = generateShortID(); 
                 await db.collection('users').doc(userCredential.user.uid).set({
                     firstName,
                     lastName,
                     fullName: `${firstName} ${lastName}`,
                     email,
                     photoURL: defaultAvatar,
-                    shortID: newShortID, // 🔥 حفظ المعرف هنا
+                    shortID: newShortID, 
                     xp: 0,
                     maxXp: 1000,
                     rank: 1,
                     streak: 1,
+                    myFriendsList: [], // 🔥 الحل هنا: إنشاء المصفوفة فارغة لمنع التعليق
                     lastLoginDate: new Date().toISOString().split('T')[0],
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -1968,53 +1970,6 @@ function renderUI(data) {
 }
 
 
-async function loadLeaderboardData() {
-    const listDiv = document.getElementById('leaderboard-list');
-    if (!listDiv) return;
-    
-    try {
-        const snapshot = await db.collection('users').orderBy('xp', 'desc').limit(50).get();
-        listDiv.innerHTML = '';
-updateQuestProgress('leaderboard', 1); // ربط مهمة التجسس على المتصدرين
-
-        let rank = 0;
-        
-        snapshot.forEach((doc) => {
-            rank++;
-            const data = doc.data();
-            const rankEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `<b>#${rank}</b>`;
-            const userPhoto = data.photoURL || 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png';
-            
-            const row = document.createElement('div');
-            const borderSide = currentLang === 'ar' ? 'border-right' : 'border-left';
-            row.style.cssText = `display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; ${borderSide}: 4px solid ${rank <= 3 ? 'var(--primary-color)' : 'transparent'}; transition: 0.3s;`;
-
-            const userLevel = data.rank || Math.floor((data.xp || 0) / 500) + 1;
-            const lvlText = currentLang === 'en' ? 'Lvl' : 'مستوى';
-            
-            row.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 15px; cursor: pointer;" onclick="viewPlayerProfile('${doc.id}')">
-                    <span style="font-size: 1.2rem; min-width: 30px; text-align: center;">${rankEmoji}</span>
-                    <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-<span style="font-weight: 700; color: white;">${(data.firstName || 'Player').replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>
-                </div>
-                
-                <div style="text-align: right; direction: ltr; display: flex; flex-direction: column; align-items: flex-end;">
-                    <span style="color: var(--primary-color); font-weight: 900; font-size: 1.1rem; letter-spacing: 0.5px; direction: rtl;">${lvlText} ${userLevel}</span>
-                    <span style="color: var(--slate); font-size: 0.8rem; font-weight: 600; margin-top: -2px;">${data.xp || 0} XP</span>
-                </div>
-            `;
-            
-            // إضافة تأثير عند التمرير
-            row.onmouseover = () => row.style.backgroundColor = 'rgba(0, 242, 167, 0.05)';
-            row.onmouseout = () => row.style.backgroundColor = 'rgba(255,255,255,0.05)';
-
-            listDiv.appendChild(row);
-        });
-    } catch (err) {
-        listDiv.innerHTML = `<p style="text-align:center;">خطأ في تحميل بيانات المتصدرين</p>`;
-    }
-}
 
 function backToDashboard() {
     const mainContent = document.getElementById('main-content-area');
@@ -4385,21 +4340,23 @@ async function searchPlayerByID() {
     }
 }
 
-// دالة عرض الأصدقاء (النسخة الحية Real-time المحدثة)
+let friendsListener = null;
+
+// 1. دالة عرض الأصدقاء (لحظية - Real-time)
 async function renderMyFriends() {
     const list = document.getElementById('my-friends-list');
     if (!list) return;
     const t = translations[currentLang || 'ar'];
-    
-    // إظهار اللودينج لحد ما يجيب الأصدقاء من السيرفر
-    list.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--primary-color);"></i></div>`;
-    
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
-    try {
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        let myFriends = doc.data()?.myFriendsList || [];
+    list.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--primary-color);"></i></div>`;
+
+    if (friendsListener) friendsListener(); // تنظيف المستمع القديم
+
+    friendsListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
+        if (!doc.exists) return;
+        let myFriends = doc.data().myFriendsList || []; // إذا لم تكن موجودة، اعتبرها فارغة
 
         if (myFriends.length === 0) {
             list.innerHTML = `
@@ -4411,55 +4368,114 @@ async function renderMyFriends() {
             return;
         }
 
-        // 🔥 السحر هنا: جلب أحدث صورة واسم ومستوى لكل صديق من الداتا بيس مباشرة!
-        let friendsHTML = '';
-        
-        // نستخدم Promise.all عشان نجيب بيانات كل الأصدقاء بنفس الوقت (أسرع بكثير)
-        const friendsDataPromises = myFriends.map(async (friend) => {
-            try {
-                // نجيب الداتا الطازجة تبعت هاد الصديق
-                const friendDoc = await db.collection('users').doc(friend.id).get();
-                if (friendDoc.exists) {
-                    const freshData = friendDoc.data();
-                    const freshName = freshData.firstName ? `${freshData.firstName} ${freshData.lastName}` : friend.name;
-                    const freshImg = freshData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
-                    const freshLevel = freshData.rank || 1;
-                    
-                    return `
-                        <div class="friend-card" style="animation: fadeIn 0.4s;">
-                            <div class="friend-info" style="cursor: pointer; transition: 0.3s;" onclick="viewPlayerProfile('${friend.id}')">
-                                <img src="${freshImg}">
-                                <div>
-                                    <h4>${freshName}</h4>
-                                    <p>Level ${freshLevel} 🔥</p>
+        try {
+            const friendsDataPromises = myFriends.map(async (friend) => {
+                try {
+                    const friendDoc = await db.collection('users').doc(friend.id).get();
+                    if (friendDoc.exists) {
+                        const freshData = friendDoc.data();
+                        const freshName = freshData.firstName ? `${freshData.firstName} ${freshData.lastName}` : friend.name;
+                        const freshImg = freshData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
+                        const freshLevel = freshData.rank || 1;
+                        
+                        return `
+                            <div class="friend-card" style="animation: fadeIn 0.4s;">
+                                <div class="friend-info" style="cursor: pointer; transition: 0.3s;" onclick="viewPlayerProfile('${friend.id}')">
+                                    <img src="${freshImg}">
+                                    <div>
+                                        <h4>${freshName.replace(/</g, "&lt;")}</h4>
+                                        <p>Level ${freshLevel} 🔥</p>
+                                    </div>
+                                </div>
+                                <div class="friend-actions">
+                                    <button class="chat-action-btn" onclick="openChat('${friend.id}', '${freshName.replace(/</g, "&lt;")}', '${freshImg}')">
+                                        <i class="fa-solid fa-message"></i> ${t.chat_btn}
+                                    </button>
+                                    <button class="delete-friend-btn" onclick="deleteFriend('${friend.id}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="friend-actions">
-                                <button class="chat-action-btn" onclick="openChat('${friend.id}', '${freshName}', '${freshImg}')">
-                                    <i class="fa-solid fa-message"></i> ${t.chat_btn}
-                                </button>
-                                <button class="delete-friend-btn" onclick="deleteFriend('${friend.id}')">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            } catch (e) { console.error("Error fetching friend data", e); }
-            return '';
-        });
+                        `;
+                    }
+                } catch(e) { return ''; }
+                return '';
+            });
 
-        // استنّي كل الداتا تيجي، وبعدين اعرضها
-        const friendsResults = await Promise.all(friendsDataPromises);
-        friendsHTML = friendsResults.join('');
-        
-        list.innerHTML = friendsHTML;
+            const friendsResults = await Promise.all(friendsDataPromises);
+            list.innerHTML = friendsResults.join('');
 
+        } catch (error) {
+            list.innerHTML = `<p style="text-align:center; color:#ff4d4d;">حدث خطأ</p>`;
+        }
+    });
+}
+
+// 2. دالة قبول الصداقة (سريعة جداً)
+window.acceptFriendRequest = async function(notifId, senderId, senderName, senderPhoto) {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    try {
+        const notifElement = document.getElementById(notifId);
+        if (notifElement) notifElement.remove(); // إخفاء من الشاشة فوراً لسرعة الاستجابة
+
+        const acceptCall = firebase.functions().httpsCallable('secureAcceptFriend');
+        await acceptCall({ senderId, senderName, senderPhoto, notifId });
+
+        showToast(currentLang === 'en' ? "Friend request accepted! 🤝" : "تم قبول الصداقة! 🤝");
     } catch (error) {
-        console.error("خطأ في جلب الأصدقاء:", error);
-        list.innerHTML = `<p style="text-align:center; color:#ff4d4d;">حدث خطأ في تحميل الأصدقاء</p>`;
+        console.error(error);
+        showToast(currentLang === 'en' ? "Error accepting request" : "حدث خطأ أثناء قبول الطلب");
+    }
+};
+
+// 3. دالة المتصدرين (منعنا التعليق بفصل المهمة عن العرض)
+async function loadLeaderboardData() {
+    const listDiv = document.getElementById('leaderboard-list');
+    if (!listDiv) return;
+    
+    setTimeout(() => {
+        if(typeof updateQuestProgress === 'function') updateQuestProgress('leaderboard', 1);
+    }, 1000);
+
+    try {
+        const snapshot = await db.collection('users').orderBy('xp', 'desc').limit(50).get();
+        listDiv.innerHTML = ''; 
+        let rank = 0;
+        
+        snapshot.forEach((doc) => {
+            rank++;
+            const data = doc.data();
+            const rankEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `<b>#${rank}</b>`;
+            const userPhoto = data.photoURL || 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png';
+            const safeName = (data.firstName || 'Player').replace(/</g, "&lt;");
+            
+            const row = document.createElement('div');
+            const borderSide = currentLang === 'ar' ? 'border-right' : 'border-left';
+            row.style.cssText = `display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; ${borderSide}: 4px solid ${rank <= 3 ? 'var(--primary-color)' : 'transparent'}; transition: 0.3s;`;
+
+            const userLevel = data.rank || Math.floor((data.xp || 0) / 500) + 1;
+            const lvlText = currentLang === 'en' ? 'Lvl' : 'مستوى';
+            
+            row.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px; cursor: pointer;" onclick="viewPlayerProfile('${doc.id}')">
+                    <span style="font-size: 1.2rem; min-width: 30px; text-align: center;">${rankEmoji}</span>
+                    <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    <span style="font-weight: 700; color: white;">${safeName}</span>
+                </div>
+                <div style="text-align: right; direction: ltr; display: flex; flex-direction: column; align-items: flex-end;">
+                    <span style="color: var(--primary-color); font-weight: 900; font-size: 1.1rem; letter-spacing: 0.5px; direction: rtl;">${lvlText} ${userLevel}</span>
+                    <span style="color: var(--slate); font-size: 0.8rem; font-weight: 600; margin-top: -2px;">${data.xp || 0} XP</span>
+                </div>
+            `;
+            listDiv.appendChild(row);
+        });
+    } catch (err) {
+        listDiv.innerHTML = `<p style="text-align:center; color:#ff4d4d; padding:20px;">حدث خطأ</p>`;
     }
 }
+
 
 async function viewPlayerProfile(targetUid) {
     const t = translations[currentLang || 'ar'];
@@ -4785,33 +4801,6 @@ window.sendFriendRequest = async function(targetUid, targetName, targetPhoto) {
     }
 };
 
-// دالة قبول طلب الصداقة (النسخة الآمنة المربوطة بالسيرفر 🛡️)
-window.acceptFriendRequest = async function(notifId, senderId, senderName, senderPhoto) {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    try {
-        // إظهار اللودينج عشان اللاعب يعرف إنه انكبس
-        showToast(currentLang === 'en' ? "Accepting..." : "جاري القبول...");
-        
-        // 🛡️ توجيه الطلب للسيرفر الآمن بدل ما نكتب عالداتا بيس مباشرة
-        const acceptCall = firebase.functions().httpsCallable('secureAcceptFriend');
-        await acceptCall({ senderId, senderName, senderPhoto, notifId });
-
-        // إخفاء الإشعار من الشاشة فوراً
-        const notifElement = document.getElementById(notifId);
-        if (notifElement) notifElement.remove();
-
-        showToast(currentLang === 'en' ? "Friend request accepted! 🤝" : "تم قبول الصداقة! 🤝");
-
-        // تحديث واجهة الأصدقاء لتعرض الصديق الجديد
-        if (typeof renderMyFriends === "function") renderMyFriends();
-
-    } catch (error) {
-        console.error("Error accepting friend:", error);
-        showToast(currentLang === 'en' ? "Error accepting request" : "حدث خطأ أثناء قبول الطلب");
-    }
-};
 
 
 async function rejectFriendRequest(notifId) {
