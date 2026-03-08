@@ -391,7 +391,7 @@ window.deleteAdminMessage = async function(docId) {
     } catch(e) { showToast("فشل الحذف!"); }
 };
 
-let isApprovingWorkout = false; 
+let isApprovingWorkout = false;
 
 async function approveWorkout(docId) {
     const t = translations[currentLang || 'ar'];
@@ -426,7 +426,7 @@ async function approveWorkout(docId) {
         let updatedStats = userData.stats || {};
         updatedStats.maxWeight = maxW;
 
-        // 1. تحديث الإحصائيات (هذا التحديث هو اللي بيغير شكل الخريطة تلقائياً)
+        // 1. تحديث الإحصائيات 
         await userRef.update({
             workouts: workouts,
             isWorkoutPending: false,
@@ -463,14 +463,13 @@ async function approveWorkout(docId) {
             if (isNewKing) {
                 const batch = db.batch(); 
                 
-                // استخدام معرف زمني فريد لضمان عدم التكرار نهائياً (حتى لو اشتغلت الدالة مرتين غصب عنها)
-                const d = new Date();
-                const timeKey = `${d.getFullYear()}${d.getMonth()}${d.getDate()}_${d.getHours()}${d.getMinutes()}`;
+                // استخدام معرف مبني على ID الطلب نفسه (docId) عشان مستحيل يتكرر مهما انكبس!
+                const safeDocId = docId;
 
                 cityUsersSnap.forEach(userDoc => {
                     if (userDoc.id !== data.userId) { 
                         // رسالة لأهل المدينة
-                        const uniqueNotifId = `throne_${data.userId}_to_${userDoc.id}_${timeKey}`;
+                        const uniqueNotifId = `throne_${safeDocId}_to_${userDoc.id}`;
                         const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc(uniqueNotifId);
                         
                         batch.set(notifRef, {
@@ -482,19 +481,20 @@ async function approveWorkout(docId) {
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     } else {
-                        // رسالة تهنئة لنفس اللاعب اللي كسر الرقم (بدون خربطة بالكلمات)
-                        const uniqueNotifIdSelf = `throne_win_${data.userId}_${timeKey}`;
+                        // رسالة تهنئة لنفس اللاعب اللي كسر الرقم
+                        const uniqueNotifIdSelf = `throne_win_${safeDocId}_self`;
                         const notifRefSelf = db.collection('users').doc(userDoc.id).collection('notifications').doc(uniqueNotifIdSelf);
                         
+                        // نص نظيف خالي من أي كود HTML عشان ما يظهر بالخارج
                         const selfMsg = currentLang === 'en' 
-                            ? `👑 You have conquered ${userData.city}! You are the new King with a record of ${maxW} kg!`
-                            : `👑 لقد سيطرت على عرش ${userData.city}! أنت الملك الجديد برقم قياسي ${maxW} kg!`;
+                            ? `👑 You have conquered ${userData.city}! You are the new King with a record of ${maxW}kg`
+                            : `👑 لقد سيطرت على عرش ${userData.city} أنت الملك الجديد برقم قياسي ${maxW}kg!`;
                         
                         batch.set(notifRefSelf, {
                             type: 'admin_alert', 
                             senderName: t.admin_name || 'الإدارة 👑',
                             senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
-                            text: `<span style="direction: rtl; unicode-bidi: embed;">${selfMsg}</span>`, 
+                            text: selfMsg,
                             status: 'pending',
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
@@ -506,8 +506,7 @@ async function approveWorkout(docId) {
 
         // إذا لم يكسر العرش، نرسل له الرسالة العادية للاعتماد فقط
         if (!isNewKing) {
-            const timeKey = new Date().getTime();
-            await userRef.collection('notifications').doc(`approve_${data.userId}_${timeKey}`).set({
+            await userRef.collection('notifications').doc(`approve_${docId}`).set({
                 type: 'admin_alert',
                 senderId: 'admin', 
                 senderName: t.admin_name, 
@@ -538,7 +537,6 @@ async function approveWorkout(docId) {
         isApprovingWorkout = false;
     }
 }
-
 async function rejectWorkout(docId) {
     const t = translations[currentLang || 'ar'];
     if(!confirm(t.confirm_reject)) return;
