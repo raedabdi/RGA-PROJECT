@@ -390,7 +390,6 @@ window.deleteAdminMessage = async function(docId) {
         loadAdminMessages();
     } catch(e) { showToast("فشل الحذف!"); }
 };
-
 let isApprovingWorkout = false;
 
 async function approveWorkout(docId) {
@@ -426,7 +425,7 @@ async function approveWorkout(docId) {
         let updatedStats = userData.stats || {};
         updatedStats.maxWeight = maxW;
 
-        // 1. تحديث الإحصائيات 
+        // 1. التحديث الآلي في قاعدة البيانات (السيرفر سينتبه لهذا التحديث ويرسل للمدينة!)
         await userRef.update({
             workouts: workouts,
             isWorkoutPending: false,
@@ -434,9 +433,7 @@ async function approveWorkout(docId) {
             xp: firebase.firestore.FieldValue.increment(50)
         });
 
-        // ==========================================
-        // 👑 فحص العرش وإرسال الإشعارات بشكل دقيق 👑
-        // ==========================================
+        // 2. فحص العرش لإرسال رسالة تهنئة شخصية فقط
         let isNewKing = false;
         
         if (maxW > oldMaxW && userData.city) {
@@ -461,50 +458,26 @@ async function approveWorkout(docId) {
             }
 
             if (isNewKing) {
-                const batch = db.batch(); 
+                // رسالة تهنئة لنفس اللاعب اللي كسر الرقم بنص نظيف تماماً
+                const uniqueNotifIdSelf = `throne_win_${docId}_self`;
+                const notifRefSelf = db.collection('users').doc(data.userId).collection('notifications').doc(uniqueNotifIdSelf);
                 
-                // استخدام معرف مبني على ID الطلب نفسه (docId) عشان مستحيل يتكرر مهما انكبس!
-                const safeDocId = docId;
-
-                cityUsersSnap.forEach(userDoc => {
-                    if (userDoc.id !== data.userId) { 
-                        // رسالة لأهل المدينة
-                        const uniqueNotifId = `throne_${safeDocId}_to_${userDoc.id}`;
-                        const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc(uniqueNotifId);
-                        
-                        batch.set(notifRef, {
-                            type: 'throne_fall',
-                            newKingName: userData.firstName || 'بطل',
-                            newWeight: maxW,
-                            city: userData.city,
-                            status: 'pending',
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    } else {
-                        // رسالة تهنئة لنفس اللاعب اللي كسر الرقم
-                        const uniqueNotifIdSelf = `throne_win_${safeDocId}_self`;
-                        const notifRefSelf = db.collection('users').doc(userDoc.id).collection('notifications').doc(uniqueNotifIdSelf);
-                        
-                        // نص نظيف خالي من أي كود HTML عشان ما يظهر بالخارج
-                        const selfMsg = currentLang === 'en' 
-                            ? `👑 You have conquered ${userData.city}! You are the new King with a record of ${maxW}kg`
-                            : `👑 لقد سيطرت على عرش ${userData.city} أنت الملك الجديد برقم قياسي ${maxW}kg!`;
-                        
-                        batch.set(notifRefSelf, {
-                            type: 'admin_alert', 
-                            senderName: t.admin_name || 'الإدارة 👑',
-                            senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
-                            text: selfMsg,
-                            status: 'pending',
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
+                const selfMsg = currentLang === 'en' 
+                    ? `👑 You conquered ${userData.city}! You are the new King with a record of ${maxW}kg!`
+                    : `👑 لقد سيطرت على عرش ${userData.city}! أنت الملك الجديد برقم قياسي ${maxW}kg!`;
+                
+                await notifRefSelf.set({
+                    type: 'admin_alert', 
+                    senderName: t.admin_name || 'الإدارة 👑',
+                    senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
+                    text: selfMsg,
+                    status: 'pending',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                await batch.commit(); 
             }
         }
 
-        // إذا لم يكسر العرش، نرسل له الرسالة العادية للاعتماد فقط
+        // إذا لم يكسر العرش، نرسل له الرسالة العادية للاعتماد
         if (!isNewKing) {
             await userRef.collection('notifications').doc(`approve_${docId}`).set({
                 type: 'admin_alert',
@@ -537,6 +510,7 @@ async function approveWorkout(docId) {
         isApprovingWorkout = false;
     }
 }
+
 async function rejectWorkout(docId) {
     const t = translations[currentLang || 'ar'];
     if(!confirm(t.confirm_reject)) return;
