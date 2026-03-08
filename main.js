@@ -708,6 +708,8 @@ const translations = {
         template_loaded: "تم تحميل القالب الجاهز! عبي أوزانك يا وحش ",
 
 
+        game_cooldown: "اللعبة في فترة استراحة! متاحة بعد",
+        wait_setup: "لحظة نجهزلك اللعبة يا وحش ",
 
         badge_completed: "مكتمل ",
         reward_text: "الجائزة: ",
@@ -977,6 +979,8 @@ const translations = {
         auth_signup_btn: "Create Account",
         prompt_email: "Please enter your registered email address:",
         reset_sent: " Password reset link sent to your email.",
+        game_cooldown: "Game is resting! Available in",
+        wait_setup: "Wait a moment, setting things up Champ ",
 
         val1_t: "Integrity", val1_d: "Our video verification system ensures fair competition for everyone.",
         val2_t: "Innovation", val2_d: "Utilizing advanced TSB algorithms and muscle radar technology.",
@@ -2072,8 +2076,9 @@ function handleInteraction(e, type) {
         liftEnd();
     }
 }
-
 function openGame() {
+    if (!checkGameCooldown('deadlift')) return; // 🛑 فحص الكوول داون
+
     comboCount = 0;
     sessionBestCombo = 0; 
     const savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -2125,7 +2130,7 @@ function finishGame(isTimeUp) {
         // 2. إعطاء نقاط الخبرة (XP)
         if (sessionXP > 0) {
             showToast(`${translations[currentLang].great_job} +${sessionXP} XP`);
-addXP(sessionXP, 'game', 'RGA_SECURE_998877');
+addXP(sessionXP, 'game', 'RGA_SECURE_998877', 'deadlift');
         }
 
         // 3. تحديث الرقم القياسي التاريخي (إذا كسره)
@@ -2207,6 +2212,8 @@ let linePosition = 0;
 let lineDirection = 1;
 
 function openSquatGame() {
+    if (!checkGameCooldown('squat')) return; // 🛑 فحص الكوول داون
+
     squatScore = 0;
     squatMistakes = 0;
     linePosition = 0;
@@ -2218,6 +2225,7 @@ function openSquatGame() {
     if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('collapsed');
     startSquatGame();
 }
+
 
 function startSquatGame() {
     isSquatGameActive = true;
@@ -2291,7 +2299,7 @@ function finishSquatGame(saveScore = true) {
 
     if (squatScore > 0 && saveScore) {
         showToast(`${translations[currentLang].game_over} +${squatScore} XP`);
-addXP(squatScore, 'game', 'RGA_SECURE_998877');
+addXP(squatScore, 'game', 'RGA_SECURE_998877', 'squat');
         updateStat('sq_score', squatScore, true);
 updateQuestProgress('sq_score', squatScore); // ربط مهام السكوات
 
@@ -2754,24 +2762,17 @@ async function saveWorkout() {
 }
 
 
-
-// ==========================================
-// 🚀 نظام الترقية والمستويات الذكي (Leveling Engine)
-// ==========================================
-window.addXP = async function(amount, actionType = 'game', securityToken = null) {
+window.addXP = async function(amount, actionType = 'game', securityToken = null, gameType = null) {
     const user = auth.currentUser;
     if (!user) return;
 
-    // 🛡️ حماية إضافية من الواجهة: إذا شخص حاول استخدام الكونسول بدون الرمز السري للعبة
     if (actionType === 'game' && securityToken !== 'RGA_SECURE_998877') {
-        console.error("🛑 العب بنظافة يا وحش! محاولة الغش مكشوفة.");
         return; 
     }
 
     try {
         const secureXPCall = firebase.functions().httpsCallable('secureAddXP');
-        // نرسل الرمز السري للسيرفر للتأكد
-        const result = await secureXPCall({ actionType: actionType, amount: amount, securityToken: securityToken });
+        const result = await secureXPCall({ actionType: actionType, amount: amount, securityToken: securityToken, gameType: gameType });
         
         const xpAddedByServer = result.data.xpAdded;
 
@@ -2782,6 +2783,13 @@ window.addXP = async function(amount, actionType = 'game', securityToken = null)
             savedData.xp = (savedData.xp || 0) + xpAddedByServer;
             savedData.rank = Math.floor(savedData.xp / 500) + 1;
             savedData.maxXp = savedData.rank * 500;
+            
+            // حفظ وقت اللعبة محلياً عشان نمنعه يفوتها قبل الساعة
+            if (actionType === 'game' && gameType) {
+                if (gameType === 'deadlift') savedData.lastDeadliftTime = Date.now();
+                if (gameType === 'squat') savedData.lastSquatTime = Date.now();
+                savedData.lastGameXPTime = Date.now();
+            }
             
             localStorage.setItem('currentUser', JSON.stringify(savedData));
             if (typeof renderUI === "function") renderUI(savedData);
@@ -2799,9 +2807,34 @@ window.addXP = async function(amount, actionType = 'game', securityToken = null)
             }
         }
     } catch (error) {
-        console.error("تم رفض العملية من السيرفر.");
+        console.error("تم رفض العملية من السيرفر:", error.message);
     }
 };
+
+
+function checkGameCooldown(gameType) {
+    const data = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const now = Date.now();
+    const lastPlayed = gameType === 'deadlift' ? (data.lastDeadliftTime || 0) : (data.lastSquatTime || 0);
+    const lastAnyGame = data.lastGameXPTime || 0;
+    const t = translations[currentLang || 'ar'];
+
+    // 1. منع الدخول السريع جداً بين أي لعبتين (10 ثواني راحة للسيرفر)
+    if (now - lastAnyGame < 10000) {
+        showToast(t.wait_setup);
+        return false;
+    }
+
+    // 2. منع دخول نفس اللعبة قبل مرور ساعة (60 دقيقة)
+    const cooldownMs = 60 * 60 * 1000;
+    if (now - lastPlayed < cooldownMs) {
+        const minsLeft = Math.ceil((cooldownMs - (now - lastPlayed)) / 60000);
+        showToast(`${t.game_cooldown} ${minsLeft} ${currentLang === 'en' ? 'm' : 'دقيقة'}`);
+        return false;
+    }
+
+    return true;
+}
 
 // ==========================================
 // 📊 مركز الأداء والشارت
