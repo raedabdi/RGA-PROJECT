@@ -598,32 +598,25 @@ try {
 
 
 
-// ==========================================
-// 🛡️ نظام حفظ تسجيل الدخول والتوجيه التلقائي
-// ==========================================
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   .then(() => {
-    // مراقبة حالة المستخدم بشكل دائم
     firebase.auth().onAuthStateChanged((user) => {
-        // معرفة الصفحة الحالية اللي فاتحها المستخدم
         const currentPath = window.location.pathname;
         const isIndexPage = currentPath.endsWith('index.html') || currentPath === '/';
 
         if (user) {
-            // 🟢 إذا المستخدم مسجل دخول
-            if (isIndexPage) {
-                // إذا كان بصفحة البداية (index)، انقله فوراً للوحة التحكم
+            // 🟢 التعديل هنا: ننقله للداشبورد فقط إذا كان الإيميل مفعل
+            if (isIndexPage && user.emailVerified) {
                 window.location.replace('dashboard.html');
             }
         } else {
-            // 🔴 إذا المستخدم مش مسجل دخول (أو عمل تسجيل خروج)
             if (!isIndexPage) {
-                // إذا كان بيحاول يدخل لوحة التحكم، رجعه لصفحة البداية
                 window.location.replace('index.html');
             }
         }
     });
   })
+
   .catch((error) => {
     console.error("Error setting persistence:", error);
   });
@@ -1701,7 +1694,6 @@ function animateNumbers(targetElement) {
         }
     }, stepTime);
 }
-
 function initDashboardPage() {
     auth.onAuthStateChanged(user => {
 
@@ -1711,23 +1703,29 @@ function initDashboardPage() {
         }
 
         if (user) {
+            // 🚨 حماية إضافية: طرد المستخدم إذا وصل للداشبورد وإيميله غير مفعل
+            if (!user.emailVerified) {
+                auth.signOut();
+                window.location.href = 'index.html';
+                return; // إيقاف تنفيذ باقي الكود حتى لا تظهر أخطاء
+            }
+
             // إظهار الزر إذا كان المستخدم هو الآدمن (أنت)
             const adminEmail = "raedabdi9@gmail.com"; // 👈 اكتب إيميلك هون بالضبط
             const adminBtn = document.getElementById('admin-panel-btn');
             if (adminBtn && user.email === adminEmail) {
                 adminBtn.style.display = 'block';
             }
-checkAndShowOnboarding();
 
+            checkAndShowOnboarding();
+            preloadHeavyCovers(); 
 
-preloadHeavyCovers(); 
-          
-                        const savedData = localStorage.getItem('currentUser');
-            if (savedData) renderUI(JSON.parse(savedData));
+            // تحديث الواجهة
+            const localData = localStorage.getItem('currentUser');
+            if (localData) renderUI(JSON.parse(localData));
+
             syncUserData(user);
             listenForNotifications(); 
-            
-
 
             if (Notification.permission === 'granted' && typeof requestNotificationPermission === 'function') {
                 requestNotificationPermission();
@@ -1766,14 +1764,16 @@ preloadHeavyCovers();
         });
     }
 
-    const logoutBtn = document.getElementById('logout-btn');
+       const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.onclick = async () => {
             await auth.signOut();
             localStorage.removeItem('currentUser');
+            localStorage.removeItem('hasSeenTour');  
             window.location.href = 'index.html';
         };
     }
+
 
     const photoInput = document.getElementById('upload-photo');
     const cropperModal = document.getElementById('cropper-modal');
@@ -5925,9 +5925,6 @@ document.addEventListener('click', function() {
     }
 });
 
-
-// دالة تسجيل الخروج من البروفايل
-// دالة تسجيل الخروج من البروفايل (الآمنة)
 window.logoutFromProfile = async function() {
     const t = translations[currentLang || 'ar'];
     const confirmMsg = currentLang === 'en' ? "Are you sure you want to logout?" : "متأكد إنك بدك تسجل خروج يا وحش؟";
@@ -5936,7 +5933,7 @@ window.logoutFromProfile = async function() {
         const user = auth.currentUser;
         if (user) {
             try {
-                // 🔥 الخطوة السحرية: مسح التوكن من الحساب القديم حتى لا تصله إشعارات وهو مسجل خروج
+                // مسح التوكن من الحساب القديم حتى لا تصله إشعارات وهو مسجل خروج
                 await db.collection('users').doc(user.uid).update({
                     fcmToken: firebase.firestore.FieldValue.delete()
                 });
@@ -5945,6 +5942,7 @@ window.logoutFromProfile = async function() {
 
         await auth.signOut();
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('hasSeenTour'); // 👈 السطر السحري تم إضافته هنا كمان
         window.location.href = 'index.html';
     }
 };
