@@ -1,15 +1,14 @@
-const CACHE_NAME = 'rga-fit-v10'; // غيرنا النسخة لتحديث إجباري
+const CACHE_NAME = 'rga-fit-v11'; // تم تغيير النسخة لفرض التحديث
 const ASSETS = ['/'];
 
 self.addEventListener('install', (e) => {
-  self.skipWaiting(); // إجبار التحديث
+  self.skipWaiting(); 
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(clients.claim());
 });
 
-// استيراد الفايربيس
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
@@ -24,33 +23,20 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// استقبال الإشعار
 messaging.onBackgroundMessage(function(payload) {
     if (!payload.data) return;
-
     const data = payload.data;
     
-    // 🌍 محاولة استخراج اللغة بطريقة أذكى من النظام
-    // إذا كانت لغة الكيبورد أو الهاتف عربي، بيصير عربي.
-    const sysLang = navigator.language || navigator.userLanguage || 'en';
-    const isAr = sysLang.toLowerCase().includes('ar'); 
-
-    let finalTitle = '';
-    let finalBody = '';
-
-    // بناء النصوص حسب اللغة وبدون إضافات مستفزة
-    if (data.type === 'message') {
-        finalTitle = isAr ? `رسالة من ${data.senderName}` : `Message from ${data.senderName}`;
-        finalBody = data.text;
-    } else if (data.type === 'throne_fall') {
-        finalTitle = isAr ? '👑 سقوط العرش!' : '👑 Throne Fallen!';
-        finalBody = isAr ? `الوحش ${data.newKingName} كسر رقمك بوزن ${data.newWeight}kg` : `Beast ${data.newKingName} broke your record: ${data.newWeight}kg`;
+    // سيعتمد على النصوص القادمة من السيرفر، أو إذا لم توجد نترجمها بناءً على محتوى الرسالة
+    let finalTitle = data.senderName ? `إشعار من ${data.senderName}` : 'إشعار جديد RGA Fit';
+    let finalBody = data.text || '';
+    
+    if (data.type === 'throne_fall') {
+        finalTitle = '👑 سقوط العرش!';
+        finalBody = `الوحش ${data.newKingName} كسر رقمك بوزن ${data.newWeight}kg`;
     } else if (data.type === 'friend_request') {
-        finalTitle = isAr ? 'طلب صداقة' : 'Friend Request';
-        finalBody = isAr ? `${data.senderName} أرسل لك طلب صداقة` : `${data.senderName} sent you a request`;
-    } else {
-        finalTitle = isAr ? 'إشعار جديد' : 'New Notification';
-        finalBody = data.text || '';
+        finalTitle = 'طلب صداقة';
+        finalBody = `${data.senderName} أرسل لك طلب صداقة`;
     }
 
     const notificationOptions = {
@@ -60,11 +46,9 @@ messaging.onBackgroundMessage(function(payload) {
         vibrate: [200, 100, 200]
     };
 
-    // إظهار الإشعار بشكل نظيف جداً
     self.registration.showNotification(finalTitle, notificationOptions);
 });
 
-// فتح التطبيق عند النقر
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     event.waitUntil(
