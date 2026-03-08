@@ -2159,7 +2159,7 @@ function finishGame(isTimeUp) {
         // 2. إعطاء نقاط الخبرة (XP)
         if (sessionXP > 0) {
             showToast(`${translations[currentLang].great_job} +${sessionXP} XP`);
-            addXP(sessionXP); 
+addXP(sessionXP, 'game', 'RGA_SECURE_998877');
         }
 
         // 3. تحديث الرقم القياسي التاريخي (إذا كسره)
@@ -2325,7 +2325,7 @@ function finishSquatGame(saveScore = true) {
 
     if (squatScore > 0 && saveScore) {
         showToast(`${translations[currentLang].game_over} +${squatScore} XP`);
-        addXP(squatScore); 
+addXP(squatScore, 'game', 'RGA_SECURE_998877');
         updateStat('sq_score', squatScore, true);
 updateQuestProgress('sq_score', squatScore); // ربط مهام السكوات
 
