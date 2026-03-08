@@ -1561,20 +1561,27 @@ const tabBtns = document.querySelectorAll('#auth-modal .tab-btn');
         });
     }
 
-    const loginForm = document.getElementById('real-login-form');
+       const loginForm = document.getElementById('real-login-form');
     if (loginForm) {
         loginForm.onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
+            const t = translations[currentLang || 'ar'];
+            
             try {
-                await auth.signInWithEmailAndPassword(email, password);
-const t = translations[currentLang || 'ar'];
-showToast(t.login_success || " تم الدخول، جاري تحويلك...");
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                
+                // التحقق من تفعيل الإيميل قبل الدخول
+                if (!userCredential.user.emailVerified) {
+                    await auth.signOut();
+                    showToast(currentLang === 'en' ? " Please verify your email first!" : " الرجاء تفعيل بريدك الإلكتروني أولاً!");
+                    return;
+                }
 
+                showToast(t.login_success || " تم الدخول، جاري تحويلك...");
                 setTimeout(() => window.location.href = 'dashboard.html', 1500);
             } catch (error) {
-                const t = translations[currentLang || 'ar'];
                 let message = t.err_default;
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                     message = t.err_invalid_cred;
@@ -1583,7 +1590,6 @@ showToast(t.login_success || " تم الدخول، جاري تحويلك...");
                 }
                 showToast(message);
             }
-
         };
     }
 
@@ -1596,12 +1602,16 @@ showToast(t.login_success || " تم الدخول، جاري تحويلك...");
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
             const defaultAvatar = "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
+            const t = translations[currentLang || 'ar'];
 
             try {
-                // 1. إنشاء الحساب في فايربيس
+                // 1. إنشاء الحساب
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 
-                // 2. حفظ بيانات المستخدم
+                // 2. إرسال إيميل التحقق فوراً
+                await userCredential.user.sendEmailVerification();
+                
+                // 3. حفظ بيانات المستخدم في قاعدة البيانات
                 await db.collection('users').doc(userCredential.user.uid).set({
                     firstName,
                     lastName,
@@ -1616,32 +1626,25 @@ showToast(t.login_success || " تم الدخول، جاري تحويلك...");
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast("🚀 تم إنشاء الحساب بنجاح!");
+                // 4. رسالة تطلب منه يروح يأكد الإيميل
+                showToast(currentLang === 'en' ? " Account created! Check your email to verify." : "تم الإنشاء! تفقد بريدك لتفعيل الحساب.");
                 
-                // 3. إجبار ظهور الجولة التعليمية للحساب الجديد
-                localStorage.removeItem('hasSeenTour'); 
+                // 5. تسجيل الخروج فوراً (عشان ما يدخل إلا لما يفعل الإيميل)
+                await auth.signOut();
                 
-                // 4. التحويل للداشبورد بعد النجاح
-                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                // تنظيف الفورم ونقله لتبويب تسجيل الدخول
+                signupForm.reset();
+                document.querySelector('[data-form="login"]').click();
                 
             } catch (error) {
-                // 5. التعامل مع الأخطاء (إذا الإيميل مستخدم أو الباسورد ضعيف)
-                const t = translations[currentLang || 'ar'];
                 let message = t.err_default;
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    message = t.err_email_in_use;
-                } else if (error.code === 'auth/weak-password') {
-                    message = t.err_weak_pass;
-                } else if (error.code === 'auth/invalid-email') {
-                    message = t.err_invalid_email;
-                }
-                
+                if (error.code === 'auth/email-already-in-use') message = t.err_email_in_use;
+                else if (error.code === 'auth/weak-password') message = t.err_weak_pass;
+                else if (error.code === 'auth/invalid-email') message = t.err_invalid_email;
                 showToast(message);
             }
         };
     }
-
 
     const forgotPasswordLink = document.getElementById('forgot-password-link');
     if (forgotPasswordLink) {
@@ -1875,7 +1878,22 @@ async function syncUserData(user) {
     const userRef = db.collection('users').doc(user.uid);
     try {
         const doc = await userRef.get();
-        if (!doc.exists) return;
+        
+        if (!doc.exists) {
+            console.warn("بيانات المستخدم غير موجودة! جاري بنائها...");
+            await userRef.set({
+                firstName: "بطل",
+                lastName: "جديد",
+                email: user.email,
+                xp: 0,
+                rank: 1,
+                streak: 1,
+                lastLoginDate: new Date().toISOString().split('T')[0]
+            });
+            window.location.reload(); // إعادة تحميل لبدء العمل النظيف
+            return;
+        }
+
 
         let data = doc.data();
         let needsUpdate = false;
