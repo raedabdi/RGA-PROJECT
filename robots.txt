@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://rga.best/sitemap.xml
