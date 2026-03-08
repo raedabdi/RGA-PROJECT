@@ -2372,50 +2372,41 @@ window.logHealthyMeal = async function() {
     }
 
     const t = translations[currentLang || 'ar'];
-    const now = Date.now();
-    const cooldownMs = 4 * 60 * 60 * 1000; // 4 ساعات
+    
+    // إظهار اللودينج على الزر لمنع الكبس المتكرر
+    const btn = window.event ? window.event.target.closest('button') : null;
+    let originalHtml = '';
+    if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+    }
 
     try {
-        // 🔒 القراءة من قاعدة البيانات مباشرة (مصدر الحقيقة)
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        const serverData = userDoc.data();
-        const serverLastMealTime = serverData.lastMealTime || 0;
+        // نطلب الـ XP من السيرفر وننتظر قراره (هو يمتلك الوقت الحقيقي)
+        const success = await window.addXP(50, 'meal');
 
-        const timePassed = now - serverLastMealTime;
-
-        // 1. فحص الوقت بناءً على بيانات السيرفر
-        if (timePassed < cooldownMs) {
-            const timeLeftMs = cooldownMs - timePassed;
-            const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
-            const minutesLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-
-            const hrText = currentLang === 'en' ? 'h' : 'س';
-            const minText = currentLang === 'en' ? 'm' : 'د';
-            const cooldownPrefix = currentLang === 'en' ? 'Next meal available in' : 'الوجبة القادمة تتوفر بعد';
-
-            showToast(` ${cooldownPrefix} ${hoursLeft}${hrText} و ${minutesLeft}${minText}`);
-            return;
+        if (success) {
+            // السيرفر وافق وتمت إضافة النقاط فعلياً
+            showToast(`${t.meal_success} +50 XP 🥗`);
+            updateQuestProgress('meal', 1);
+            
+            // نحدث الوقت المحلي فقط لتسهيل العرض لاحقاً
+            let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            savedData.lastMealTime = Date.now(); 
+            localStorage.setItem('currentUser', JSON.stringify(savedData));
+        } else {
+            // السيرفر رفض (معناها اللاعب قدم الوقت بتلفونه، أو لسه ما خلصت 4 ساعات)
+            showToast(currentLang === 'en' ? " You must wait 4 hours!" : " وجبتك لسه بتنهضم! انتظر 4 ساعات.");
         }
 
-        // 2. إذا كان الوقت سليماً، نحدث السيرفر أولاً
-        await db.collection('users').doc(user.uid).update({
-            lastMealTime: now
-        });
-
-        // 3. ثم نحدث الجهاز المحلي ليتطابق مع السيرفر
-        let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        savedData.lastMealTime = now;
-        localStorage.setItem('currentUser', JSON.stringify(savedData));
-
-        // 4. إعطاء المكافأة
-        showToast(`${t.meal_success} +50 XP 🥗`);
-        updateQuestProgress('meal', 1);
-       if (typeof addXP === "function") addXP(50, 'meal');
-
-
     } catch (e) {
-        console.error("خطأ في الاتصال بالسيرفر:", e);
-        showToast("حدث خطأ، تأكد من اتصالك بالإنترنت.");
+        console.error("خطأ:", e);
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
     }
 };
 
