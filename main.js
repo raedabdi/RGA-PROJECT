@@ -1886,11 +1886,10 @@ async function syncUserData(user) {
             needsUpdate = true;
         }
 
-        // 🔥 السحر هنا: سحب سجل التمارين من السحابة وتخزينه وعرضه
+        // سحب سجل التمارين من السحابة وتخزينه وعرضه
         if (data.workouts) {
             localStorage.setItem('userWorkouts', JSON.stringify(data.workouts));
         } else {
-            // إذا كان عنده تمارين بالجهاز بس مش مرفوعة (عملية ترحيل البيانات)
             const localWorkouts = JSON.parse(localStorage.getItem('userWorkouts')) || [];
             if (localWorkouts.length > 0) {
                 data.workouts = localWorkouts;
@@ -1898,28 +1897,29 @@ async function syncUserData(user) {
             }
         }
 
-        // تحديث سلسلة الدخول (الستريك)
-        const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Amman" })).toISOString().split('T')[0];
-        if (data.lastLoginDate !== today) {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = new Date(yesterday.toLocaleString("en-US", { timeZone: "Asia/Amman" })).toISOString().split('T')[0];
+        // 🛡️ السحر هنا: تحديث الستريك من السيرفر (مستحيل يتأثر بتاريخ الموبايل)
+        try {
+            const syncStreakCall = firebase.functions().httpsCallable('secureSyncStreak');
+            const streakResult = await syncStreakCall();
             
-            if (data.lastLoginDate === yesterdayStr) {
-                data.streak = (data.streak || 0) + 1;
-
-                const t = translations[currentLang || 'ar'];
-showToast(`${t.streak_fire} ${data.streak} ${t.days_streak}`);
-                updateStat('streak', data.streak, true);
-
-            } else {
-                data.streak = 1;
+            // إذا السيرفر رد علينا، بناخذ بيانات الستريك الصح منه
+            if (streakResult.data && streakResult.data.success) {
+                data.streak = streakResult.data.newStreak;
+                
+                // إذا اللاعب دخل بيوم جديد والستريك زاد، بنطلعله إشعار فخم
+                if (streakResult.data.updated && data.streak > 1) {
+                    const t = translations[currentLang || 'ar'];
+                    showToast(`${t.streak_fire} ${data.streak} ${t.days_streak}`);
+                    
+                    // نستخدم setTimeout عشان نعطي السيرفر مجال يخلص تحديثاته قبل ما نبعث إحصائية الستريك
+                    setTimeout(() => updateStat('streak', data.streak, true), 1000);
+                }
             }
-            data.lastLoginDate = today;
-            needsUpdate = true;
+        } catch (e) {
+            console.error("خطأ في مزامنة الستريك مع السيرفر:", e);
         }
 
-
+        // حساب المستوى بناءً على الـ XP 
         let calculatedLevel = Math.floor((data.xp || 0) / 500) + 1;
         let calculatedMaxXp = calculatedLevel * 500;
 
@@ -1929,8 +1929,15 @@ showToast(`${t.streak_fire} ${data.streak} ${t.days_streak}`);
             needsUpdate = true;
         }
 
+        // إذا ضفنا معرف جديد أو عدلنا المستوى، نرفع التحديث للفايربيس
+        // (ملاحظة: الستريك انرفع من خلال السيرفر أصلاً فما بنحتاج نرفعه هون)
         if (needsUpdate) {
-            await userRef.update(data);
+            await userRef.update({
+                shortID: data.shortID,
+                rank: data.rank,
+                maxXp: data.maxXp,
+                workouts: data.workouts || []
+            });
         }
 
         localStorage.setItem('currentUser', JSON.stringify(data));
@@ -1939,6 +1946,7 @@ showToast(`${t.streak_fire} ${data.streak} ${t.days_streak}`);
         console.error("Sync Error:", err);
     }
 }
+
 
 function renderUI(data) {
     if (!data) return;
@@ -6230,7 +6238,9 @@ function generateStoreCardHTML(item, isOwned, isEquipped, userXP, type, previewH
 // دالة الشراء الموحدة (مترجمة ومعدلة لمنع نزول المستوى)
 
 window.buyStoreItem = async function(type, itemId, price, val) {
-    const user = auth.currentUser; if (!user) return;
+    const user = auth.currentUser; 
+    if (!user) return;
+    
     let data = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     let currentXp = data.xp || 0;
@@ -6241,37 +6251,67 @@ window.buyStoreItem = async function(type, itemId, price, val) {
         showToast(currentLang === 'en' ? "Not enough XP!" : "نقاطك ما بتكفي!"); 
         return; 
     }
+    
     if(!confirm(currentLang === 'en' ? `Buy for ${price} XP?` : `تأكيد الشراء بـ ${price} XP؟`)) return;
 
-    // 🔥 السحر هنا: نزيد "المصروفات" بدلاً من إنقاص "الخبرة الأساسية"
-    data.spentXp = currentSpent + price;
-    
-    // إرسال حقل المصروفات فقط للفايربيس، الـ XP الأساسي والمستوى يبقى سليم 100%
-    let updates = { spentXp: firebase.firestore.FieldValue.increment(price) };
-
-    if (type === 'cover') {
-        if (!data.purchasedCovers) data.purchasedCovers = [];
-        data.purchasedCovers.push(itemId);
-        data.currentCover = val;
-        updates.purchasedCovers = firebase.firestore.FieldValue.arrayUnion(itemId);
-        updates.currentCover = val;
-    } else {
-        if (!data.purchasedItems) data.purchasedItems = [];
-        data.purchasedItems.push(itemId);
-        updates.purchasedItems = firebase.firestore.FieldValue.arrayUnion(itemId);
-        
-        if(type === 'title') { data.currentTitle = val; updates.currentTitle = val; }
-        if(type === 'border') { data.currentBorder = val; updates.currentBorder = val; }
-        if(type === 'theme') { data.currentTheme = val; updates.currentTheme = val; applyAppTheme(val); }
+    // 🔥 تغيير شكل الزر لإظهار التحميل (لمنع الكبس السريع مرتين)
+    const btn = event.target.closest('button');
+    let originalHtml = '';
+    if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        btn.disabled = true;
     }
 
-    localStorage.setItem('currentUser', JSON.stringify(data));
     try {
-        await db.collection('users').doc(user.uid).update(updates);
-        showToast(currentLang === 'en' ? " Congrats, Beast!" : " مبروك يا وحش!"); 
-        openStore();
-    } catch(e) { console.error(e); }
+        // 🛡️ توجيه طلب الشراء للسيرفر المحمي
+        const secureBuyCall = firebase.functions().httpsCallable('secureBuyItem');
+        const result = await secureBuyCall({ 
+            itemType: type, 
+            itemId: itemId, 
+            price: price, 
+            itemVal: val 
+        });
+
+        // إذا السيرفر راجع وقال "تم الشراء وخصم الرصيد" بنحدث الشاشة
+        if (result.data.success) {
+            
+            data.spentXp = currentSpent + price;
+
+            if (type === 'cover') {
+                if (!data.purchasedCovers) data.purchasedCovers = [];
+                data.purchasedCovers.push(itemId);
+                data.currentCover = val;
+            } else {
+                if (!data.purchasedItems) data.purchasedItems = [];
+                data.purchasedItems.push(itemId);
+                
+                if(type === 'title') data.currentTitle = val;
+                if(type === 'border') data.currentBorder = val;
+                if(type === 'theme') { 
+                    data.currentTheme = val; 
+                    applyAppTheme(val); 
+                }
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify(data));
+            showToast(currentLang === 'en' ? " Congrats, Beast!" : " مبروك يا وحش!"); 
+            openStore(); // تحديث شاشة المتجر لعرض الزر الأخضر (مُستخدم)
+        }
+
+    } catch(e) { 
+        console.error(e);
+        // إذا السيرفر رفض (بسبب قلة الرصيد أو محاولة غش)
+        showToast(currentLang === 'en' ? "Purchase failed!" : "فشل الشراء! قد يكون رصيدك غير كافٍ.");
+        
+        // إرجاع الزر لشكله الطبيعي
+        if (btn) {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    }
 };
+
 
 // دالة الاستخدام الموحدة (مترجمة)
 window.equipStoreItem = async function(type, val) {
