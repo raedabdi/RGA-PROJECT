@@ -391,14 +391,27 @@ window.deleteAdminMessage = async function(docId) {
     } catch(e) { showToast("فشل الحذف!"); }
 };
 
+let isApprovingWorkout = false; // 🔒 قفل السيرفر لمنع الكبسة المزدوجة من الإدارة
 
 async function approveWorkout(docId) {
     const t = translations[currentLang || 'ar'];
     if(!confirm(t.confirm_approve)) return;
+    
+    // 🛡️ إذا الدالة شغالة (يعني كبست مرتين)، وقف الكبسة الثانية فوراً
+    if (isApprovingWorkout) return; 
+    isApprovingWorkout = true;
+
     try {
         showToast(t.processing_wait);
         const docRef = db.collection('pending_workouts').doc(docId);
-        const data = (await docRef.get()).data();
+        const docSnap = await docRef.get();
+        
+        // 🛡️ حماية إضافية: لو الطلب مش موجود (انحذف من كبسة قبل بأجزاء من الثانية)، وقف!
+        if (!docSnap.exists) {
+            return;
+        }
+        
+        const data = docSnap.data();
 
         // 1. تحديث بيانات المستخدم
         const userRef = db.collection('users').doc(data.userId);
@@ -442,34 +455,45 @@ async function approveWorkout(docId) {
 
             if (!cityUsersSnap.empty) {
                 const topPlayerDoc = cityUsersSnap.docs[0];
-                // إذا كان اللاعب هو المركز الأول بعد التحديث
                 if (topPlayerDoc.id === data.userId) {
                     if (cityUsersSnap.docs.length > 1) {
                         const secondPlayerDoc = cityUsersSnap.docs[1];
                         const secondPlayerWeight = secondPlayerDoc.data().stats?.maxWeight || 0;
-                        // إذا كان وزنه القديم أقل من أو يساوي صاحب المركز الثاني، يعني هسه كسر رقمه
                         if (oldMaxW <= secondPlayerWeight && maxW > secondPlayerWeight) {
-                            isNewKing = true;
+                            isNewKing = true; // اللاعب كسر رقم المركز الأول
                         }
                     } else {
-                        // إذا هو اللاعب الوحيد بالمدينة
-                        if (oldMaxW === 0) isNewKing = true;
+                        if (oldMaxW === 0) isNewKing = true; // هو الوحيد بالمدينة
                     }
                 }
             }
 
             if (isNewKing) {
-                showToast("⚔️ لقد أسقط هذا اللاعب العرش في مدينته!");
                 const batch = db.batch(); 
                 cityUsersSnap.forEach(userDoc => {
-                    // إرسال الإشعار للجميع باستثناء الملك الجديد
+                    const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
+                    
                     if (userDoc.id !== data.userId) { 
-                        const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
+                        // 📢 إرسال إنذار لباقي لاعبي المدينة
                         batch.set(notifRef, {
                             type: 'throne_fall',
                             newKingName: userData.firstName || 'بطل',
                             newWeight: maxW,
                             city: userData.city,
+                            status: 'pending',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        // 👑 رسالة مميزة للشخص اللي كسر العرش
+                        const selfMsg = currentLang === 'en' 
+                            ? `👑 You have conquered ${userData.city}! You are the new King with a record of ${maxW}kg!`
+                            : `👑 لقد سيطرت على عرش ${userData.city}! أنت الملك الجديد برقم قياسي ${maxW}kg!`;
+                        
+                        batch.set(notifRef, {
+                            type: 'admin_alert', 
+                            senderName: t.admin_name || 'الإدارة 👑',
+                            senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
+                            text: selfMsg,
                             status: 'pending',
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
@@ -492,12 +516,16 @@ async function approveWorkout(docId) {
         await docRef.delete();
 
         showToast(t.approve_success);
-        loadPendingWorkouts();
+        loadPendingWorkouts(); // إعادة تحميل الطلبات
     } catch (e) { 
         console.error(e); 
         showToast(t.approve_fail); 
+    } finally {
+        // 🔓 فتح القفل بعد ما يخلص كل شيء عشان الإدارة تقدر تقيم الطلب اللي بعده
+        isApprovingWorkout = false;
     }
 }
+
 
 
 async function rejectWorkout(docId) {
@@ -2603,212 +2631,230 @@ window.loadWorkoutTemplate = function() {
 
 
 
+let isSavingNormalWorkout = false; // 🔒 قفل لمنع الكبسة المزدوجة
 
 async function saveWorkout() {
-    const rows = document.querySelectorAll('.exercise-row');
-    let hasValidExercise = false;
-    let exercises = [];
-    const typeElement = document.getElementById('selected-workout-type');
-    const typeText = typeElement ? typeElement.innerText : 'تمرين'; 
-    
-    let needsProof = false;
-    let heavyWeight = 0;
-    let heavyExerciseName = "";
+    if (isSavingNormalWorkout) return; // إذا الدالة شغالة، لا تقبل كبسة ثانية
+    isSavingNormalWorkout = true;
 
-    // 1. تجميع التمارين وفحص الأوزان
-    rows.forEach(row => {
-        const nameInput = row.querySelector('.ex-name');
-        const repsInput = row.querySelector('.ex-reps');
-        const weightInput = row.querySelector('.ex-weight');
+    try {
+        const rows = document.querySelectorAll('.exercise-row');
+        let hasValidExercise = false;
+        let exercises = [];
+        const typeElement = document.getElementById('selected-workout-type');
+        const typeText = typeElement ? typeElement.innerText : 'تمرين'; 
         
-        if(nameInput && nameInput.value.trim() !== "") {
-            hasValidExercise = true;
-            let currentWeight = parseFloat(weightInput.value) || 0; 
-            let exName = nameInput.value.trim();
+        let needsProof = false;
+        let heavyWeight = 0;
+        let heavyExerciseName = "";
+
+        // تجميع التمارين وفحص الأوزان
+        rows.forEach(row => {
+            const nameInput = row.querySelector('.ex-name');
+            const repsInput = row.querySelector('.ex-reps');
+            const weightInput = row.querySelector('.ex-weight');
             
-            exercises.push({ 
-                name: exName, 
-                reps: (repsInput && repsInput.value.trim() !== "") ? repsInput.value.trim() : '-', 
-                weight: currentWeight > 0 ? currentWeight : '-' 
-            });
+            if(nameInput && nameInput.value.trim() !== "") {
+                hasValidExercise = true;
+                let currentWeight = parseFloat(weightInput.value) || 0; 
+                let exName = nameInput.value.trim();
+                
+                exercises.push({ 
+                    name: exName, 
+                    reps: (repsInput && repsInput.value.trim() !== "") ? repsInput.value.trim() : '-', 
+                    weight: currentWeight > 0 ? currentWeight : '-' 
+                });
 
-            let threshold = 999;
-            if (typeText.includes("صدر") || typeText.includes("Chest")) threshold = 60;
-            if (typeText.includes("ظهر") || typeText.includes("Back")) threshold = 80;
-            if (typeText.includes("أكتاف") || typeText.includes("Shoulders")) threshold = 50;
-            if (typeText.includes("بايسبس") || typeText.includes("ترايسبس") || typeText.includes("Biceps") || typeText.includes("Triceps")) threshold = 50;
-            if (typeText.includes("بطن") || typeText.includes("Core")) threshold = 80;
+                let threshold = 999;
+                if (typeText.includes("صدر") || typeText.includes("Chest")) threshold = 60;
+                if (typeText.includes("ظهر") || typeText.includes("Back")) threshold = 80;
+                if (typeText.includes("أكتاف") || typeText.includes("Shoulders")) threshold = 50;
+                if (typeText.includes("بايسبس") || typeText.includes("ترايسبس") || typeText.includes("Biceps") || typeText.includes("Triceps")) threshold = 50;
+                if (typeText.includes("بطن") || typeText.includes("Core")) threshold = 80;
+                if (typeText.includes("دفع") || typeText.includes("Push")) threshold = 70;
+                if (typeText.includes("سحب") || typeText.includes("Pull")) threshold = 70;
+                if (typeText.includes("أرجل") || typeText.includes("Legs")) threshold = 120;
+                if (typeText.includes("شامل") || typeText.includes("Full Body")) threshold = 60;
 
-            if (typeText.includes("دفع") || typeText.includes("Push")) threshold = 70;
-            if (typeText.includes("سحب") || typeText.includes("Pull")) threshold = 70;
-            if (typeText.includes("أرجل") || typeText.includes("Legs")) threshold = 120;
-            if (typeText.includes("شامل") || typeText.includes("Full Body")) threshold = 60;
+                if (exName.includes("ديدليفت") || exName.toLowerCase().includes("deadlift")) threshold = 120;
+                if (exName.includes("سكوات") || exName.toLowerCase().includes("squat")) threshold = 140;
 
-            if (exName.includes("ديدليفت") || exName.toLowerCase().includes("deadlift")) threshold = 120;
-            if (exName.includes("سكوات") || exName.toLowerCase().includes("squat")) threshold = 140;
-
-            if (currentWeight >= threshold) {
-                needsProof = true;
-                if (currentWeight > heavyWeight) {
-                    heavyWeight = currentWeight;
-                    heavyExerciseName = exName;
+                if (currentWeight >= threshold) {
+                    needsProof = true;
+                    if (currentWeight > heavyWeight) {
+                        heavyWeight = currentWeight;
+                        heavyExerciseName = exName;
+                    }
                 }
             }
+        });
+
+        if(!hasValidExercise) {
+            showToast(translations[currentLang].ex_error || "يرجى إضافة تمرين واحد على الأقل.");
+            return; 
         }
-    });
 
-    if(!hasValidExercise) {
-        showToast(translations[currentLang].ex_error || "يرجى إضافة تمرين واحد على الأقل.");
-        return; 
-    }
+        if (needsProof) {
+            const t = translations[currentLang || 'ar']; 
+            const confirmMsg = currentLang === 'en' 
+                ? `💪 You are a beast!!\nYou lifted ${heavyWeight}kg in ${heavyExerciseName}!\nSince you broke the record, you must upload a video to prove your strength.\nReady to upload?`
+                : `💪 إنت وحش!!\nشلت ${heavyWeight}kg بتمرين ${heavyExerciseName}!\nلأنك قطعت الدنيا، لازم ترفع فيديو يثبت قوتك عشان نعتمدلك الرقم ونحطه بالليدربورد.\nجاهز ترفع الفيديو؟`;
 
-    if (needsProof) {
-        const t = translations[currentLang || 'ar']; 
-        const confirmMsg = currentLang === 'en' 
-            ? `💪 You are a beast!!\nYou lifted ${heavyWeight}kg in ${heavyExerciseName}!\nSince you broke the record, you must upload a video to prove your strength.\nReady to upload?`
-            : `💪 إنت وحش!!\nشلت ${heavyWeight}kg بتمرين ${heavyExerciseName}!\nلأنك قطعت الدنيا، لازم ترفع فيديو يثبت قوتك عشان نعتمدلك الرقم ونحطه بالليدربورد.\nجاهز ترفع الفيديو؟`;
+            const confirmProof = confirm(confirmMsg);
+            if (!confirmProof) {
+                showToast(t.cancel_upload); 
+                return;
+            }
 
-        const confirmProof = confirm(confirmMsg);
-        if (!confirmProof) {
-            showToast(t.cancel_upload); 
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'video/*';
+            
+            let isUploadingProof = false; // 🔒 قفل ثاني لمنع الرفع مرتين
+            fileInput.onchange = async (e) => {
+                if (isUploadingProof) return;
+                const file = e.target.files[0];
+                if(file) {
+                    isUploadingProof = true;
+                    if(file.size > 30 * 1024 * 1024) { 
+                        showToast(t.video_size_error); 
+                        isUploadingProof = false;
+                        return;
+                    }
+
+                    closeWorkoutModal();
+                    document.getElementById('workout-step-3').innerHTML = `
+                        <div style="text-align:center; padding: 40px;">
+                            <i class="fa-solid fa-spinner fa-spin fa-3x" style="color:var(--primary-color);"></i>
+                            <p style="margin-top:20px; font-weight:bold; color:white;">${t.uploading_proof}</p>
+                            <h1 id="upload-progress" style="color:var(--primary-color); font-size: 2.5rem; margin-top: 15px;">0%</h1>
+                        </div>`;
+                    document.getElementById('workout-modal').classList.add('active');
+
+                    const user = auth.currentUser;
+                    const cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+                    const videoRef = storage.ref(`proofs/${user.uid}_${Date.now()}_${cleanFileName}`);
+                    
+                    const uploadTask = videoRef.put(file);
+
+                    uploadTask.on('state_changed', 
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            const progressText = document.getElementById('upload-progress');
+                            if (progressText) progressText.innerText = Math.round(progress) + '%';
+                        }, 
+                        (error) => {
+                            closeWorkoutModal();
+                            showToast(t.upload_fail_storage); 
+                        }, 
+                        async () => {
+                            try {
+                                const videoURL = await uploadTask.snapshot.ref.getDownloadURL();
+                                let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                                
+                                await db.collection('pending_workouts').add({
+                                    userId: user.uid,
+                                    userName: JSON.parse(localStorage.getItem('currentUser')).firstName,
+                                    date: dateStr,
+                                    type: typeText,
+                                    details: exercises,
+                                    videoUrl: videoURL,
+                                    status: 'pending',
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+
+                                await db.collection('users').doc(user.uid).update({ isWorkoutPending: true });
+                                
+                                let savedData = JSON.parse(localStorage.getItem('currentUser'));
+                                savedData.isWorkoutPending = true;
+                                localStorage.setItem('currentUser', JSON.stringify(savedData));
+
+                                closeWorkoutModal();
+                                showToast(t.upload_success_wait); 
+                            } catch (dbError) {
+                                closeWorkoutModal();
+                                showToast(t.save_db_error); 
+                            }
+                        }
+                    );
+                }
+            };
+            fileInput.click();
             return;
         }
 
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'video/*';
-        
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if(file) {
-                if(file.size > 30 * 1024 * 1024) { 
-                    showToast(t.video_size_error); 
-                    return;
-                }
+        // الحفظ العادي بدون فيديو
+        let workoutHistory = [];
+        try { workoutHistory = JSON.parse(localStorage.getItem('userWorkouts')) || []; } catch(e) {}
+        let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        workoutHistory.unshift({ date: dateStr, type: typeText, details: exercises }); 
+        localStorage.setItem('userWorkouts', JSON.stringify(workoutHistory));
 
-                closeWorkoutModal();
-                document.getElementById('workout-step-3').innerHTML = `
-                    <div style="text-align:center; padding: 40px;">
-                        <i class="fa-solid fa-spinner fa-spin fa-3x" style="color:var(--primary-color);"></i>
-                        <p style="margin-top:20px; font-weight:bold; color:white;">${t.uploading_proof}</p>
-                        <h1 id="upload-progress" style="color:var(--primary-color); font-size: 2.5rem; margin-top: 15px;">0%</h1>
-                    </div>`;
-                document.getElementById('workout-modal').classList.add('active');
-
-                const user = auth.currentUser;
-                const cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-                const videoRef = storage.ref(`proofs/${user.uid}_${Date.now()}_${cleanFileName}`);
-                
-                const uploadTask = videoRef.put(file);
-
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        const progressText = document.getElementById('upload-progress');
-                        if (progressText) progressText.innerText = Math.round(progress) + '%';
-                    }, 
-                    (error) => {
-                        closeWorkoutModal();
-                        showToast(t.upload_fail_storage); 
-                    }, 
-                    async () => {
-                        try {
-                            const videoURL = await uploadTask.snapshot.ref.getDownloadURL();
-                            let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                            
-                            await db.collection('pending_workouts').add({
-                                userId: user.uid,
-                                userName: JSON.parse(localStorage.getItem('currentUser')).firstName,
-                                date: dateStr,
-                                type: typeText,
-                                details: exercises,
-                                videoUrl: videoURL,
-                                status: 'pending',
-                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-
-                            await db.collection('users').doc(user.uid).update({ isWorkoutPending: true });
-                            
-                            let savedData = JSON.parse(localStorage.getItem('currentUser'));
-                            savedData.isWorkoutPending = true;
-                            localStorage.setItem('currentUser', JSON.stringify(savedData));
-
-                            closeWorkoutModal();
-                            showToast(t.upload_success_wait); 
-                        } catch (dbError) {
-                            closeWorkoutModal();
-                            showToast(t.save_db_error); 
-                        }
-                    }
-                );
-            }
-        };
-        fileInput.click();
-        return;
-    }
-
-    let workoutHistory = [];
-    try { workoutHistory = JSON.parse(localStorage.getItem('userWorkouts')) || []; } catch(e) {}
-    let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    workoutHistory.unshift({ date: dateStr, type: typeText, details: exercises }); 
-    localStorage.setItem('userWorkouts', JSON.stringify(workoutHistory));
-
-    let totalVol = 0; let totalReps = 0;
-    exercises.forEach(ex => { 
-        totalVol += (parseFloat(ex.weight) * parseInt(ex.reps)) || 0; 
-        totalReps += parseInt(ex.reps) || 0;
-    });
-
-    // 🔥 التحديث المدمج للمهام (هنا السحر الجديد)
-    await updateQuestProgressBatch({ volume: totalVol, reps: totalReps, workout_days: 1 });
-
-    if (typeof updateStat === "function") {
-        updateStat('workouts', 1);
-        rows.forEach(row => {
-            let w = parseFloat(row.querySelector('.ex-weight').value) || 0;
-            if (w > 0) updateStat('maxWeight', w, true);
+        let totalVol = 0; let totalReps = 0;
+        exercises.forEach(ex => { 
+            totalVol += (parseFloat(ex.weight) * parseInt(ex.reps)) || 0; 
+            totalReps += parseInt(ex.reps) || 0;
         });
-    }
 
-    const user = auth.currentUser;
-    if (user) { 
-        let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        const todayStr = new Date().toDateString(); 
-        const lastXpDate = savedData.lastWorkoutXpDate || "";
+        await updateQuestProgressBatch({ volume: totalVol, reps: totalReps, workout_days: 1 });
 
-        if (lastXpDate === todayStr) {
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setHours(24, 0, 0, 0); 
-            const timeLeftMs = tomorrow - now;
-            const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-            
-            let timeMsg = currentLang === 'en' ? `${hours}h ${minutes}m` : `${hours} س و ${minutes} د`;
-            db.collection('users').doc(user.uid).update({ workouts: workoutHistory });
-            showToast(currentLang === 'en' ? `Workout Saved! XP resets in ${timeMsg}` : `تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`);
-            
-        } else {
-            savedData.lastWorkoutXpDate = todayStr;
-            localStorage.setItem('currentUser', JSON.stringify(savedData));
-
-            db.collection('users').doc(user.uid).update({ 
-                workouts: workoutHistory,
-                lastWorkoutXpDate: todayStr 
+        if (typeof updateStat === "function") {
+            updateStat('workouts', 1);
+            let highestWeight = 0;
+            rows.forEach(row => {
+                let w = parseFloat(row.querySelector('.ex-weight').value) || 0;
+                if (w > highestWeight) highestWeight = w;
             });
-
-            if (typeof addXP === "function") await addXP(50, 'workout');
-            showToast(currentLang === 'en' ? `Saved! +50 XP` : `تم الحفظ! +50 XP`);
+            if (highestWeight > 0) {
+                updateStat('maxWeight', highestWeight, true);
+            }
         }
-    } 
 
-    closeWorkoutModal();
+        const user = auth.currentUser;
+        if (user) { 
+            let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const todayStr = new Date().toDateString(); 
+            const lastXpDate = savedData.lastWorkoutXpDate || "";
 
-    if(document.getElementById('log-container')) {
-        renderWorkoutLog();
-        if(typeof initWorkoutChart === "function") setTimeout(initWorkoutChart, 200);
+            if (lastXpDate === todayStr) {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setHours(24, 0, 0, 0); 
+                const timeLeftMs = tomorrow - now;
+                const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                let timeMsg = currentLang === 'en' ? `${hours}h ${minutes}m` : `${hours} س و ${minutes} د`;
+                db.collection('users').doc(user.uid).update({ workouts: workoutHistory });
+                showToast(currentLang === 'en' ? `Workout Saved! XP resets in ${timeMsg}` : `تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`);
+                
+            } else {
+                savedData.lastWorkoutXpDate = todayStr;
+                localStorage.setItem('currentUser', JSON.stringify(savedData));
+
+                db.collection('users').doc(user.uid).update({ 
+                    workouts: workoutHistory,
+                    lastWorkoutXpDate: todayStr 
+                });
+
+                if (typeof addXP === "function") await addXP(50, 'workout');
+                showToast(currentLang === 'en' ? `Saved! +50 XP` : `تم الحفظ! +50 XP`);
+            }
+        } 
+
+        closeWorkoutModal();
+
+        if(document.getElementById('log-container')) {
+            renderWorkoutLog();
+            if(typeof initWorkoutChart === "function") setTimeout(initWorkoutChart, 200);
+        }
+
+    } finally {
+        // فك القفل بعد ثانيتين لضمان عدم التكرار
+        setTimeout(() => { isSavingNormalWorkout = false; }, 2000);
     }
 }
+
 
 
 window.addXP = async function(amount, actionType = 'game', securityToken = null, gameType = null) {
@@ -5557,108 +5603,116 @@ function animateValue(obj, start, end, duration) {
     };
     window.requestAnimationFrame(step);
 }
+let isSavingLiveWorkout = false; // 🔒 قفل لمنع التكرار في اللايف
+
 async function finishLiveWorkout() {
     if (liveExercises.length === 0) { closeLiveWorkout(); return; }
     
-    const totalSets = liveExercises.length;
-    const totalVolume = liveExercises.reduce((sum, ex) => sum + (ex.weight * ex.reps), 0);
-    let liveReps = 0;
-    liveExercises.forEach(ex => liveReps += parseInt(ex.reps) || 0);
+    if (isSavingLiveWorkout) return; // منع التنفيذ مرتين إذا كبس بسرعة
+    isSavingLiveWorkout = true;
 
-    // 🔥 التحديث المدمج للمهام للتمرين اللايف
-    await updateQuestProgressBatch({ volume: totalVolume, reps: liveReps, workout_days: 1 });
+    try {
+        const totalSets = liveExercises.length;
+        const totalVolume = liveExercises.reduce((sum, ex) => sum + (ex.weight * ex.reps), 0);
+        let liveReps = 0;
+        liveExercises.forEach(ex => liveReps += parseInt(ex.reps) || 0);
 
-    if (typeof updateStat === "function") {
-        updateStat('workouts', 1);
-        liveExercises.forEach(ex => {
-            let w = parseFloat(ex.weight) || 0;
-            if (w > 0) updateStat('maxWeight', w, true);
-        });
-    }
+        await updateQuestProgressBatch({ volume: totalVolume, reps: liveReps, workout_days: 1 });
 
-    const m = String(Math.floor(liveSeconds / 60)).padStart(2, '0');
-    const s = String(liveSeconds % 60).padStart(2, '0');
-    const finalTime = `${m}:${s}`;
-
-    let workoutHistory = JSON.parse(localStorage.getItem('userWorkouts')) || [];
-    let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    workoutHistory.unshift({ date: dateStr, type: "تمرين لايف", details: liveExercises });
-    localStorage.setItem('userWorkouts', JSON.stringify(workoutHistory));
-    
-    const user = auth.currentUser;
-    let xpMessage = "";
-    let xpGained = false;
-
-    if (user) {
-        let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        const todayStr = new Date().toDateString();
-        const lastXpDate = savedData.lastWorkoutXpDate || "";
-
-        if (lastXpDate === todayStr) {
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setHours(24, 0, 0, 0); 
-            const timeLeftMs = tomorrow - now;
-            const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-            
-            xpMessage = currentLang === 'en' ? `XP resets in ${hours}h ${minutes}m` : `تتجدد المكافأة بعد ${hours}س و${minutes}د`;
-            await db.collection('users').doc(user.uid).update({ workouts: workoutHistory });
-        } else {
-            savedData.lastWorkoutXpDate = todayStr;
-            localStorage.setItem('currentUser', JSON.stringify(savedData));
-            
-            await db.collection('users').doc(user.uid).update({ 
-                workouts: workoutHistory,
-                lastWorkoutXpDate: todayStr 
-            });
-            
-            if (typeof addXP === "function") await addXP(50, 'workout');
-            xpGained = true;
-            xpMessage = "+50 XP";
-        }
-
-        if (pendingProofData) {
-            await db.collection('users').doc(user.uid).collection('notifications').add({
-                type: 'pending_proof',
-                text: translations[currentLang].proof_required_notif,
-                exerciseData: pendingProofData, 
-                status: 'pending',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        if (typeof updateStat === "function") {
+            updateStat('workouts', 1);
+            liveExercises.forEach(ex => {
+                let w = parseFloat(ex.weight) || 0;
+                if (w > 0) updateStat('maxWeight', w, true);
             });
         }
-    }
 
-    clearInterval(liveDurationTimer); 
-    clearInterval(restInterval);
-    const overlay = document.getElementById('live-workout-overlay');
-    overlay.classList.remove('active');
-    setTimeout(() => overlay.style.display = 'none', 500);
-    document.getElementById('rest-timer-overlay').classList.remove('active');
+        const m = String(Math.floor(liveSeconds / 60)).padStart(2, '0');
+        const s = String(liveSeconds % 60).padStart(2, '0');
+        const finalTime = `${m}:${s}`;
 
-    const summaryOverlay = document.getElementById('live-summary-overlay');
-    if (summaryOverlay) {
-        document.getElementById('sum-time').innerText = finalTime;
-        document.getElementById('sum-sets').innerText = totalSets;
-        document.getElementById('sum-volume').innerText = "0"; 
+        let workoutHistory = JSON.parse(localStorage.getItem('userWorkouts')) || [];
+        let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        workoutHistory.unshift({ date: dateStr, type: "تمرين لايف", details: liveExercises });
+        localStorage.setItem('userWorkouts', JSON.stringify(workoutHistory));
         
-        const xpRewardBox = document.querySelector('.xp-reward-box');
-        if (xpRewardBox) {
-            xpRewardBox.innerText = xpMessage;
-            xpRewardBox.style.fontSize = xpGained ? '2.5rem' : '1.1rem';
-            xpRewardBox.style.color = xpGained ? 'var(--primary-color)' : 'var(--slate)';
-            xpRewardBox.style.textShadow = xpGained ? '0 0 20px rgba(0, 242, 167, 0.6)' : 'none';
-            xpRewardBox.style.animation = xpGained ? 'pulseXP 1.5s infinite alternate' : 'none';
+        const user = auth.currentUser;
+        let xpMessage = "";
+        let xpGained = false;
+
+        if (user) {
+            let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const todayStr = new Date().toDateString();
+            const lastXpDate = savedData.lastWorkoutXpDate || "";
+
+            if (lastXpDate === todayStr) {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setHours(24, 0, 0, 0); 
+                const timeLeftMs = tomorrow - now;
+                const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                xpMessage = currentLang === 'en' ? `XP resets in ${hours}h ${minutes}m` : `تتجدد المكافأة بعد ${hours}س و${minutes}د`;
+                await db.collection('users').doc(user.uid).update({ workouts: workoutHistory });
+            } else {
+                savedData.lastWorkoutXpDate = todayStr;
+                localStorage.setItem('currentUser', JSON.stringify(savedData));
+                
+                await db.collection('users').doc(user.uid).update({ 
+                    workouts: workoutHistory,
+                    lastWorkoutXpDate: todayStr 
+                });
+                
+                if (typeof addXP === "function") await addXP(50, 'workout');
+                xpGained = true;
+                xpMessage = "+50 XP";
+            }
+
+            if (pendingProofData) {
+                await db.collection('users').doc(user.uid).collection('notifications').add({
+                    type: 'pending_proof',
+                    text: translations[currentLang].proof_required_notif,
+                    exerciseData: pendingProofData, 
+                    status: 'pending',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
         }
 
-        summaryOverlay.style.display = 'flex';
-        setTimeout(() => {
-            summaryOverlay.classList.add('active');
-            animateValue(document.getElementById('sum-volume'), 0, totalVolume, 1500);
-        }, 50);
-    } else {
-        showToast(currentLang === 'en' ? `Workout Saved! ${xpMessage}` : `تم حفظ التمرين! ${xpMessage}`);
-        closeLiveSummary();
+        clearInterval(liveDurationTimer); 
+        clearInterval(restInterval);
+        const overlay = document.getElementById('live-workout-overlay');
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.style.display = 'none', 500);
+        document.getElementById('rest-timer-overlay').classList.remove('active');
+
+        const summaryOverlay = document.getElementById('live-summary-overlay');
+        if (summaryOverlay) {
+            document.getElementById('sum-time').innerText = finalTime;
+            document.getElementById('sum-sets').innerText = totalSets;
+            document.getElementById('sum-volume').innerText = "0"; 
+            
+            const xpRewardBox = document.querySelector('.xp-reward-box');
+            if (xpRewardBox) {
+                xpRewardBox.innerText = xpMessage;
+                xpRewardBox.style.fontSize = xpGained ? '2.5rem' : '1.1rem';
+                xpRewardBox.style.color = xpGained ? 'var(--primary-color)' : 'var(--slate)';
+                xpRewardBox.style.textShadow = xpGained ? '0 0 20px rgba(0, 242, 167, 0.6)' : 'none';
+                xpRewardBox.style.animation = xpGained ? 'pulseXP 1.5s infinite alternate' : 'none';
+            }
+
+            summaryOverlay.style.display = 'flex';
+            setTimeout(() => {
+                summaryOverlay.classList.add('active');
+                animateValue(document.getElementById('sum-volume'), 0, totalVolume, 1500);
+            }, 50);
+        } else {
+            showToast(currentLang === 'en' ? `Workout Saved! ${xpMessage}` : `تم حفظ التمرين! ${xpMessage}`);
+            closeLiveSummary();
+        }
+    } finally {
+        setTimeout(() => { isSavingLiveWorkout = false; }, 3000); // فتح القفل بعد 3 ثواني
     }
 }
 
