@@ -1551,12 +1551,14 @@ const tabBtns = document.querySelectorAll('#auth-modal .tab-btn');
                 await userCredential.user.sendEmailVerification();
                 
                 // 3. حفظ بيانات المستخدم في قاعدة البيانات
+                const newShortID = generateShortID(); // 🔥 إنشاء المعرف فوراً
                 await db.collection('users').doc(userCredential.user.uid).set({
                     firstName,
                     lastName,
                     fullName: `${firstName} ${lastName}`,
                     email,
                     photoURL: defaultAvatar,
+                    shortID: newShortID, // 🔥 حفظ المعرف هنا
                     xp: 0,
                     maxXp: 1000,
                     rank: 1,
@@ -1564,6 +1566,7 @@ const tabBtns = document.querySelectorAll('#auth-modal .tab-btn');
                     lastLoginDate: new Date().toISOString().split('T')[0],
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
                 
                 // 4. رسالة تطلب منه يروح يأكد الإيميل
                 showToast(currentLang === 'en' ? " Account created! Check your email to verify." : "تم الإنشاء! تفقد بريدك لتفعيل الحساب.");
@@ -1887,22 +1890,23 @@ async function syncUserData(user) {
         let calculatedLevel = Math.floor((data.xp || 0) / 500) + 1;
         let calculatedMaxXp = calculatedLevel * 500;
 
-        if (data.rank !== calculatedLevel || data.maxXp !== calculatedMaxXp) {
+            if (data.rank !== calculatedLevel || data.maxXp !== calculatedMaxXp) {
             data.rank = calculatedLevel;
             data.maxXp = calculatedMaxXp;
-            needsUpdate = true;
+            // لا نرسل تحديث للسيرفر هنا لأن السيرفر هو المسؤول عن الرتبة
         }
 
-        // إذا ضفنا معرف جديد أو عدلنا المستوى، نرفع التحديث للفايربيس
-        // (ملاحظة: الستريك انرفع من خلال السيرفر أصلاً فما بنحتاج نرفعه هون)
+        // إرسال التحديثات المسموحة فقط لتجنب رفض الفايربيس (Security Rules)
         if (needsUpdate) {
-            await userRef.update({
-                shortID: data.shortID,
-                rank: data.rank,
-                maxXp: data.maxXp,
-                workouts: data.workouts || []
-            });
+            let safeUpdates = {};
+            if (!doc.data().shortID) safeUpdates.shortID = data.shortID;
+            if (data.workouts && data.workouts.length > 0) safeUpdates.workouts = data.workouts;
+            
+            if (Object.keys(safeUpdates).length > 0) {
+                await userRef.update(safeUpdates);
+            }
         }
+
 
         localStorage.setItem('currentUser', JSON.stringify(data));
         renderUI(data);
