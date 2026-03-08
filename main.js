@@ -2776,8 +2776,9 @@ exercises.forEach(ex => {
     totalVol += (parseFloat(ex.weight) * parseInt(ex.reps)) || 0; 
     totalReps += parseInt(ex.reps) || 0;
 });
-updateQuestProgress('volume', totalVol);
-updateQuestProgress('reps', totalReps);
+await updateQuestProgress('volume', totalVol);
+await updateQuestProgress('reps', totalReps);
+
 
 
 
@@ -5638,8 +5639,9 @@ async function finishLiveWorkout() {
 
 let liveReps = 0;
 liveExercises.forEach(ex => liveReps += parseInt(ex.reps) || 0);
-updateQuestProgress('volume', totalVolume);
-updateQuestProgress('reps', liveReps);
+await updateQuestProgress('volume', totalVolume);
+await updateQuestProgress('reps', liveReps);
+
 // تم إزالة سطر workout_days
 
 
@@ -6869,9 +6871,10 @@ window.updateQuestProgress = async function(actionType, amount = 1) {
                 if (typeof renderQuests === 'function') renderQuests();
             }
 
-            if (totalXpGained > 0) {
-                addXP(totalXpGained);
+                      if (totalXpGained > 0) {
+                await addXP(totalXpGained, 'quest'); 
             }
+
         }
     } catch (error) {
         console.error("Error updating quests securely:", error);
