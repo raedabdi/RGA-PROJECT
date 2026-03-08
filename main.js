@@ -391,13 +391,12 @@ window.deleteAdminMessage = async function(docId) {
     } catch(e) { showToast("فشل الحذف!"); }
 };
 
-let isApprovingWorkout = false; // 🔒 قفل السيرفر لمنع الكبسة المزدوجة من الإدارة
+let isApprovingWorkout = false; 
 
 async function approveWorkout(docId) {
     const t = translations[currentLang || 'ar'];
     if(!confirm(t.confirm_approve)) return;
     
-    // 🛡️ إذا الدالة شغالة (يعني كبست مرتين)، وقف الكبسة الثانية فوراً
     if (isApprovingWorkout) return; 
     isApprovingWorkout = true;
 
@@ -406,14 +405,13 @@ async function approveWorkout(docId) {
         const docRef = db.collection('pending_workouts').doc(docId);
         const docSnap = await docRef.get();
         
-        // 🛡️ حماية إضافية: لو الطلب مش موجود (انحذف من كبسة قبل بأجزاء من الثانية)، وقف!
         if (!docSnap.exists) {
+            isApprovingWorkout = false;
             return;
         }
         
         const data = docSnap.data();
 
-        // 1. تحديث بيانات المستخدم
         const userRef = db.collection('users').doc(data.userId);
         const userSnap = await userRef.get();
         let userData = userSnap.data();
@@ -421,15 +419,14 @@ async function approveWorkout(docId) {
         let workouts = userData.workouts || [];
         workouts.unshift({ date: data.date, type: data.type, details: data.details });
 
-        // سحب الوزن القديم ومقارنته بالجديد
         let oldMaxW = userData.stats?.maxWeight || 0;
         let maxW = oldMaxW;
         data.details.forEach(ex => { if(parseFloat(ex.weight) > maxW) maxW = parseFloat(ex.weight); });
 
-        // تحديث إحصائيات اللاعب بشكل آمن
         let updatedStats = userData.stats || {};
         updatedStats.maxWeight = maxW;
 
+        // 1. تحديث الإحصائيات (هذا التحديث هو اللي بيغير شكل الخريطة تلقائياً)
         await userRef.update({
             workouts: workouts,
             isWorkoutPending: false,
@@ -437,22 +434,17 @@ async function approveWorkout(docId) {
             xp: firebase.firestore.FieldValue.increment(50)
         });
 
-        // 2. إرسال إشعار الاعتماد للاعب
-        await userRef.collection('notifications').add({
-            type: 'admin_alert',
-            senderId: 'admin', senderName: t.admin_name, senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
-            text: t.admin_notif_approve, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        // 3. 👑 التحقق من سقوط العرش في المدينة وإرسال الإنذار 👑
+        // ==========================================
+        // 👑 فحص العرش وإرسال الإشعارات بشكل دقيق 👑
+        // ==========================================
+        let isNewKing = false;
+        
         if (maxW > oldMaxW && userData.city) {
             const cityUsersSnap = await db.collection('users')
                 .where('city', '==', userData.city)
                 .orderBy('stats.maxWeight', 'desc')
                 .get();
                 
-            let isNewKing = false;
-
             if (!cityUsersSnap.empty) {
                 const topPlayerDoc = cityUsersSnap.docs[0];
                 if (topPlayerDoc.id === data.userId) {
@@ -460,21 +452,27 @@ async function approveWorkout(docId) {
                         const secondPlayerDoc = cityUsersSnap.docs[1];
                         const secondPlayerWeight = secondPlayerDoc.data().stats?.maxWeight || 0;
                         if (oldMaxW <= secondPlayerWeight && maxW > secondPlayerWeight) {
-                            isNewKing = true; // اللاعب كسر رقم المركز الأول
+                            isNewKing = true;
                         }
                     } else {
-                        if (oldMaxW === 0) isNewKing = true; // هو الوحيد بالمدينة
+                        if (oldMaxW === 0) isNewKing = true;
                     }
                 }
             }
 
             if (isNewKing) {
                 const batch = db.batch(); 
+                
+                // استخدام معرف زمني فريد لضمان عدم التكرار نهائياً (حتى لو اشتغلت الدالة مرتين غصب عنها)
+                const d = new Date();
+                const timeKey = `${d.getFullYear()}${d.getMonth()}${d.getDate()}_${d.getHours()}${d.getMinutes()}`;
+
                 cityUsersSnap.forEach(userDoc => {
-                    const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
-                    
                     if (userDoc.id !== data.userId) { 
-                        // 📢 إرسال إنذار لباقي لاعبي المدينة
+                        // رسالة لأهل المدينة
+                        const uniqueNotifId = `throne_${data.userId}_to_${userDoc.id}_${timeKey}`;
+                        const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc(uniqueNotifId);
+                        
                         batch.set(notifRef, {
                             type: 'throne_fall',
                             newKingName: userData.firstName || 'بطل',
@@ -484,16 +482,19 @@ async function approveWorkout(docId) {
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     } else {
-                        // 👑 رسالة مميزة للشخص اللي كسر العرش
-                        const selfMsg = currentLang === 'en' 
-                            ? `👑 You have conquered ${userData.city}! You are the new King with a record of ${maxW}kg!`
-                            : `👑 لقد سيطرت على عرش ${userData.city}! أنت الملك الجديد برقم قياسي ${maxW}kg!`;
+                        // رسالة تهنئة لنفس اللاعب اللي كسر الرقم (بدون خربطة بالكلمات)
+                        const uniqueNotifIdSelf = `throne_win_${data.userId}_${timeKey}`;
+                        const notifRefSelf = db.collection('users').doc(userDoc.id).collection('notifications').doc(uniqueNotifIdSelf);
                         
-                        batch.set(notifRef, {
+                        const selfMsg = currentLang === 'en' 
+                            ? `👑 You have conquered ${userData.city}! You are the new King with a record of ${maxW} kg!`
+                            : `👑 لقد سيطرت على عرش ${userData.city}! أنت الملك الجديد برقم قياسي ${maxW} kg!`;
+                        
+                        batch.set(notifRefSelf, {
                             type: 'admin_alert', 
                             senderName: t.admin_name || 'الإدارة 👑',
                             senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
-                            text: selfMsg,
+                            text: `<span style="direction: rtl; unicode-bidi: embed;">${selfMsg}</span>`, 
                             status: 'pending',
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
@@ -503,7 +504,20 @@ async function approveWorkout(docId) {
             }
         }
 
-        // 4. تحديث البيانات المحلية إذا كان الإدمن يجرب بحسابه الشخصي
+        // إذا لم يكسر العرش، نرسل له الرسالة العادية للاعتماد فقط
+        if (!isNewKing) {
+            const timeKey = new Date().getTime();
+            await userRef.collection('notifications').doc(`approve_${data.userId}_${timeKey}`).set({
+                type: 'admin_alert',
+                senderId: 'admin', 
+                senderName: t.admin_name, 
+                senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
+                text: t.admin_notif_approve, 
+                status: 'pending', 
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
         if (auth.currentUser && auth.currentUser.uid === data.userId) {
             let localData = JSON.parse(localStorage.getItem('currentUser') || '{}');
             localData.stats = updatedStats;
@@ -516,17 +530,14 @@ async function approveWorkout(docId) {
         await docRef.delete();
 
         showToast(t.approve_success);
-        loadPendingWorkouts(); // إعادة تحميل الطلبات
+        loadPendingWorkouts();
     } catch (e) { 
         console.error(e); 
         showToast(t.approve_fail); 
     } finally {
-        // 🔓 فتح القفل بعد ما يخلص كل شيء عشان الإدارة تقدر تقيم الطلب اللي بعده
         isApprovingWorkout = false;
     }
 }
-
-
 
 async function rejectWorkout(docId) {
     const t = translations[currentLang || 'ar'];
