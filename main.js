@@ -436,11 +436,7 @@ window.deleteAdminMessage = async function(docId) {
             text: t.admin_notif_approve, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 🚨 الخطوة السحرية: إذا كسر رقمه الشخصي، نفحص هل كسر عرش مدينته؟
-        if (isNewPR && userData.city) {
-            await checkThroneUsurperFromAdmin(maxW, userData.city, userData.firstName, data.userId);
-        }
-
+   
         try { await storage.refFromURL(data.videoUrl).delete(); } catch(err) {}
         await docRef.delete();
 
@@ -449,62 +445,6 @@ window.deleteAdminMessage = async function(docId) {
     } catch (e) { 
         console.error(e); 
         showToast(t.approve_fail); 
-    }
-}
-
-// دالة إطلاق إنذار سقوط العرش (تعمل بصمت في الخلفية بعد موافقة الآدمن)
-async function checkThroneUsurperFromAdmin(newWeight, city, newKingName, newKingId) {
-    try {
-        // 1. جلب الملك السابق للمدينة (بناءً على الأوزان قبل هذا اللاعب)
-        const snapshot = await db.collection('users')
-            .where('city', '==', city)
-            .orderBy('stats.maxWeight', 'desc')
-            .limit(2) // نجيب أعلى 2 عشان نتاكد
-            .get();
-
-        let previousKingId = null;
-        let previousKingWeight = 0;
-
-        snapshot.forEach(doc => {
-            // نبحث عن أعلى وزن للاعب "غير" اللاعب الحالي اللي اعتمدنا وزنه للتو
-            if (doc.id !== newKingId && !previousKingId) {
-                previousKingId = doc.id;
-                previousKingWeight = doc.data().stats?.maxWeight || 0;
-            }
-        });
-
-        // 2. إذا لم يكن هناك ملك سابق، أو وزنه أقل من الوزن الجديد.. إذن العرش سقط! 👑
-        if (!previousKingId || newWeight > previousKingWeight) {
-            
-            // جلب كل أبطال المدينة لإبلاغهم
-            const cityUsersSnap = await db.collection('users').where('city', '==', city).get();
-            const batch = db.batch(); 
-            let count = 0;
-            
-            cityUsersSnap.forEach(userDoc => {
-                // نرسل الإنذار للجميع (باستثناء الملك الجديد نفسه)
-                if (userDoc.id !== newKingId) { 
-                    const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
-                    batch.set(notifRef, {
-                        type: 'throne_fall',
-                        newKingName: newKingName || 'بطل مجهول',
-                        newWeight: newWeight,
-                        city: city,
-                        status: 'pending',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    count++;
-                }
-            });
-
-            // إطلاق الإنذار الشامل للمدينة
-            if (count > 0) {
-                await batch.commit(); 
-                console.log(`تم إرسال إنذار سقوط العرش لـ ${count} لاعبين في مدينة ${city}`);
-            }
-        }
-    } catch (error) {
-        console.error("خطأ في فحص العرش:", error);
     }
 }
 
@@ -2046,7 +1986,7 @@ updateQuestProgress('leaderboard', 1); // ربط مهمة التجسس على ا
                 <div style="display: flex; align-items: center; gap: 15px; cursor: pointer;" onclick="viewPlayerProfile('${doc.id}')">
                     <span style="font-size: 1.2rem; min-width: 30px; text-align: center;">${rankEmoji}</span>
                     <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                    <span style="font-weight: 700; color: white;">${data.firstName || 'Player'}</span>
+<span style="font-weight: 700; color: white;">${(data.firstName || 'Player').replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>
                 </div>
                 
                 <div style="text-align: right; direction: ltr; display: flex; flex-direction: column; align-items: flex-end;">
@@ -3890,12 +3830,10 @@ async function updateStat(statName, value, isMax = false) {
     if (isMax) {
         if (value > oldValue) {
             savedData.stats[statName] = value;
-            
-            if (statName === 'maxWeight' && savedData.city) {
-                checkThroneUsurper(value, savedData.city, savedData.firstName || 'بطل');
-            }
+            // ملاحظة: التحقق من سقوط العرش يتم الآن آلياً عبر Cloud Functions.
         }
     } else {
+
         savedData.stats[statName] = oldValue + value;
     }
 
@@ -3903,74 +3841,6 @@ async function updateStat(statName, value, isMax = false) {
     db.collection('users').doc(user.uid).set({ stats: savedData.stats }, { merge: true });
     
     checkBadges(savedData, user);
-}
-
-
-
-
-async function checkThroneUsurper(newWeight, city, myName) {
-    const currentUser = auth.currentUser;
-    if (!currentUser || !city) return;
-
-    try {
-        // جلب الملك الحالي للمدينة
-        const snapshot = await db.collection('users')
-            .where('city', '==', city)
-            .orderBy('stats.maxWeight', 'desc')
-            .limit(1)
-            .get();
-
-        let currentKingId = null;
-        let currentKingWeight = 0;
-
-        if (!snapshot.empty) {
-            snapshot.forEach(doc => {
-                currentKingId = doc.id;
-                currentKingWeight = doc.data().stats?.maxWeight || 0;
-            });
-        }
-
-        // 1. إذا أنا أصلاً الملك وقاعد بزيد رقمي القياسي لسه أعلى، ما بنزعج الناس بإشعار
-        if (currentKingId === currentUser.uid) {
-            return;
-        }
-
-        // 2. إذا رقمي الجديد كسر رقم الملك الحالي! ⚔️
-        if (newWeight > currentKingWeight) {
-            
-            // إشعار فوري إلك أنت عشان تعرف إنك عملت إنجاز عظيم
-            showToast("⚔️ لقد أسقطت العرش! جاري إبلاغ المدينة...");
-            
-            // جلب كل لاعبين مدينتي لإرسال الإشعار لهم
-            const cityUsersSnap = await db.collection('users').where('city', '==', city).get();
-            const batch = db.batch(); 
-            let count = 0;
-            
-            cityUsersSnap.forEach(userDoc => {
-                // بنبعث الإشعار للكل (ومنهم صاحبك) باستثنائك أنت
-                if (userDoc.id !== currentUser.uid) { 
-                    const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
-                    batch.set(notifRef, {
-                        type: 'throne_fall',
-                        newKingName: myName,
-                        newWeight: newWeight,
-                        city: city,
-                        status: 'pending',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    count++;
-                }
-            });
-
-            // تنفيذ الإرسال الجماعي
-            if (count > 0) {
-                await batch.commit(); 
-                setTimeout(() => showToast("📢 تم إرسال إنذار سقوط العرش لجميع أبطال المدينة!"), 1500);
-            }
-        }
-    } catch (error) {
-        console.error("Error checking throne:", error);
-    }
 }
 
 
@@ -5201,13 +5071,19 @@ async function populateMapCitiesDropdown(country, defaultCity) {
 
 // دالة تحميل الخريطة حسب المدينة المختارة
 function loadCityMapData(city, country) {
-    const t = translations[currentLang || 'ar']; // سحب الترجمة
+    const t = translations[currentLang || 'ar'];
     const infoContainer = document.getElementById('monster-info');
     infoContainer.innerHTML = `<i class="fa-solid fa-spinner fa-spin fa-2x"></i> ${t.moving_to} ${city}...`;
     
+    // 🔥 تدمير الخريطة القديمة فوراً قبل أي تأخير زمني لمنع تضارب الخرائط
+    if (window.monsterMap) { 
+        window.monsterMap.off();
+        window.monsterMap.remove(); 
+        window.monsterMap = null; 
+    }
+    
     setTimeout(async () => {
-        if (window.monsterMap) { window.monsterMap.remove(); window.monsterMap = null; }
-        
+
         let cityCoords = [31.9522, 35.9334]; 
         try {
             const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&country=${country}&format=json`);
