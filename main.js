@@ -3880,7 +3880,6 @@ function showBadgeReward(id) {
     }
 }
 
-
 async function updateStat(statName, value, isMax = false) {
     const user = auth.currentUser;
     if (!user) return;
@@ -3889,29 +3888,26 @@ async function updateStat(statName, value, isMax = false) {
     if (!savedData.stats) savedData.stats = { meals: 0, workouts: 0, maxWeight: 0, streak: 0, dl_combo: 0, sq_score: 0 };
     if (!savedData.earnedBadges) savedData.earnedBadges = [];
 
-    // 🔥 تنظيف العدادات قبل التحديث لتجنب خطأ الـ object
     let oldValue = savedData.stats[statName];
     if (typeof oldValue !== 'number') {
         if (statName === 'workouts' && Array.isArray(savedData.workouts)) {
-            oldValue = savedData.workouts.length; // استرجاع العدد الصحيح للتمارين
+            oldValue = savedData.workouts.length;
         } else {
             oldValue = 0;
         }
     }
 
-    // التحديث حسب نوع الإحصائية
     if (isMax) {
-        if (value > oldValue) {
-            savedData.stats[statName] = value;
-            // ملاحظة: التحقق من سقوط العرش يتم الآن آلياً عبر Cloud Functions.
-        }
+        if (value > oldValue) savedData.stats[statName] = value;
     } else {
-
         savedData.stats[statName] = oldValue + value;
     }
 
     localStorage.setItem('currentUser', JSON.stringify(savedData));
-    db.collection('users').doc(user.uid).set({ stats: savedData.stats }, { merge: true });
+    
+    // 🔥 بدلاً من الكتابة المباشرة، نرسلها للبوابة الآمنة في السيرفر
+    firebase.functions().httpsCallable('secureSyncProgress')({ stats: savedData.stats })
+        .catch(e => console.error("Error syncing stats:", e));
     
     checkBadges(savedData, user);
 }
@@ -3937,7 +3933,7 @@ function checkBadges(data, user) {
     if (newlyEarned.length > 0) {
         data.earnedBadges = earned;
         localStorage.setItem('currentUser', JSON.stringify(data));
-        db.collection('users').doc(user.uid).update({ earnedBadges: earned });
+firebase.functions().httpsCallable('secureSyncProgress')({ earnedBadges: earned }).catch(e=>console.error(e));
 
         newlyEarned.forEach((b, index) => {
             setTimeout(() => {
@@ -4789,60 +4785,26 @@ window.sendFriendRequest = async function(targetUid, targetName, targetPhoto) {
     }
 };
 
-
-
-// دالة قبول طلب الصداقة (تم الإصلاح ✅)
+// دالة قبول طلب الصداقة (النسخة الآمنة المربوطة بالسيرفر 🛡️)
 window.acceptFriendRequest = async function(notifId, senderId, senderName, senderPhoto) {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
     try {
-        // 1. جلب بياناتي عشان أضيف نفسي عند الطرف الثاني
-        const myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        const myName = myData.firstName ? `${myData.firstName} ${myData.lastName}` : "بطل";
-        const myPhoto = myData.photoURL || "https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png";
-        const myLevel = myData.rank || 1;
+        // إظهار اللودينج عشان اللاعب يعرف إنه انكبس
+        showToast(currentLang === 'en' ? "Accepting..." : "جاري القبول...");
+        
+        // 🛡️ توجيه الطلب للسيرفر الآمن بدل ما نكتب عالداتا بيس مباشرة
+        const acceptCall = firebase.functions().httpsCallable('secureAcceptFriend');
+        await acceptCall({ senderId, senderName, senderPhoto, notifId });
 
-        // 2. تجهيز كائنات الأصدقاء بنفس الشكل اللي بيقرأه التطبيق
-        const friendForMe = { id: senderId, name: senderName, img: senderPhoto, level: 1 };
-        const friendForThem = { id: currentUser.uid, name: myName, img: myPhoto, level: myLevel };
-
-        const batch = db.batch();
-
-        const currentUserRef = db.collection('users').doc(currentUser.uid);
-        const senderUserRef = db.collection('users').doc(senderId);
-        // تم الإصلاح: مسار الإشعار الصحيح
-        const notifRef = db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId);
-
-        // إضافة الصديق لي
-        batch.update(currentUserRef, {
-            myFriendsList: firebase.firestore.FieldValue.arrayUnion(friendForMe)
-        });
-
-        // إضافة الصديق للطرف الآخر
-        batch.update(senderUserRef, {
-            myFriendsList: firebase.firestore.FieldValue.arrayUnion(friendForThem)
-        });
-
-        // حذف الإشعار لأن الطلب تم قبوله
-        batch.delete(notifRef);
-
-        await batch.commit();
-
-        // تحديث اللوكال ستورج
-        let localFriends = JSON.parse(localStorage.getItem('myFriends') || '[]');
-        if (!localFriends.find(f => f.id === senderId)) {
-            localFriends.push(friendForMe);
-            localStorage.setItem('myFriends', JSON.stringify(localFriends));
-        }
-
-        showToast(currentLang === 'en' ? "Friend request accepted!" : "تم قبول الصداقة! 🤝");
-
-        // إخفاء الإشعار من الشاشة
+        // إخفاء الإشعار من الشاشة فوراً
         const notifElement = document.getElementById(notifId);
         if (notifElement) notifElement.remove();
 
-        // تحديث واجهة الأصدقاء
+        showToast(currentLang === 'en' ? "Friend request accepted! 🤝" : "تم قبول الصداقة! 🤝");
+
+        // تحديث واجهة الأصدقاء لتعرض الصديق الجديد
         if (typeof renderMyFriends === "function") renderMyFriends();
 
     } catch (error) {
