@@ -2516,7 +2516,6 @@ const workoutTemplates = {
         "Full Body": ["Squat", "Bench Press", "Barbell Row", "Shoulder Press", "Deadlift"]
     }
 };
-
 window.addExerciseRow = function() {
     const container = document.getElementById('exercises-container');
     if (!container) return; 
@@ -2526,13 +2525,14 @@ window.addExerciseRow = function() {
     const t = translations[currentLang || 'ar'];
     
     row.innerHTML = `
-        <input type="text" list="smart-exercises" placeholder="${t.ex_name || 'التمرين'}" class="ex-name" spellcheck="false">
-        <input type="number" placeholder="${t.ex_reps || 'العدات'}" class="ex-reps" inputmode="numeric">
-        <input type="number" placeholder="${t.ex_weight || 'الوزن'}" class="ex-weight" inputmode="decimal">
+        <input type="text" name="exercise_name" list="smart-exercises" placeholder="${t.ex_name || 'التمرين'}" class="ex-name" spellcheck="false">
+        <input type="number" name="exercise_reps" placeholder="${t.ex_reps || 'العدات'}" class="ex-reps" inputmode="numeric">
+        <input type="number" name="exercise_weight" placeholder="${t.ex_weight || 'الوزن'}" class="ex-weight" inputmode="decimal">
         <button class="remove-exercise-btn" onclick="this.parentElement.remove()" title="حذف">×</button>
     `;
     container.appendChild(row);
 };
+
 
 window.selectWorkoutType = function(type) {
     document.getElementById('selected-workout-type').innerText = type;
