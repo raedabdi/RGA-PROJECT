@@ -2829,17 +2829,20 @@ if (typeof addXP === "function") addXP(50, 'workout');
 // ==========================================
 // 🚀 نظام الترقية والمستويات الذكي (Leveling Engine)
 // ==========================================
-window.addXP = async function(amount, actionType = 'game') {
+window.addXP = async function(amount, actionType = 'game', securityToken = null) {
     const user = auth.currentUser;
-    if (!user) {
-        console.error("❌ اللاعب غير مسجل دخول.");
-        return;
+    if (!user) return;
+
+    // 🛡️ حماية إضافية من الواجهة: إذا شخص حاول استخدام الكونسول بدون الرمز السري للعبة
+    if (actionType === 'game' && securityToken !== 'RGA_SECURE_998877') {
+        console.error("🛑 العب بنظافة يا وحش! محاولة الغش مكشوفة.");
+        return; 
     }
 
     try {
-        // المناداة على الدالة في السيرفر
         const secureXPCall = firebase.functions().httpsCallable('secureAddXP');
-        const result = await secureXPCall({ actionType: actionType, amount: amount });
+        // نرسل الرمز السري للسيرفر للتأكد
+        const result = await secureXPCall({ actionType: actionType, amount: amount, securityToken: securityToken });
         
         const xpAddedByServer = result.data.xpAdded;
 
@@ -2852,14 +2855,11 @@ window.addXP = async function(amount, actionType = 'game') {
             savedData.maxXp = savedData.rank * 500;
             
             localStorage.setItem('currentUser', JSON.stringify(savedData));
-            
             if (typeof renderUI === "function") renderUI(savedData);
 
             if (typeof updateStat === "function") {
                 updateStat('xpTotal', savedData.xp, true);
-                if (savedData.rank > oldLevel) {
-                    updateStat('levelReach', savedData.rank, true);
-                }
+                if (savedData.rank > oldLevel) updateStat('levelReach', savedData.rank, true);
             }
 
             if (savedData.rank > oldLevel) {
@@ -2869,13 +2869,10 @@ window.addXP = async function(amount, actionType = 'game') {
                 }, 1200); 
             }
         }
-
     } catch (error) {
-        console.error("🛑 تم الرفض من السيرفر!");
-        console.error(error.message);
+        console.error("تم رفض العملية من السيرفر.");
     }
 };
-
 
 // ==========================================
 // 📊 مركز الأداء والشارت
