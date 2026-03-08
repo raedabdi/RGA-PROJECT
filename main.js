@@ -2574,8 +2574,20 @@ window.selectWorkoutType = function(type) {
 
 window.loadWorkoutTemplate = function() {
     const typeElement = document.getElementById('selected-workout-type');
-    const type = typeElement ? typeElement.innerText : '';
-    const template = workoutTemplates[currentLang][type]; // جلب التمارين بلغة التطبيق الحالية
+    let type = typeElement ? typeElement.innerText : '';
+    
+    // البحث في القاموسين لتفادي انهيار اللغة
+    let template = workoutTemplates['ar'][type] || workoutTemplates['en'][type]; 
+
+    if (!template) {
+        // محاولة إيجاد الترجمة العكسية
+        const t = translations[currentLang === 'en' ? 'ar' : 'en'];
+        let reverseType = Object.keys(t).find(key => t[key] === type);
+        if(reverseType) {
+            let mappedKey = translations[currentLang][reverseType];
+            template = workoutTemplates[currentLang][mappedKey];
+        }
+    }
 
     if (!template) return;
 
@@ -2589,8 +2601,7 @@ window.loadWorkoutTemplate = function() {
         if(lastRow) lastRow.querySelector('.ex-name').value = exName;
     });
 
-    const t = translations[currentLang || 'ar'];
-    showToast(t.template_loaded);
+    showToast(translations[currentLang].template_loaded);
 };
 
 
@@ -2601,7 +2612,7 @@ async function saveWorkout() {
     let hasValidExercise = false;
     let exercises = [];
     const typeElement = document.getElementById('selected-workout-type');
-    const typeText = typeElement ? typeElement.innerText : 'تمرين'; // (صدر، ظهر، أرجل...)
+    const typeText = typeElement ? typeElement.innerText : 'تمرين'; 
     
     let needsProof = false;
     let heavyWeight = 0;
@@ -2624,27 +2635,20 @@ async function saveWorkout() {
                 weight: currentWeight > 0 ? currentWeight : '-' 
             });
 
-            // 🔥 تحديد الحد الأقصى حسب العضلة واسم التمرين 🔥
-            // 🔥 تحديد الحد الأقصى حسب العضلة والنظام واسم التمرين 🔥
             let threshold = 999;
-            
-            // 1. فحص العضلات المفردة (Bro Split)
             if (typeText.includes("صدر") || typeText.includes("Chest")) threshold = 60;
             if (typeText.includes("ظهر") || typeText.includes("Back")) threshold = 80;
             if (typeText.includes("أكتاف") || typeText.includes("Shoulders")) threshold = 50;
             if (typeText.includes("بايسبس") || typeText.includes("ترايسبس") || typeText.includes("Biceps") || typeText.includes("Triceps")) threshold = 50;
             if (typeText.includes("بطن") || typeText.includes("Core")) threshold = 80;
 
-            // 2. فحص الأنظمة الشاملة والدفع والسحب (PPL & Full Body)
             if (typeText.includes("دفع") || typeText.includes("Push")) threshold = 70;
             if (typeText.includes("سحب") || typeText.includes("Pull")) threshold = 70;
             if (typeText.includes("أرجل") || typeText.includes("Legs")) threshold = 120;
             if (typeText.includes("شامل") || typeText.includes("Full Body")) threshold = 60;
 
-            // 3. استثناءات بالاسم المتعارف عليه (هذه الأرقام تطغى على النظام العام)
             if (exName.includes("ديدليفت") || exName.toLowerCase().includes("deadlift")) threshold = 120;
             if (exName.includes("سكوات") || exName.toLowerCase().includes("squat")) threshold = 140;
-
 
             if (currentWeight >= threshold) {
                 needsProof = true;
@@ -2661,24 +2665,18 @@ async function saveWorkout() {
         return; 
     }
 
-    // 2. إذا كسر الرقم، بنطلب فيديو
-    // 2. إذا كسر الرقم، بنطلب فيديو
     if (needsProof) {
-        const t = translations[currentLang || 'ar']; // سحب الترجمة
-        
-        // رسالة التنبيه الديناميكية مترجمة
+        const t = translations[currentLang || 'ar']; 
         const confirmMsg = currentLang === 'en' 
             ? `💪 You are a beast!!\nYou lifted ${heavyWeight}kg in ${heavyExerciseName}!\nSince you broke the record, you must upload a video to prove your strength.\nReady to upload?`
             : `💪 إنت وحش!!\nشلت ${heavyWeight}kg بتمرين ${heavyExerciseName}!\nلأنك قطعت الدنيا، لازم ترفع فيديو يثبت قوتك عشان نعتمدلك الرقم ونحطه بالليدربورد.\nجاهز ترفع الفيديو؟`;
 
         const confirmProof = confirm(confirmMsg);
-        
         if (!confirmProof) {
-            showToast(t.cancel_upload); // 🔥 رسالة الإلغاء المترجمة
+            showToast(t.cancel_upload); 
             return;
         }
 
-        // إنشاء زر رفع فيديو مخفي
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'video/*';
@@ -2686,12 +2684,11 @@ async function saveWorkout() {
         fileInput.onchange = async (e) => {
             const file = e.target.files[0];
             if(file) {
-                if(file.size > 30 * 1024 * 1024) { // منع فيديوهات أكبر من 30 ميجا
-                    showToast(t.video_size_error); // 🔥 رسالة الحجم المترجمة
+                if(file.size > 30 * 1024 * 1024) { 
+                    showToast(t.video_size_error); 
                     return;
                 }
 
-                // تجهيز الشاشة وعرض عداد التحميل %
                 closeWorkoutModal();
                 document.getElementById('workout-step-3').innerHTML = `
                     <div style="text-align:center; padding: 40px;">
@@ -2702,32 +2699,26 @@ async function saveWorkout() {
                 document.getElementById('workout-modal').classList.add('active');
 
                 const user = auth.currentUser;
-                // تنظيف اسم الملف عشان الفايربيس ما يعلق إذا الاسم فيه عربي أو مسافات
                 const cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
                 const videoRef = storage.ref(`proofs/${user.uid}_${Date.now()}_${cleanFileName}`);
                 
-                // بدء الرفع مع المراقبة
                 const uploadTask = videoRef.put(file);
 
                 uploadTask.on('state_changed', 
                     (snapshot) => {
-                        // حساب النسبة المئوية وتحديث الرقم عالشاشة
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                         const progressText = document.getElementById('upload-progress');
                         if (progressText) progressText.innerText = Math.round(progress) + '%';
                     }, 
                     (error) => {
-                        console.error("خطأ في الرفع:", error);
                         closeWorkoutModal();
-                        showToast(t.upload_fail_storage); // 🔥 رسالة فشل الرفع المترجمة
+                        showToast(t.upload_fail_storage); 
                     }, 
                     async () => {
-                        // لما يوصل 100% ويخلص رفع
                         try {
                             const videoURL = await uploadTask.snapshot.ref.getDownloadURL();
                             let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
                             
-                            // حفظ التمرين في قائمة المراجعة (Pending)
                             await db.collection('pending_workouts').add({
                                 userId: user.uid,
                                 userName: JSON.parse(localStorage.getItem('currentUser')).firstName,
@@ -2739,7 +2730,6 @@ async function saveWorkout() {
                                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
                             });
 
-                            // تجميد حساب اللاعب
                             await db.collection('users').doc(user.uid).update({ isWorkoutPending: true });
                             
                             let savedData = JSON.parse(localStorage.getItem('currentUser'));
@@ -2747,11 +2737,10 @@ async function saveWorkout() {
                             localStorage.setItem('currentUser', JSON.stringify(savedData));
 
                             closeWorkoutModal();
-                            showToast(t.upload_success_wait); // 🔥 رسالة النجاح والانتظار المترجمة
+                            showToast(t.upload_success_wait); 
                         } catch (dbError) {
-                            console.error("خطأ في قاعدة البيانات:", dbError);
                             closeWorkoutModal();
-                            showToast(t.save_db_error); // 🔥 رسالة فشل حفظ البيانات المترجمة
+                            showToast(t.save_db_error); 
                         }
                     }
                 );
@@ -2759,28 +2748,22 @@ async function saveWorkout() {
         };
         fileInput.click();
         return;
-
     }
 
-    // 3. إذا الأوزان طبيعية، بيحفظ التمرين مباشرة (الكود القديم تبعك)
-    // 3. إذا الأوزان طبيعية، بيحفظ التمرين مباشرة (مع نظام المكافآت المحصن سحابياً)
     let workoutHistory = [];
     try { workoutHistory = JSON.parse(localStorage.getItem('userWorkouts')) || []; } catch(e) {}
     let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     workoutHistory.unshift({ date: dateStr, type: typeText, details: exercises }); 
     localStorage.setItem('userWorkouts', JSON.stringify(workoutHistory));
 
+    let totalVol = 0; let totalReps = 0;
+    exercises.forEach(ex => { 
+        totalVol += (parseFloat(ex.weight) * parseInt(ex.reps)) || 0; 
+        totalReps += parseInt(ex.reps) || 0;
+    });
 
-let totalVol = 0; let totalReps = 0;
-exercises.forEach(ex => { 
-    totalVol += (parseFloat(ex.weight) * parseInt(ex.reps)) || 0; 
-    totalReps += parseInt(ex.reps) || 0;
-});
-await updateQuestProgress('volume', totalVol);
-await updateQuestProgress('reps', totalReps);
-
-
-
+    // 🔥 التحديث المدمج للمهام (هنا السحر الجديد)
+    await updateQuestProgressBatch({ volume: totalVol, reps: totalReps, workout_days: 1 });
 
     if (typeof updateStat === "function") {
         updateStat('workouts', 1);
@@ -2793,54 +2776,42 @@ await updateQuestProgress('reps', totalReps);
     const user = auth.currentUser;
     if (user) { 
         let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        const todayStr = new Date().toDateString(); // تاريخ اليوم
-        
-        // قراءة التاريخ من بيانات اللاعب المحفوظة بالسحابة لمنع الغش من جهاز آخر
+        const todayStr = new Date().toDateString(); 
         const lastXpDate = savedData.lastWorkoutXpDate || "";
 
         if (lastXpDate === todayStr) {
-            // اللاعب أخذ مكافأته اليوم، نحسب الوقت المتبقي لمنتصف الليل
             const now = new Date();
             const tomorrow = new Date(now);
             tomorrow.setHours(24, 0, 0, 0); 
-            
             const timeLeftMs = tomorrow - now;
             const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
             
             let timeMsg = currentLang === 'en' ? `${hours}h ${minutes}m` : `${hours} س و ${minutes} د`;
-
-            // تحديث التمارين فقط في الفايربيس بدون تجديد التاريخ
             db.collection('users').doc(user.uid).update({ workouts: workoutHistory });
             showToast(currentLang === 'en' ? `Workout Saved! XP resets in ${timeMsg}` : `تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`);
             
         } else {
-
             savedData.lastWorkoutXpDate = todayStr;
             localStorage.setItem('currentUser', JSON.stringify(savedData));
-
 
             db.collection('users').doc(user.uid).update({ 
                 workouts: workoutHistory,
                 lastWorkoutXpDate: todayStr 
             });
 
-if (typeof addXP === "function") addXP(50, 'workout');
-
-            updateQuestProgress('workout_days', 1); 
+            if (typeof addXP === "function") await addXP(50, 'workout');
             showToast(currentLang === 'en' ? `Saved! +50 XP` : `تم الحفظ! +50 XP`);
         }
     } 
 
     closeWorkoutModal();
 
-    // تحديث الشاشة والرسوم البيانية فوراً
     if(document.getElementById('log-container')) {
         renderWorkoutLog();
         if(typeof initWorkoutChart === "function") setTimeout(initWorkoutChart, 200);
     }
 }
-
 
 
 
@@ -5397,27 +5368,25 @@ async function fetchCityMonster(city, coords) {
     }
 }
 
+window.claimTribute = async function() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-function claimTribute() {
-    const lastClaim = localStorage.getItem('lastTributeClaim');
-    const today = new Date().toDateString();
+    const success = await addXP(50, 'tribute');
     
-    if (lastClaim === today) {
-        showToast("الضريبة محصلة اليوم 👑"); // رسالة قصيرة جداً
-        return;
+    if (success) {
+        showToast("💰 تم تحصيل +50 XP ضريبة الملك!");
+        updateQuestProgress('tribute', 1);
+        localStorage.setItem('lastTributeClaim', new Date().toDateString());
+    } else {
+        showToast("الضريبة محصلة اليوم 👑");
     }
     
-    localStorage.setItem('lastTributeClaim', today);
-addXP(50, 'tribute');
-
-    showToast("💰 تم تحصيل +50 XP ضريبة الملك!"); // رسالة قصيرة جداً
-
-
-updateQuestProgress('tribute', 1); // ربط مهمة الضريبة
-
-
-}
-
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+};
 
 
 // ==========================================
@@ -5628,37 +5597,29 @@ function animateValue(obj, start, end, duration) {
     };
     window.requestAnimationFrame(step);
 }
-
-// دالة إنهاء التمرين اللايف (تشمل الملخص ونظام المكافآت الذكي)
 async function finishLiveWorkout() {
     if (liveExercises.length === 0) { closeLiveWorkout(); return; }
     
-    // 1. حساب إحصائيات التمرين للملخص
     const totalSets = liveExercises.length;
     const totalVolume = liveExercises.reduce((sum, ex) => sum + (ex.weight * ex.reps), 0);
+    let liveReps = 0;
+    liveExercises.forEach(ex => liveReps += parseInt(ex.reps) || 0);
 
-let liveReps = 0;
-liveExercises.forEach(ex => liveReps += parseInt(ex.reps) || 0);
-await updateQuestProgress('volume', totalVolume);
-await updateQuestProgress('reps', liveReps);
+    // 🔥 التحديث المدمج للمهام للتمرين اللايف
+    await updateQuestProgressBatch({ volume: totalVolume, reps: liveReps, workout_days: 1 });
 
-// تم إزالة سطر workout_days
-
-
-if (typeof updateStat === "function") {
-    updateStat('workouts', 1);
-    liveExercises.forEach(ex => {
-        let w = parseFloat(ex.weight) || 0;
-        if (w > 0) updateStat('maxWeight', w, true);
-    });
-}
-
+    if (typeof updateStat === "function") {
+        updateStat('workouts', 1);
+        liveExercises.forEach(ex => {
+            let w = parseFloat(ex.weight) || 0;
+            if (w > 0) updateStat('maxWeight', w, true);
+        });
+    }
 
     const m = String(Math.floor(liveSeconds / 60)).padStart(2, '0');
     const s = String(liveSeconds % 60).padStart(2, '0');
     const finalTime = `${m}:${s}`;
 
-    // 2. تحديث السجل المحلي
     let workoutHistory = JSON.parse(localStorage.getItem('userWorkouts')) || [];
     let dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     workoutHistory.unshift({ date: dateStr, type: "تمرين لايف", details: liveExercises });
@@ -5673,9 +5634,7 @@ if (typeof updateStat === "function") {
         const todayStr = new Date().toDateString();
         const lastXpDate = savedData.lastWorkoutXpDate || "";
 
-        // 🛡️ فحص هل أخذ المكافأة اليوم أو لأ
         if (lastXpDate === todayStr) {
-            // أخذها اليوم.. نحسب الوقت المتبقي لمنتصف الليل
             const now = new Date();
             const tomorrow = new Date(now);
             tomorrow.setHours(24, 0, 0, 0); 
@@ -5686,7 +5645,6 @@ if (typeof updateStat === "function") {
             xpMessage = currentLang === 'en' ? `XP resets in ${hours}h ${minutes}m` : `تتجدد المكافأة بعد ${hours}س و${minutes}د`;
             await db.collection('users').doc(user.uid).update({ workouts: workoutHistory });
         } else {
-            // أول تمرين اليوم، مبروك الـ 50 XP
             savedData.lastWorkoutXpDate = todayStr;
             localStorage.setItem('currentUser', JSON.stringify(savedData));
             
@@ -5695,14 +5653,11 @@ if (typeof updateStat === "function") {
                 lastWorkoutXpDate: todayStr 
             });
             
-            if (typeof addXP === "function") addXP(50);
-            updateQuestProgress('workout_days', 1); 
+            if (typeof addXP === "function") await addXP(50, 'workout');
             xpGained = true;
             xpMessage = "+50 XP";
         }
 
-
-        // إرسال إشعار المطالبة بالعرش إذا كسر الرقم
         if (pendingProofData) {
             await db.collection('users').doc(user.uid).collection('notifications').add({
                 type: 'pending_proof',
@@ -5714,7 +5669,6 @@ if (typeof updateStat === "function") {
         }
     }
 
-    // 3. إيقاف العدادات وإخفاء شاشة التمرين الحالية
     clearInterval(liveDurationTimer); 
     clearInterval(restInterval);
     const overlay = document.getElementById('live-workout-overlay');
@@ -5722,14 +5676,12 @@ if (typeof updateStat === "function") {
     setTimeout(() => overlay.style.display = 'none', 500);
     document.getElementById('rest-timer-overlay').classList.remove('active');
 
-    // 4. عرض شاشة الملخص الفخمة
     const summaryOverlay = document.getElementById('live-summary-overlay');
     if (summaryOverlay) {
         document.getElementById('sum-time').innerText = finalTime;
         document.getElementById('sum-sets').innerText = totalSets;
         document.getElementById('sum-volume').innerText = "0"; 
         
-        // تعديل ستايل الـ XP بالملخص (إذا أخذ نقاط بتضوي، إذا لأ بتكون رمادية)
         const xpRewardBox = document.querySelector('.xp-reward-box');
         if (xpRewardBox) {
             xpRewardBox.innerText = xpMessage;
@@ -5745,7 +5697,6 @@ if (typeof updateStat === "function") {
             animateValue(document.getElementById('sum-volume'), 0, totalVolume, 1500);
         }, 50);
     } else {
-        // احتياط في حال نسيت تضيف كود الـ HTML تبع الملخص
         showToast(currentLang === 'en' ? `Workout Saved! ${xpMessage}` : `تم حفظ التمرين! ${xpMessage}`);
         closeLiveSummary();
     }
@@ -6805,81 +6756,67 @@ window.renderQuests = function() {
 };
 
 
-window.updateQuestProgress = async function(actionType, amount = 1) {
+window.updateQuestProgressBatch = async function(updatesObj) {
     const user = auth.currentUser;
     if (!user) return;
 
     try {
-        // 🔒 جلب البيانات من قاعدة البيانات مباشرة (مصدر الحقيقة) لمنع أي تعديل محلي
         const userDoc = await db.collection('users').doc(user.uid).get();
         if (!userDoc.exists) return;
 
         let serverData = userDoc.data();
         let serverQuests = serverData.quests || { active: [], progress: {} };
-
         if (!serverQuests.active || serverQuests.active.length === 0) return;
 
         let progressChanged = false;
         let totalXpGained = 0;
         const isEn = currentLang === 'en';
+        if (!serverQuests.progress) serverQuests.progress = {};
 
         serverQuests.active.forEach(quest => {
-            // فحص نوع المهمة
-            if (quest.type === actionType) {
-                if (!serverQuests.progress) serverQuests.progress = {};
+            // نتحقق إذا كان نوع المهمة موجود ضمن الكائن المرسل
+            if (updatesObj[quest.type] !== undefined) {
                 let currentProg = serverQuests.progress[quest.id] || 0;
-                
+                let amount = updatesObj[quest.type];
+
                 if (currentProg < quest.target) {
-                    // إذا كانت مهمة الكومبو، نأخذ الرقم الأعلى دائماً، لا نجمعه
-                    if (actionType === 'dl_combo') {
-                        if (amount > currentProg) {
-                            serverQuests.progress[quest.id] = amount;
-                            progressChanged = true;
-                        }
+                    if (quest.type === 'dl_combo') {
+                        if (amount > currentProg) { serverQuests.progress[quest.id] = amount; progressChanged = true; }
                     } else {
                         serverQuests.progress[quest.id] = currentProg + amount;
                         progressChanged = true;
                     }
                     
-                    if (progressChanged) {
-                        let newProg = serverQuests.progress[quest.id];
-
-                        // إذا اكتملت المهمة للتو!
-                        if (newProg >= quest.target && currentProg < quest.target) {
-                            totalXpGained += quest.xp;
-                            let qName = isEn ? quest.en : quest.ar;
-                            setTimeout(() => {
-                                showToast(`🎯 ${isEn ? 'Quest Completed' : 'تم إنجاز المهمة'}: ${qName}! (+${quest.xp} XP)`);
-                            }, 800);
-                        }
+                    if (progressChanged && serverQuests.progress[quest.id] >= quest.target && currentProg < quest.target) {
+                        totalXpGained += quest.xp;
+                        let qName = isEn ? quest.en : quest.ar;
+                        setTimeout(() => showToast(`🎯 ${isEn ? 'Quest Completed' : 'تم إنجاز المهمة'}: ${qName}! (+${quest.xp} XP)`), 800);
                     }
                 }
             }
         });
 
         if (progressChanged) {
-            // 1. تحديث الفايربيس أولاً بالبيانات الموثوقة
             await db.collection('users').doc(user.uid).update({ quests: serverQuests });
-
-            // 2. تحديث اللوكال ستورج ليتطابق مع السيرفر النظيف
             let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
             savedData.quests = serverQuests;
             localStorage.setItem('currentUser', JSON.stringify(savedData));
             
-            // تحديث واجهة المهام إذا كان المستخدم في الداشبورد
-            if (document.getElementById('active-quests-container')) {
-                if (typeof renderQuests === 'function') renderQuests();
-            }
-
-                      if (totalXpGained > 0) {
-                await addXP(totalXpGained, 'quest'); 
-            }
-
+            if (document.getElementById('active-quests-container')) renderQuests();
+            if (totalXpGained > 0) await addXP(totalXpGained, 'quest');
         }
-    } catch (error) {
-        console.error("Error updating quests securely:", error);
-    }
+    } catch (error) { console.error("Error updating quests securely:", error); }
 };
+
+// دالة لدعم الاستدعاء الفردي القديم لكي لا تتعطل باقي الأزرار
+window.updateQuestProgress = async function(actionType, amount = 1) {
+    let obj = {};
+    obj[actionType] = amount;
+    await updateQuestProgressBatch(obj);
+};
+
+
+
 
 // تهيئة النظام عند فتح الداشبورد
 document.addEventListener('DOMContentLoaded', () => {
