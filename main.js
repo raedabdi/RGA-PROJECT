@@ -391,9 +391,7 @@ window.deleteAdminMessage = async function(docId) {
 };
 
 
-
-        
-        async function approveWorkout(docId) {
+async function approveWorkout(docId) {
     const t = translations[currentLang || 'ar'];
     if(!confirm(t.confirm_approve)) return;
     try {
@@ -401,7 +399,7 @@ window.deleteAdminMessage = async function(docId) {
         const docRef = db.collection('pending_workouts').doc(docId);
         const data = (await docRef.get()).data();
 
-        // 1. جلب بيانات المستخدم الذي رفع الفيديو
+        // 1. تحديث بيانات المستخدم
         const userRef = db.collection('users').doc(data.userId);
         const userSnap = await userRef.get();
         let userData = userSnap.data();
@@ -409,34 +407,86 @@ window.deleteAdminMessage = async function(docId) {
         let workouts = userData.workouts || [];
         workouts.unshift({ date: data.date, type: data.type, details: data.details });
 
-        // 2. فحص هل هناك وزن جديد أعلى من وزنه القديم؟
-        let maxW = userData.stats?.maxWeight || 0;
-        let isNewPR = false;
-        
-        data.details.forEach(ex => { 
-            let exWeight = parseFloat(ex.weight);
-            if(exWeight > maxW) {
-                maxW = exWeight;
-                isNewPR = true;
-            }
-        });
+        // سحب الوزن القديم ومقارنته بالجديد
+        let oldMaxW = userData.stats?.maxWeight || 0;
+        let maxW = oldMaxW;
+        data.details.forEach(ex => { if(parseFloat(ex.weight) > maxW) maxW = parseFloat(ex.weight); });
 
-        // 3. تحديث بيانات المستخدم
+        // تحديث إحصائيات اللاعب بشكل آمن
+        let updatedStats = userData.stats || {};
+        updatedStats.maxWeight = maxW;
+
         await userRef.update({
             workouts: workouts,
             isWorkoutPending: false,
-            'stats.maxWeight': maxW,
+            stats: updatedStats,
             xp: firebase.firestore.FieldValue.increment(50)
         });
 
-        // 4. إرسال إشعار موافقة للاعب نفسه
+        // 2. إرسال إشعار الاعتماد للاعب
         await userRef.collection('notifications').add({
             type: 'admin_alert',
             senderId: 'admin', senderName: t.admin_name, senderPhoto: 'https://i.ibb.co/9mPmHXkh/cropped-circle-image-2.png',
             text: t.admin_notif_approve, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-   
+        // 3. 👑 التحقق من سقوط العرش في المدينة وإرسال الإنذار 👑
+        if (maxW > oldMaxW && userData.city) {
+            const cityUsersSnap = await db.collection('users')
+                .where('city', '==', userData.city)
+                .orderBy('stats.maxWeight', 'desc')
+                .get();
+                
+            let isNewKing = false;
+
+            if (!cityUsersSnap.empty) {
+                const topPlayerDoc = cityUsersSnap.docs[0];
+                // إذا كان اللاعب هو المركز الأول بعد التحديث
+                if (topPlayerDoc.id === data.userId) {
+                    if (cityUsersSnap.docs.length > 1) {
+                        const secondPlayerDoc = cityUsersSnap.docs[1];
+                        const secondPlayerWeight = secondPlayerDoc.data().stats?.maxWeight || 0;
+                        // إذا كان وزنه القديم أقل من أو يساوي صاحب المركز الثاني، يعني هسه كسر رقمه
+                        if (oldMaxW <= secondPlayerWeight && maxW > secondPlayerWeight) {
+                            isNewKing = true;
+                        }
+                    } else {
+                        // إذا هو اللاعب الوحيد بالمدينة
+                        if (oldMaxW === 0) isNewKing = true;
+                    }
+                }
+            }
+
+            if (isNewKing) {
+                showToast("⚔️ لقد أسقط هذا اللاعب العرش في مدينته!");
+                const batch = db.batch(); 
+                cityUsersSnap.forEach(userDoc => {
+                    // إرسال الإشعار للجميع باستثناء الملك الجديد
+                    if (userDoc.id !== data.userId) { 
+                        const notifRef = db.collection('users').doc(userDoc.id).collection('notifications').doc();
+                        batch.set(notifRef, {
+                            type: 'throne_fall',
+                            newKingName: userData.firstName || 'بطل',
+                            newWeight: maxW,
+                            city: userData.city,
+                            status: 'pending',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                });
+                await batch.commit(); 
+            }
+        }
+
+        // 4. تحديث البيانات المحلية إذا كان الإدمن يجرب بحسابه الشخصي
+        if (auth.currentUser && auth.currentUser.uid === data.userId) {
+            let localData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            localData.stats = updatedStats;
+            localData.isWorkoutPending = false;
+            localData.xp = (localData.xp || 0) + 50;
+            localStorage.setItem('currentUser', JSON.stringify(localData));
+        }
+
         try { await storage.refFromURL(data.videoUrl).delete(); } catch(err) {}
         await docRef.delete();
 
