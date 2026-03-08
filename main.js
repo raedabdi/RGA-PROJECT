@@ -498,23 +498,29 @@ function activateButton(clickedButton) {
 }
 
 
-
 const firebaseConfig = {
     apiKey: "AIzaSyDV7SNwgv_K10tX0iJpNYqg8_iJnWprFB4",
     authDomain: "rgalab.firebaseapp.com",
     projectId: "rgalab",
-    storageBucket: "rgalab.firebasestorage.app", // 🔥 هذا السطر اللي تصلح وانحل فيه اللغز!
+    storageBucket: "rgalab.firebasestorage.app",
     messagingSenderId: "882288745140",
     appId: "1:882288745140:web:3c77b0f83ac4e11d30d5e1"
 };
 
-// 1. تعريفات الفايربيس الأساسية (موجودة عندك مسبقاً)
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// 🔥 السحر هنا: إجبار الفايربيس على استخدام Long Polling بدل WebChannel لحل خطأ الـ Listen 404
+db.settings({
+    experimentalForceLongPolling: true,
+    useFetchStreams: false
+});
+
 const storage = firebase.storage(); 
+
 
 // 2. الكود الآمن للإشعارات (أضفه هنا)
 let messaging = null;
