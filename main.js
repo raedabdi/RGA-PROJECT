@@ -277,9 +277,10 @@ async function openAdminPanel() {
         </header>
         <section class="performance-container">
             <div class="performance-tabs" style="display: flex; gap: 5px; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px;">
-                <button class="perf-tab-btn active-tab" onclick="switchAdminTab('requests', this)">طلبات الوحوش (فيديو)</button>
-                <button class="perf-tab-btn" onclick="switchAdminTab('messages', this)">صندوق الوارد (دعم فني)</button>
-            </div>
+    <button class="perf-tab-btn active-tab" onclick="switchAdminTab('requests', this)">${currentLang === 'en' ? 'Beast Requests (Videos)' : 'طلبات الوحوش (فيديو)'}</button>
+    <button class="perf-tab-btn" onclick="switchAdminTab('messages', this)">${currentLang === 'en' ? 'Inbox (Support)' : 'صندوق الوارد (دعم فني)'}</button>
+</div>
+
 
             <div id="admin-tab-requests" style="display: block;">
                 <div id="admin-requests-container" style="text-align:center; padding:40px; color:var(--primary-color);">
@@ -4080,12 +4081,13 @@ async function openProfile() {
 
                 <div class="bio-container" style="margin-top: 15px;">
                     <p id="display-bio" class="bio-text">"${bio}"</p>
-                    <p id="display-location" style="color: var(--primary-color); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">
-                        📍 ${data.country || 'الدولة غير محددة'} - ${data.city || 'المدينة غير محددة'}
-                    </p>
-                    <p id="display-gym" style="color: var(--slate); font-size: 0.8rem; margin-bottom: 15px;">
-                        <i class="fa-solid fa-dumbbell"></i> ${data.gym || 'غير منتمي لنادي'}
-                    </p>
+              <p id="display-location" style="color: var(--primary-color); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">
+    📍 ${data.country || t.undefined_country} - ${data.city || t.undefined_city}
+</p>
+<p id="display-gym" style="color: var(--slate); font-size: 0.8rem; margin-bottom: 15px;">
+    <i class="fa-solid fa-dumbbell"></i> ${data.gym || t.no_gym}
+</p>
+
                     
                     <button id="edit-bio-btn" class="btn-primary" style="padding: 5px 15px; font-size: 0.8rem; background: transparent; border-color: var(--slate); color: var(--slate);">${t.edit_bio}</button>
                     
@@ -4223,8 +4225,9 @@ async function openProfile() {
             localStorage.setItem('currentUser', JSON.stringify(data));
             
             displayBio.innerText = `"${newBio || t.bio_placeholder}"`;
-            displayLocation.innerText = `📍 ${newCountry || 'غير محدد'} - ${newCity || 'غير محدد'}`;
-            displayGym.innerHTML = `<i class="fa-solid fa-dumbbell"></i> ${newGym || 'غير منتمي لنادي'}`;
+          displayLocation.innerText = `📍 ${newCountry || t.undefined_country} - ${newCity || t.undefined_city}`;
+displayGym.innerHTML = `<i class="fa-solid fa-dumbbell"></i> ${newGym || t.no_gym}`;
+
             displayBio.style.display = 'block'; displayLocation.style.display = 'block'; displayGym.style.display = 'block';
             editBtn.style.display = 'inline-block'; editArea.style.display = 'none';
             showToast("✅ تم حفظ البروفايل بنجاح!");
@@ -4637,12 +4640,13 @@ async function viewPlayerProfile(targetUid) {
                         
                         <div class="bio-container" style="margin-top: 10px;">
                             <p class="bio-text">"${bio}"</p>
-                            <p style="color: var(--primary-color); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">
-                                📍 ${data.country || 'الدولة غير محددة'} - ${data.city || 'المدينة غير محددة'}
-                            </p>
-                            <p style="color: var(--slate); font-size: 0.8rem; margin-bottom: 15px;">
-                                <i class="fa-solid fa-dumbbell"></i> ${data.gym || 'غير منتمي لنادي'}
-                            </p>
+                        <p style="color: var(--primary-color); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">
+    📍 ${data.country || t.undefined_country} - ${data.city || t.undefined_city}
+</p>
+<p style="color: var(--slate); font-size: 0.8rem; margin-bottom: 15px;">
+    <i class="fa-solid fa-dumbbell"></i> ${data.gym || t.no_gym}
+</p>
+
                         </div>
                     </div>
                 </section>
