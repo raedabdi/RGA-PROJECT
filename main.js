@@ -723,7 +723,8 @@ const translations = {
         streak_promo: "سجل دخول يومياً لمضاعفة النقاط",
         enter_id_msg: "أدخل ID اللاعب للبحث عنه",
         search_heroes_msg: "ابحث عن أصدقائك وضيفهم لتبدأ التحديات!", // <-- هنا كان الخلل (الفاصلة ناقصة)
-        
+                meal_cooldown: "وجبتك لسه بتنهضم! انتظر",
+
         // --- لوحة الإدارة (Admin Panel) ---
         admin_panel: "👑 لوحة الإدارة",
         admin_requests: "👑 طلبات الوحشنة",
@@ -1001,6 +1002,7 @@ const translations = {
         tour_7_text: "Manage your account, edit your details, and track your overall progress here.",
 
         badge_completed: "Completed ",
+        meal_cooldown: "Still digesting! Wait",
 
 
         sidebar_competitions: "Competitions & Challenges",
@@ -2310,17 +2312,37 @@ updateQuestProgress('sq_score', squatScore); // ربط مهام السكوات
 }
 
 
-
-
 window.logHealthyMeal = async function() {
     const user = auth.currentUser;
     if (!user) {
-        showToast("يجب تسجيل الدخول أولاً!");
+        showToast(currentLang === 'en' ? "Please login first!" : "يجب تسجيل الدخول أولاً!");
         return;
     }
 
     const t = translations[currentLang || 'ar'];
     
+    // 🛑 فحص الكوول داون محلياً قبل إرسال الطلب للسيرفر لتوفير الموارد
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const now = Date.now();
+    const lastMealTime = savedData.lastMealTime || 0;
+    const fourHoursMs = 4 * 60 * 60 * 1000;
+
+    if (now - lastMealTime < fourHoursMs) {
+        const timeLeftMs = fourHoursMs - (now - lastMealTime);
+        const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+        const minutes = Math.ceil((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeMsg = '';
+        if (hours > 0) {
+            timeMsg = currentLang === 'en' ? `${hours}h ${minutes}m` : `${hours}س و ${minutes}د`;
+        } else {
+            timeMsg = currentLang === 'en' ? `${minutes}m` : `${minutes} دقيقة`;
+        }
+        
+        showToast(`${t.meal_cooldown} ${timeMsg} ⏳`);
+        return; // إيقاف العملية فوراً
+    }
+
     // إظهار اللودينج على الزر لمنع الكبس المتكرر
     const btn = window.event ? window.event.target.closest('button') : null;
     let originalHtml = '';
@@ -2331,25 +2353,36 @@ window.logHealthyMeal = async function() {
     }
 
     try {
-        // نطلب الـ XP من السيرفر وننتظر قراره (هو يمتلك الوقت الحقيقي)
-        const success = await window.addXP(50, 'meal');
+        // نطلب الـ XP من السيرفر وننتظر قراره
+        // ملاحظة: الـ actionType هنا 'meal' كما هو في Cloud Functions
+        const secureXPCall = firebase.functions().httpsCallable('secureAddXP');
+        const result = await secureXPCall({ actionType: 'meal', amount: 50 });
 
-        if (success) {
+        if (result.data.xpAdded > 0) {
             // السيرفر وافق وتمت إضافة النقاط فعلياً
             showToast(`${t.meal_success} +50 XP 🥗`);
             updateQuestProgress('meal', 1);
             
-            // نحدث الوقت المحلي فقط لتسهيل العرض لاحقاً
-            let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            // تحديث الوقت المحلي والـ XP فوراً
             savedData.lastMealTime = Date.now(); 
+            savedData.xp = (savedData.xp || 0) + 50;
+            savedData.rank = Math.floor(savedData.xp / 500) + 1;
+            savedData.maxXp = savedData.rank * 500;
             localStorage.setItem('currentUser', JSON.stringify(savedData));
-        } else {
-            // السيرفر رفض (معناها اللاعب قدم الوقت بتلفونه، أو لسه ما خلصت 4 ساعات)
-            showToast(currentLang === 'en' ? " You must wait 4 hours!" : " وجبتك لسه بتنهضم! انتظر 4 ساعات.");
+            
+            if (typeof renderUI === "function") renderUI(savedData);
+            if (typeof updateStat === "function") {
+                updateStat('meals', 1);
+                updateStat('xpTotal', 50, true);
+            }
         }
-
     } catch (e) {
-        console.error("خطأ:", e);
+        console.error("خطأ:", e.message);
+        if (e.message.includes('cooldown')) {
+            showToast(currentLang === 'en' ? "Please wait before logging again." : "انتظر قليلاً قبل التسجيل مجدداً.");
+        } else {
+            showToast(currentLang === 'en' ? "Error connecting to server" : "حدث خطأ في الاتصال");
+        }
     } finally {
         if (btn) {
             btn.innerHTML = originalHtml;
@@ -2811,7 +2844,6 @@ window.addXP = async function(amount, actionType = 'game', securityToken = null,
     }
 };
 
-
 function checkGameCooldown(gameType) {
     const data = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const now = Date.now();
@@ -2821,20 +2853,24 @@ function checkGameCooldown(gameType) {
 
     // 1. منع الدخول السريع جداً بين أي لعبتين (10 ثواني راحة للسيرفر)
     if (now - lastAnyGame < 10000) {
-        showToast(t.wait_setup);
+        const secsLeft = Math.ceil((10000 - (now - lastAnyGame)) / 1000);
+        showToast(`${t.wait_setup} (${secsLeft}s)`);
         return false;
     }
 
-    // 2. منع دخول نفس اللعبة قبل مرور ساعة (60 دقيقة)
+    // 2. منع دخول نفس اللعبة قبل مرور ساعة (60 دقيقة = 3600000 ملي ثانية)
     const cooldownMs = 60 * 60 * 1000;
     if (now - lastPlayed < cooldownMs) {
-        const minsLeft = Math.ceil((cooldownMs - (now - lastPlayed)) / 60000);
-        showToast(`${t.game_cooldown} ${minsLeft} ${currentLang === 'en' ? 'm' : 'دقيقة'}`);
+        const timeLeftMs = cooldownMs - (now - lastPlayed);
+        const minsLeft = Math.ceil(timeLeftMs / 60000);
+        
+        showToast(`${t.game_cooldown} ${minsLeft} ${currentLang === 'en' ? 'm' : 'دقيقة'} `);
         return false;
     }
 
     return true;
 }
+
 
 // ==========================================
 // 📊 مركز الأداء والشارت
