@@ -5647,18 +5647,14 @@ const epicTitle = t.city_grave_title ? t.city_grave_title.replace('{city}', user
     window.currentGraveDateFilter = 'all';
 
     mainContent.innerHTML = `
-        <header class="top-bar" style="margin-bottom: 10px;">
-            <div class="header-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <button onclick="openCityMonster()" class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: #ff4d4d;">${t.back}</button>
-
-
-<h1 class="epic-grave-title">${epicTitle}</h1>
-
-
-                </div>
+              <header class="top-bar" style="margin-bottom: 15px;">
+            <div class="header-row" style="display: flex; justify-content: flex-start; align-items: center; width: 100%; gap: 12px;">
+                <button onclick="openCityMonster()" class="btn-primary" style="padding: 6px 12px; font-size: 0.85rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: #ff4d4d; flex-shrink: 0;">${t.back}</button>
+                
+                <h1 class="epic-grave-title" style="flex: 1; text-align: ${currentLang === 'en' ? 'left' : 'right'};">${epicTitle}</h1>
             </div>
         </header>
+
 
         <section class="performance-container" style="animation: fadeIn 0.5s;">
             
