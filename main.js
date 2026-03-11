@@ -9263,7 +9263,8 @@ window.startWarTimer = function(warStartTime, warId, myClanId, myScore, enemySco
     
     const lang = localStorage.getItem('lang') || 'ar';
 // ⏱️ مدة الحرب: 15 دقيقة للتجربة
-const warDurationMs = 15 * 60 * 1000; 
+const warDurationMs = 15 * 1000;
+
 
 
     
@@ -9551,7 +9552,8 @@ window.startBackgroundWarMonitor = async function(user) {
                     if (warData.status === 'active' && warData.startTime) {
 
 // ⏱️ مدة الحرب: 15 دقيقة للتجربة
-const warDurationMs = 15 * 60 * 1000; 
+const warDurationMs = 15 * 1000;
+
 
                         const startTimeMs = typeof warData.startTime.toDate === 'function' ? warData.startTime.toDate().getTime() : new Date(warData.startTime).getTime();
                         const endTime = startTimeMs + warDurationMs;
