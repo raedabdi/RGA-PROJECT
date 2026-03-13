@@ -9699,20 +9699,37 @@ window.toggleMemberMenu = function(menuId, btnElement) {
         m.style.display = 'none';
     });
 
-    if (!isShowing) {
-        menu.classList.add('show');
-        menu.style.display = 'block';
-        
-        // حساب مكان الزر عشان تطلع القائمة طايفة بمكانها الصح (Fixed)
-        if (btnElement) {
-            let rect = btnElement.getBoundingClientRect();
-            menu.style.position = 'fixed';
-            menu.style.top = (rect.bottom + 5) + 'px';
-            menu.style.left = (rect.left - 100) + 'px'; // تفتح لليسار شوي عشان ما تطلع برا الشاشة
-            menu.style.zIndex = '9999999';
+// Locate this section:
+// ... (code to hide all menus) ...
+if (!isShowing) {
+    menu.classList.add('show');
+    menu.style.display = 'block';
+    
+    if (btnElement) {
+        let rect = btnElement.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = (rect.bottom + 5) + 'px';
+
+        // 🟢 FIX FOR PROBLEM 1: Adjust position based on language direction 🟢
+        const isRTL = document.documentElement.dir === 'rtl';
+        const menuWidth = 140; // Approximate min-width from CSS
+
+        // LTR (Default behavior: align left edge of menu with left edge of button)
+        if (!isRTL) {
+            menu.style.left = rect.left + 'px';
+            menu.style.right = 'auto';
+        } 
+        // RTL (New behavior: align right edge of menu with right edge of button)
+        else {
+            // Calculate the position relative to the right edge.
+            // rect.right gives the rightmost coordinate of the button.
+            menu.style.left = 'auto'; // Disable left calculation
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
         }
+        
+        menu.style.zIndex = '9999999';
     }
-};
+}
 
 // إغلاق القائمة المنسدلة عند الضغط في أي مكان فارغ بالشاشة
 window.onclick = function(event) {
