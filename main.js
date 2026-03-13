@@ -4137,7 +4137,7 @@ const allBadges = [
     { id: 'sq300', type: 'sq_score', target: 300, icon: '<i class="fas fa-gem"></i>', title_ar: 'الجوهرة', title_en: 'The Gem', desc_ar: '300 نقطة بالسكوات', desc_en: '300 Points in Squat', xp: 350 },
     { id: 'sq400', type: 'sq_score', target: 400, icon: '<i class="fas fa-crown"></i>', title_ar: 'توازن مطلق', title_en: 'Pure Balance', desc_ar: '400 نقطة بالسكوات', desc_en: '400 Points in Squat', xp: 500 },
 
-    // --- ✨ إنجازات إضافية من ذوقي (نيون وفخمة) ---
+
     { id: 'xp5000', type: 'xpTotal', target: 5000, icon: '<i class="fas fa-vault"></i>', title_ar: 'خزنة النقاط', title_en: 'XP Vault', desc_ar: 'اجمع 5000 نقطة إجمالاً', desc_en: 'Collect 5000 total XP', xp: 1000 },
     { id: 'lvl10', type: 'levelReach', target: 10, icon: '<i class="fas fa-rocket"></i>', title_ar: 'انطلاق الصاروخ', title_en: 'Rocket Launch', desc_ar: 'وصلت للمستوى 10', desc_en: 'Reach Level 10', xp: 1000 },
     { id: 'morning_warrior', type: 'morning', target: 1, icon: '<i class="fas fa-sun"></i>', title_ar: 'طير الصبح', title_en: 'Early Bird', desc_ar: 'سجل تمرينك قبل الساعة 8 صباحاً', desc_en: 'Log workout before 8 AM', xp: 300 },
@@ -4248,13 +4248,14 @@ function checkBadges(data, user) {
         localStorage.setItem('currentUser', JSON.stringify(data));
 firebase.functions().httpsCallable('secureSyncProgress')({ earnedBadges: earned }).catch(e=>console.error(e));
 
-        newlyEarned.forEach((b, index) => {
+                newlyEarned.forEach((b, index) => {
             setTimeout(() => {
                 const title = currentLang === 'en' ? b.title_en : b.title_ar;
                 showToast(`🏆 إنجاز جديد: ${title}! (+${b.xp} XP)`);
-                addXP(b.xp); // يعطيه الإكس بي تبع الوسام
+                addXP(b.xp, 'achievement'); // 👈 التعديل السحري هنا: ضفنا 'achievement' عشان يتجاوز ليميت الـ 10 ثواني
             }, index * 2000); // تأخير عشان ما يطلعوا فوق بعض
         });
+
 
         // إذا كان فاتح الغرفة، حدثها
         if (document.getElementById('badges-container')) {
