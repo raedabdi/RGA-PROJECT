@@ -4664,3 +4664,151 @@ html, body, *, div, button, a, .friend-card {
     box-shadow: none !important;
     outline: none !important;
 }
+
+
+@keyframes aiGlow {
+    0% { transform: scale(0.98); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; text-shadow: 0 0 10px currentColor; }
+}
+
+/* ==========================================
+   🎬 نظام السينما البصرية (Iron Reflex CSS)
+   ========================================== */
+
+/* 1. الحاوية الرئيسية - تتغير حسب الحالة النفسية */
+.reflex-board-container {
+    position: relative;
+    width: 320px;
+    height: 480px;
+    background: #02050a; /* خلفية افتراضية عميقة */
+    border: 3px solid #1a1a1a;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); /* انتقال ناعم جداً للألوان */
+    z-index: 10;
+}
+
+/* 2. المسارات - خطوط نيون خافتة */
+.reflex-lane {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    -webkit-tap-highlight-color: transparent;
+}
+.reflex-lane:last-child { border-right: none; }
+
+/* 3. الأوزان (Tiles) - تصميم زجاجي أنيق */
+.reflex-tile {
+    position: absolute;
+    width: 90%;
+    left: 5%;
+    height: 125px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(5px);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.4rem;
+    pointer-events: none;
+    will-change: top;
+}
+
+/* 🌟 تأثير الضربة (لحظة اللمس) - وميض سريع واختفاء 🌟 */
+.tile-hit {
+    background: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 0 40px #ffffff !important;
+    transform: scale(1.15) !important;
+    opacity: 0;
+    transition: 0.1s ease-out;
+}
+
+/* 💛 ستايل الدمبل الذهبي (القلب النادر) 💛 */
+.heart-tile {
+    background: linear-gradient(45deg, #ff0080, #ff8c00) !important;
+    border-color: #ff0080 !important;
+    box-shadow: 0 0 25px rgba(255, 0, 128, 0.6) !important;
+    animation: heartPulse 0.4s infinite alternate;
+}
+.heart-tile i { color: white !important; filter: drop-shadow(0 0 5px white); }
+
+@keyframes heartPulse {
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(1.08); filter: brightness(1.3); }
+}
+
+/* ------------------------------------------
+   🎨 كلاسات الحالات النفسية (Emotional Moods)
+   ------------------------------------------ */
+
+/* عميق (Deep) */
+.mood-deep { background: #050a15; border-color: #1f3a5f; }
+.mood-deep .reflex-tile { border-color: #34495e; box-shadow: 0 0 10px #1f3a5f; }
+
+/* حزين (Sad) */
+.mood-sad { background: #0a0a0f; border-color: #2d3748; filter: grayscale(0.6) contrast(0.9); }
+
+/* أمل (Hopeful) */
+.mood-hopeful { background: #001a1a; border-color: #008080; box-shadow: 0 0 30px rgba(0,128,128,0.2); }
+.mood-hopeful .reflex-tile { color: #00f2a7; }
+
+/* سعيد (Happy) */
+.mood-happy { background: #002d21; border-color: #00f2a7; box-shadow: 0 0 40px rgba(0,242,167,0.3); }
+.mood-happy .reflex-tile { background: rgba(0, 242, 167, 0.1); border-color: #00f2a7; }
+
+/* بطولي/طاقة (Heroic/Energetic) */
+.mood-heroic { background: #1a1500; border-color: #FFD700; }
+.mood-heroic .reflex-tile { border-color: #FFD700; box-shadow: 0 0 15px rgba(255,215,0,0.4); }
+
+/* سايبر (Cyber) */
+.mood-cyber { background: #000; border-color: #00ffff; }
+.mood-cyber .reflex-tile { border-radius: 0; border: 1px solid #0ff; box-shadow: 0 0 15px #0ff; }
+
+/* عدواني (Aggressive) */
+.mood-aggressive { 
+    background: #1a0505; 
+    border-color: #ff4d4d; 
+    animation: aggressiveShake 0.1s infinite;
+}
+.mood-aggressive .reflex-tile { background: rgba(255, 77, 77, 0.2); border-color: #ff4d4d; }
+
+/* جنون (Insane/Hell) */
+.mood-insane { background: #000; border-color: #ff0000; filter: saturate(2) contrast(1.5); }
+.mood-insane .reflex-tile { animation: glitchTile 0.2s infinite; }
+
+/* الفراغ (Void) */
+.mood-void { background: #ffffff; border-color: #000; filter: invert(1); }
+
+/* ------------------------------------------
+   ✨ تأثيرات الحركة والاهتزاز ✨
+   ------------------------------------------ */
+@keyframes aggressiveShake {
+    0% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -1px); }
+    100% { transform: translate(0, 0); }
+}
+
+@keyframes glitchTile {
+    0% { transform: skew(0deg); opacity: 1; }
+    50% { transform: skew(3deg); opacity: 0.8; }
+    100% { transform: skew(-3deg); opacity: 1; }
+}
+
+/* اهتزاز البورد عند الخطأ */
+.reflex-board-shake {
+    animation: errorShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    border-color: #ff4d4d !important;
+}
+
+@keyframes errorShake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
