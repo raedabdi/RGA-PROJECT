@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /dashboard.html
 
-Sitemap: https://rga.best/sitemap.xml
+Sitemap: https://www.rga.best/sitemap.xml
