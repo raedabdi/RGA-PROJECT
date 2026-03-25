@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rga-fit-v14'; 
+const CACHE_NAME = 'rga-fit-v15'; 
  
 const ASSETS =[
   '/',
