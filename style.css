@@ -508,3 +508,130 @@ body[data-theme="system_override"] .glass-card {
     from { box-shadow: 0 0 10px rgba(255,0,0,0.3); }
     to { box-shadow: 0 0 25px rgba(255,0,0,0.8); }
 }
+.glass-card, .modal-overlay, .chat-modal, .notif-dropdown, .ultimate-game-lobby {
+    backdrop-filter: blur(5px) !important; /* تقليل التغبيش من 15 و 25 إلى 5 فقط */
+    -webkit-backdrop-filter: blur(5px) !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important; /* تخفيف الظلال */
+}
+
+/* إيقاف الحركات اللانهائية (Animations) على الأجهزة التي تفعل وضع توفير الطاقة */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* منع سحب الصفحة عند فتح الـ Modals */
+body.no-scroll-modal {
+    overflow: hidden !important;
+    height: 100vh !important;
+}
+/* --- Premium Custom Scrollbar --- */
+::-webkit-scrollbar {
+    width: 4px; /* سكرول بار نحيف جداً وأنيق */
+    height: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 167, 0.3);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 167, 0.8);
+}
+/* إخفاء السكرول بار تماماً في القوائم الأفقية (التابات) */
+.performance-tabs::-webkit-scrollbar, 
+.store-tabs-container::-webkit-scrollbar {
+    display: none !important;
+}
+/* --- Premium Button Press Effect --- */
+.btn-primary, .nav-item, .store-tab-btn, .game-choice-card-compact {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease !important;
+}
+/* لما اللاعب يضغط على الزر بإصبعه يصغر بنسبة 5% */
+.btn-primary:active, .nav-item:active, .store-tab-btn:active {
+    transform: scale(0.92) !important;
+}
+
+/* إزالة المربع الأزرق البشع اللي بيطلع بأندرويد لما تلمس أي زر */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+}
+/* --- Premium Skeleton Loading --- */
+@keyframes skeletonShine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.skeleton-box {
+    width: 100%;
+    height: 60px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShine 1.5s infinite linear;
+    border: 1px solid rgba(255,255,255,0.02);
+}
+/* --- Luxury Text Gradients --- */
+.text-gradient-gold {
+    background: linear-gradient(to right, #FFD700, #ffaa00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.text-gradient-neon {
+    background: linear-gradient(to right, #00f2a7, #008f63);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(0, 242, 167, 0.2);
+}
+/* --- Premium Dynamic Island Toasts --- */
+#toast-container {
+    bottom: calc(90px + env(safe-area-inset-bottom)) !important; /* فوق النافذة السفلية دائماً */
+    gap: 12px !important;
+}
+.toast-message {
+    background: rgba(10, 20, 41, 0.85) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    color: #fff !important;
+    border: 1px solid rgba(0, 242, 167, 0.4) !important;
+    border-radius: 50px !important; /* شكل كبسولة */
+    padding: 12px 25px !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 242, 167, 0.1) !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+@keyframes toastPop {
+    0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* --- Stable Numbers (Tabular Nums) --- */
+#live-timer, #rest-countdown, .stat-value, .stat-number, #war-countdown-timer, .quest-status {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+}
+/* --- Smooth Page Transitions --- */
+#main-content-area {
+    animation: pageFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes pageFadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+/* --- Interactive Cards --- */
+.friend-card, .clan-suggest-card, .log-card {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease !important;
+}
+.friend-card:active, .clan-suggest-card:active, .log-card:active {
+    transform: scale(0.96) !important;
+    background: rgba(0, 242, 167, 0.1) !important;
+}

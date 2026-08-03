@@ -65,7 +65,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RGA Fit">
-    <link rel="apple-touch-icon" href="https://i.ibb.co/b3bJc03/4041155-2.png">
+    <link rel="apple-touch-icon" href="/Photos/icon2.png">
     <meta name="mobile-web-app-capable" content="yes">
 
 
@@ -74,7 +74,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Royal Gravitas Arena | RGA Fitness- منصة الأبطال">
     <meta property="og:description" content="Level up your power with Royal Gravitas Arena. انضم إلى ثورة اللياقة البدنية، تنافس مع الأصدقاء، وسيطر على مدينتك.">
-    <meta property="og:image" content="https://i.ibb.co/ch2FcQwj/IMG-4621.jpg"> 
+    <meta property="og:image" content="/Photos/icon1.JPEG"> 
     <meta property="og:url" content="https://rga360.com">
     <meta property="og:site_name" content="Royal Gravitas Arena">
 
@@ -589,25 +589,25 @@
         <div class="features-wrapper">
             <div class="features-list">
 
-                <div class="feature-item" data-img="https://i.ibb.co/gDF0g4R/IMG-4786.png">
+                <div class="feature-item" data-img="/Photos/feat1.png">
                     <div class="icon"><i class="fa-solid fa-brain fa-2x"></i></div>
                     <h3 data-translate="feat1_title">المدرب الذكي (AI Coach)</h3>
                     <p data-translate="feat1_desc">خوارزميات ذكاء اصطناعي متطورة تحلل كل تمرين، تقرأ مستوى الإرهاق العصبي (TSB)، وتخبرك باللحظة المثالية لكسر رقمك القياسي مع رادار يراقب توازن عضلاتك.</p>
                 </div>
 
-                <div class="feature-item" data-img="https://i.ibb.co/wJv0wVb/IMG-4787.png">
+                <div class="feature-item" data-img="/Photos/feat2.png">
                     <div class="icon"><i class="fa-solid fa-shield-halved fa-2x"></i></div>
                     <h3 data-translate="feat2_title">حروب العصابات (Iron Guilds)</h3>
                     <p data-translate="feat2_desc">الذئاب المنفردة لا تنجو هنا. أسس عصابتك أو انضم لكلان، جهز مقاتليك، وأعلن الحرب الطاحنة ضد العصابات الأخرى لسحق الخصوم وغنم الجوائز الملحمية.</p>
                 </div>
 
-                <div class="feature-item" data-img="https://i.ibb.co/2Z58Bjf/IMG-4788.png">
+                <div class="feature-item" data-img="/Photos/feat3.png">
                     <div class="icon"><i class="fa-solid fa-gem fa-2x"></i></div>
                     <h3 data-translate="feat3_title">نظام وحش المدينة والمكافآت</h3>
                     <p data-translate="feat3_desc">سجل أعلى وزن، ارفع فيديو الإثبات، واجلس على عرش مدينتك. احصل على 'ضريبة الملك' اليومية، واجمع أوسمة وإطارات نادرة من المتجر تثبت فخامتك.</p>
                 </div>
 
-                <div class="feature-item" data-img="https://i.ibb.co/dGtC2dF/IMG-4789.png">
+                <div class="feature-item" data-img="/Photos/feat4.png">
                     <div class="icon"><i class="fa-solid fa-gamepad fa-2x"></i></div>
                     <h3 data-translate="feat4_title">ألعاب القوة والتسجيل المباشر</h3>
                     <p data-translate="feat4_desc">سجل تمرينك بالوقت الفعلي مع مؤقت راحة ذكي. وفي وقت الفراغ؟ العب تحديات الديدليفت والسكوات وصائد الأوزان على إيقاع الموسيقى لتضاعف نقاطك.</p>
@@ -615,7 +615,7 @@
             </div>
             <div class="features-visual">
 
-                <img id="feature-image" src="https://i.ibb.co/gDF0g4R/IMG-4786.png" alt="Feature Visual">
+                <img id="feature-image" src="/Photos/feat1.png" alt="Feature Visual">
             </div>
         </div>
     </div>
@@ -879,6 +879,17 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
     document.addEventListener('DOMContentLoaded', checkIOS);
     </script>
+    <!-- RGA Custom Alert/Confirm Modal -->
+<div id="rga-custom-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 20, 41, 0.9); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div style="background: linear-gradient(145deg, rgba(17, 34, 64, 0.98), rgba(10, 20, 41, 0.98)); border: 1px solid var(--primary-color); border-radius: 15px; width: 90%; max-width: 400px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,242,167,0.2); animation: popEpic 0.3s ease-out;">
+        <h3 id="rga-modal-title" style="color: var(--primary-color); font-weight: 900; margin-bottom: 15px;">تنبيه</h3>
+        <p id="rga-modal-text" style="color: white; font-size: 1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="rga-modal-confirm" class="btn-primary" style="flex: 1; padding: 10px;">نعم</button>
+            <button id="rga-modal-cancel" class="btn-primary" style="flex: 1; padding: 10px; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: #ff4d4d;">إلغاء</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 

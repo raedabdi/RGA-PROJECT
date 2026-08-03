@@ -1,7 +1,76 @@
-window.activateBottomNav=function(clickedItem){const navItems=document.querySelectorAll('.bottom-nav .nav-item');navItems.forEach(item=>item.classList.remove('active'));if(clickedItem){clickedItem.classList.add('active')}
-window.scrollTo({top:0,behavior:'smooth'})};window.triggerProofUpload=async function(notifId){const fileInput=document.getElementById('hidden-proof-upload');fileInput.onchange=async(e)=>{const file=e.target.files[0];if(!file)return;showToast(currentLang==='en'?"Uploading proof... Please wait ":"جاري رفع الإثبات للقيادة... انتظر ");const user=auth.currentUser;try{const notifRef=db.collection('users').doc(user.uid).collection('notifications').doc(notifId);const notifDoc=await notifRef.get();const notifData=notifDoc.data();let workoutDetails=notifData.fullWorkoutData||[notifData.exerciseData];let muscleType=notifData.exerciseData.type||"تمرين لايف";const cleanFileName=file.name.replace(/[^a-zA-Z0-9.]/g,"_");const videoRef=storage.ref(`proofs/${user.uid}_${Date.now()}_${cleanFileName}`);await videoRef.put(file);const videoURL=await videoRef.getDownloadURL();let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});await db.collection('pending_workouts').add({userId:user.uid,userName:JSON.parse(localStorage.getItem('currentUser')).firstName,date:dateStr,type:muscleType,details:workoutDetails,videoUrl:videoURL,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()});await notifRef.delete();showToast(currentLang==='en'?"Uploaded! Admin will review it.":"تم الرفع! الإدارة رح تراجع وحشنتك 👑")}catch(error){console.error(error);showToast(currentLang==='en'?"Upload failed!":"فشل الرفع!")}};fileInput.click()};window.calculate1RM=function(){const weight=parseFloat(document.getElementById('calc-weight').value);const reps=parseInt(document.getElementById('calc-reps').value);const resultDiv=document.getElementById('calc-result');const rmValue=document.getElementById('rm-value');const t=translations[currentLang||'ar'];if(!weight||!reps||reps<=0||weight<=0){showToast(t.calc_error||"يرجى إدخال وزن وعدات صحيحة! ");return}
-let oneRM=weight;if(reps>1){oneRM=weight*(1+(0.0333*reps))}
-rmValue.innerText=Math.round(oneRM);resultDiv.style.display='block';rmValue.style.animation='none';setTimeout(()=>rmValue.style.animation='neonPulse 1s ease',10)};let currentTourStep=0;let tourSteps=[];function checkAndShowOnboarding(){if(!localStorage.getItem('hasSeenTour')){setTimeout(startSpotlightTour,1500)}}
+
+
+// دالة موحدة لحساب الحد الأقصى للأوزان التي تتطلب فيديو
+window.getMuscleThreshold = function(muscleType, exerciseName = "") {
+    let threshold = 999;
+    const type = (muscleType || "").toLowerCase();
+    const ex = (exerciseName || "").toLowerCase();
+    
+    if(ex.includes("ديدليفت") || ex.includes("deadlift")) return 120;
+    if(ex.includes("سكوات") || ex.includes("squat")) return 140;
+    
+    if(type.includes("صدر") || type.includes("chest")) threshold = 60;
+    else if(type.includes("ظهر") || type.includes("back")) threshold = 80;
+    else if(type.includes("أكتاف") || type.includes("shoulders") || type.includes("بايسبس") || type.includes("ترايسبس") || type.includes("biceps") || type.includes("triceps")) threshold = 50;
+    else if(type.includes("بطن") || type.includes("core")) threshold = 80;
+    else if(type.includes("دفع") || type.includes("push") || type.includes("سحب") || type.includes("pull")) threshold = 70;
+    else if(type.includes("أرجل") || type.includes("legs")) threshold = 120;
+    else if(type.includes("شامل") || type.includes("full body")) threshold = 60;
+    
+    return threshold;
+};
+window.escapeHTML = function(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+};
+
+window.activateBottomNav = function(clickedItem) {
+    const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+    navItems.forEach(item => item.classList.remove('active'));
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+        // ضربة اهتزاز خفيفة جداً للفخامة (15 ملي ثانية)
+        if (navigator.vibrate) { navigator.vibrate(15); }
+    }
+    window.scrollTo({top: 0, behavior: 'smooth'});
+};window.triggerProofUpload=async function(notifId){const fileInput=document.getElementById('hidden-proof-upload');fileInput.onchange=async(e)=>{const file=e.target.files[0];if(!file)return;showToast(currentLang==='en'?"Uploading proof... Please wait ":"جاري رفع الإثبات للقيادة... انتظر ");const user=auth.currentUser;try{const notifRef=db.collection('users').doc(user.uid).collection('notifications').doc(notifId);const notifDoc=await notifRef.get();const notifData=notifDoc.data();let workoutDetails=notifData.fullWorkoutData||[notifData.exerciseData];let muscleType=notifData.exerciseData.type||"تمرين لايف";const cleanFileName=file.name.replace(/[^a-zA-Z0-9.]/g,"_");const videoRef=storage.ref(`proofs/${user.uid}_${Date.now()}_${cleanFileName}`);await videoRef.put(file);const videoURL=await videoRef.getDownloadURL();let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});await db.collection('pending_workouts').add({userId:user.uid,userName:JSON.parse(localStorage.getItem('currentUser')).firstName,date:dateStr,type:muscleType,details:workoutDetails,videoUrl:videoURL,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()});await notifRef.delete();showToast(currentLang==='en'?"Uploaded! Admin will review it.":"تم الرفع! الإدارة رح تراجع وحشنتك 👑")}catch(error){console.error(error);showToast(currentLang==='en'?"Upload failed!":"فشل الرفع!")}};fileInput.click()};
+window.calculate1RM=function(){
+    const weight=parseFloat(document.getElementById('calc-weight').value);
+    const reps=parseInt(document.getElementById('calc-reps').value);
+    const resultDiv=document.getElementById('calc-result');
+    const rmValue=document.getElementById('rm-value');
+    const t=translations[currentLang||'ar'];
+
+    // 1. التحقق من أن الحقول ليست فارغة أو سالبة
+    if(!weight||!reps||reps<=0||weight<=0){
+        showToast(t.calc_error||"يرجى إدخال وزن وعدات صحيحة!");
+        return;
+    }
+
+    // 2. الحماية الصارمة: رفض الأرقام الفلكية وإظهار رسالة بالفصحى 🚨
+    if(weight > 1200 || reps > 100){
+        showToast(currentLang === 'en' ? "Unrealistic numbers! Please enter valid data." : "أرقام غير واقعية! يرجى إدخال بيانات منطقية.");
+        return; // إيقاف العملية فوراً
+    }
+    
+    // 3. الحساب إذا كانت الأرقام طبيعية
+    let oneRM=weight;
+    if(reps>1){oneRM=weight*(1+(0.0333*reps))}
+    
+    rmValue.innerText=Math.round(oneRM);
+    resultDiv.style.display='block';
+    rmValue.style.animation='none';
+    setTimeout(()=>rmValue.style.animation='neonPulse 1s ease',10);
+};let currentTourStep=0;let tourSteps=[];
+function checkAndShowOnboarding(){if(!localStorage.getItem('hasSeenTour')){setTimeout(startSpotlightTour,1500)}}
 function startSpotlightTour(){const t=translations[currentLang||'ar'];tourSteps=[{target:null,title:t.tour_1_title||"أهلاً بك في RGAFIT! 🔥",text:t.tour_1_text||"مكانك الجديد لبناء العضلات وتحطيم الأرقام. رح نعمل جولة سريعة لنعرفك على الأزرار المهمة.",needsSidebar:!1},{target:document.querySelector('[onclick="openWorkoutModal()"]'),title:t.tour_2_title||"سجل تمارينك ",text:t.tour_2_text||"من هون بتسجل أوزانك. كل تمرين بيعطيك 50 XP لترفع مستواك.",needsSidebar:!1},{target:document.querySelector('[onclick="openCityMonster()"]'),title:t.tour_3_title||"وحش المدينة ",text:t.tour_3_text||"اكتشف الخريطة! حطم الأرقام عشان تسيطر على مدينتك.",needsSidebar:!1},{target:document.querySelector('[onclick="openAchievements()"]'),title:t.tour_4_title||"غرفة الجوائز ",text:t.tour_4_text||"كل إنجاز بتعمله بيفتحلك وسام جديد هون. استعد لتجميعهم كلهم!",needsSidebar:!1},{target:document.querySelector('[onclick*="openPerformanceCenter"]'),title:t.tour_5_title||"مركز الأداء 📊",text:t.tour_5_text||"راقب تطورك، شوف إحصائياتك، وقارن مستواك عشان تضل على الطريق الصح.",needsSidebar:!0},{target:document.querySelector('[onclick*="openFriendsCenter"]'),title:t.tour_6_title||"مجتمع الأبطال ",text:t.tour_6_text||"هون بتشوف ترتيبك بين الوحوش بالليدربورد. اثبت نفسك وخليهم يشوفوا اسمك بالصدارة!",needsSidebar:!0},{target:document.querySelector('[onclick*="openProfile"]'),title:t.tour_7_title||"الملف الشخصي ",text:t.tour_7_text||"من هون بتقدر تعدل بياناتك، وتتحكم بحسابك وإعداداتك بالكامل.",needsSidebar:!0}];currentTourStep=0;document.getElementById('spotlight-overlay').style.display='block';document.getElementById('spotlight-tooltip').style.display='block';showSpotlightStep()}
 function showSpotlightStep(){const t=translations[currentLang||'ar'];const step=tourSteps[currentTourStep];const highlight=document.getElementById('spotlight-highlight');const tooltip=document.getElementById('spotlight-tooltip');highlight.style.opacity='0';tooltip.style.opacity='0';document.getElementById('spotlight-title').innerText=step.title;document.getElementById('spotlight-text').innerText=step.text;const skipBtn=document.querySelector('#spotlight-tooltip button[onclick*="endSpotlightTour"]');if(skipBtn)skipBtn.innerText=t.btn_skip||(currentLang==='en'?'Skip':'تخطي');const nextBtn=document.getElementById('spotlight-next');if(currentTourStep===tourSteps.length-1){nextBtn.innerText=currentLang==='en'?"Start ":"ابدأ التحدي ";nextBtn.onclick=(e)=>{e.stopPropagation();endSpotlightTour()}}else{nextBtn.innerText=currentLang==='en'?"Next ❯":"التالي ❯";nextBtn.onclick=(e)=>{e.stopPropagation();currentTourStep++;showSpotlightStep()}}
 if(step.target){const sidebar=document.getElementById('sidebar');let delay=0;if(window.innerWidth<=768&&sidebar){if(step.needsSidebar){if(sidebar.classList.contains('collapsed')){sidebar.classList.remove('collapsed');delay=550}}else{if(!sidebar.classList.contains('collapsed')){sidebar.classList.add('collapsed');delay=550}}}
@@ -726,10 +795,40 @@ localStorage.setItem('currentUser',JSON.stringify(data));renderUI(data)}catch(er
 function renderUI(data){if(!data)return;const t=translations[currentLang||'ar'];const defaultAvatar="/Photos/adm.jpeg";let dynamicWrapper=document.getElementById('dynamic-pro-avatar');let avatarImgDiv=document.getElementById('dynamic-pro-img');if(dynamicWrapper&&avatarImgDiv){const targetBorder=`avatar-pro-wrapper ${data.currentBorder || ''}`;if(dynamicWrapper.className!==targetBorder){dynamicWrapper.className=targetBorder}
 const rawPhotoUrl=data.photoURL||defaultAvatar;if(avatarImgDiv.dataset.currentPhoto!==rawPhotoUrl){avatarImgDiv.style.backgroundImage=`url('${rawPhotoUrl}')`;avatarImgDiv.dataset.currentPhoto=rawPhotoUrl}}
 const elements={id:document.getElementById('user-id-display'),welcome:document.getElementById('welcome-user'),rank:document.getElementById('user-rank'),xp:document.getElementById('user-xp'),maxXp:document.getElementById('max-xp'),streak:document.getElementById('user-streak'),xpFill:document.getElementById('xp-fill')};if(elements.id)elements.id.innerText=`${t.id_text} ${data.shortID || '...'}`;if(elements.welcome)elements.welcome.innerText=`${t.welcome} ${data.firstName || "بطل"}`;if(elements.rank)elements.rank.innerText=data.rank||1;if(elements.xp)elements.xp.innerText=data.xp||0;if(elements.maxXp)elements.maxXp.innerText=data.maxXp||1000;if(elements.streak)elements.streak.innerText=`🔥 ${data.streak || 1} ${t.days}`;if(elements.xpFill){const currentLevelXp=(data.xp||0)%500;const percent=(currentLevelXp/500)*100;elements.xpFill.style.width=`${percent}%`}}
-function backToDashboard(){const mainContent=document.getElementById('main-content-area');if(mainContent&&mainContent.dataset.originalContent){mainContent.innerHTML=mainContent.dataset.originalContent;mainContent.dataset.originalContent='';initDashboardPage();applyLanguage();const bottomNavItems=document.querySelectorAll('.bottom-nav .nav-item');if(bottomNavItems.length>0){bottomNavItems.forEach(item=>item.classList.remove('active'));bottomNavItems[0].classList.add('active')}
-const sidebarBtns=document.querySelectorAll('.sidebar-btn');if(sidebarBtns.length>0){sidebarBtns.forEach(btn=>btn.classList.remove('active-btn'));sidebarBtns[0].classList.add('active-btn')}
-window.scrollTo({top:0,behavior:'smooth'});if(typeof renderQuests==='function'){renderQuests()}}}
-const LIFT_IMG_DOWN="https://i.ibb.co/zW74jkmK/IMG-4239.png";const LIFT_IMG_UP="https://i.ibb.co/zVkNkjfZ/IMG-4238.png";function toggleGameMenu(){const drop=document.getElementById('game-dropdown-sidebar');if(drop)drop.style.display=drop.style.display==='block'?'none':'block'}
+function backToDashboard(){
+
+    
+    // --- RGA Memory Cleanup ---
+    // إغلاق كل المستمعات النشطة في الخلفية لتوفير الفاتورة وتخفيف الذاكرة
+    if (typeof currentGraveListener === 'function') { currentGraveListener(); currentGraveListener = null; }
+    if (typeof activeWarUnsubscribe === 'function') { activeWarUnsubscribe(); activeWarUnsubscribe = null; }
+if (typeof window.clanHubUnsubscribe === 'function') { window.clanHubUnsubscribe(); window.clanHubUnsubscribe = null; }
+if (window.currentWarTimerInterval) { clearInterval(window.currentWarTimerInterval); window.currentWarTimerInterval = null; }    
+    const mainContent=document.getElementById('main-content-area');
+    if(mainContent){ mainContent.style.animation = 'none'; setTimeout(() => mainContent.style.animation = '', 10); }
+    if(mainContent&&mainContent.dataset.originalContent){
+        mainContent.innerHTML=mainContent.dataset.originalContent;
+        mainContent.dataset.originalContent='';
+        initDashboardPage();
+        applyLanguage();
+        
+        const bottomNavItems=document.querySelectorAll('.bottom-nav .nav-item');
+        if(bottomNavItems.length>0){
+            bottomNavItems.forEach(item=>item.classList.remove('active'));
+            bottomNavItems[0].classList.add('active');
+        }
+        
+        const sidebarBtns=document.querySelectorAll('.sidebar-btn');
+        if(sidebarBtns.length>0){
+            sidebarBtns.forEach(btn=>btn.classList.remove('active-btn'));
+            sidebarBtns[0].classList.add('active-btn');
+        }
+        
+        window.scrollTo({top:0,behavior:'smooth'});
+        if(typeof renderQuests==='function'){renderQuests()}
+    }
+}
+const LIFT_IMG_DOWN="/Photos/IMG-4239.png";const LIFT_IMG_UP="/Photos/IMG-4238.png";function toggleGameMenu(){const drop=document.getElementById('game-dropdown-sidebar');if(drop)drop.style.display=drop.style.display==='block'?'none':'block'}
 let gameInterval;let timeLeft=60;let isGameActive=!1;let sessionXP=0;let comboCount=0;let comboTimer;let globalBestCombo=0;let sessionBestCombo=0;let lastInteractionTime=0;function handleInteraction(e,type){e.preventDefault();const now=Date.now();if(type==='start'){if(now-lastInteractionTime<50)return;lastInteractionTime=now;liftStart()}else{liftEnd()}}
 function openGame(){if(!checkGameCooldown('deadlift'))return;comboCount=0;sessionBestCombo=0;const savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');globalBestCombo=savedData.bestCombo||0;document.getElementById('best-combo-val').innerText=globalBestCombo;sessionXP=0;document.getElementById('session-xp-val').innerText="0";document.getElementById('deadlift-char').src=LIFT_IMG_DOWN;document.getElementById('game-modal').style.display='flex';if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');startTimer()}
 function startTimer(){timeLeft=60;isGameActive=!0;document.getElementById('game-timer-val').innerText=`${timeLeft}s`;gameInterval=setInterval(()=>{timeLeft--;document.getElementById('game-timer-val').innerText=`${timeLeft}s`;if(timeLeft<=0)finishGame(!0);},1000)}
@@ -784,17 +883,47 @@ comboTimer=setTimeout(()=>{comboCount=0},800);sessionXP++;document.getElementByI
 function liftEnd(){if(!isGameActive)return;const char=document.getElementById('deadlift-char');const container=document.getElementById('shake-target');if(char){char.src=LIFT_IMG_DOWN;char.style.transform="translateY(0) scale(1)"}
 if(container)container.classList.remove('shake');}
 let squatScore=0;let squatMistakes=0;let isSquatGameActive=!1;let squatGameLoop;let squatLineSpeed=2;let linePosition=0;let lineDirection=1;function openSquatGame(){if(!checkGameCooldown('squat'))return;squatScore=0;squatMistakes=0;linePosition=0;lineDirection=1;squatLineSpeed=2;document.getElementById('squat-session-xp-val').innerText="0";document.getElementById('squat-mistakes-val').innerText="0 / 5";document.getElementById('squat-game-modal').style.display='flex';if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');startSquatGame()}
-function startSquatGame(){isSquatGameActive=!0;gameLoop()}
-function gameLoop(){if(!isSquatGameActive)return;const line=document.getElementById('squat-line');const barContainer=document.getElementById('squat-bar-container');const barHeight=barContainer.clientHeight;const lineHeight=line.clientHeight;linePosition+=lineDirection*squatLineSpeed;if(linePosition>=barHeight-lineHeight||linePosition<=0){lineDirection*=-1;linePosition=Math.max(0,Math.min(linePosition,barHeight-lineHeight))}
-line.style.transform=`translateY(${linePosition}px)`;squatGameLoop=requestAnimationFrame(gameLoop)}
-function handleSquatClick(){if(!isSquatGameActive)return;const line=document.getElementById('squat-line');const greenZone=document.getElementById('squat-green-zone');const lineTop=line.getBoundingClientRect().top;const greenZoneTop=greenZone.getBoundingClientRect().top;const greenZoneBottom=greenZone.getBoundingClientRect().bottom;if(lineTop>=greenZoneTop&&lineTop<=greenZoneBottom){squatScore+=10;document.getElementById('squat-session-xp-val').innerText=squatScore;squatLineSpeed+=0.25;const charAfter=document.getElementById('squat-char-after');charAfter.style.opacity=1;charAfter.style.transform='translateY(10px)';setTimeout(()=>{charAfter.style.opacity=0;charAfter.style.transform='translateY(0)'},300);const pop=document.createElement('div');pop.className='xp-pop';pop.innerText='+10';pop.style.left='50%';pop.style.transform='translateX(-50%)';document.getElementById('squat-bar-container').appendChild(pop);setTimeout(()=>pop.remove(),800)}else{squatMistakes++;document.getElementById('squat-mistakes-val').innerText=`${squatMistakes} / 5`;const barContainer=document.getElementById('squat-bar-container');barContainer.classList.add('squat-bar-error');setTimeout(()=>barContainer.classList.remove('squat-bar-error'),300);if(squatMistakes>=5)finishSquatGame(!0);}}
+let cachedBarHeight = 0;
+let cachedLineHeight = 0;
+let squatDOM = {};
+
+function startSquatGame(){
+    isSquatGameActive=!0;
+    // نقرأ العناصر ونحسب الأطوال مرة واحدة فقط لضمان 60FPS بدون تقطيع
+    squatDOM.line = document.getElementById('squat-line');
+    squatDOM.barContainer = document.getElementById('squat-bar-container');
+    cachedBarHeight = squatDOM.barContainer.clientHeight;
+    cachedLineHeight = squatDOM.line.clientHeight;
+    gameLoop();
+}
+
+function gameLoop(){
+    if(!isSquatGameActive) return;
+    
+    linePosition += lineDirection * squatLineSpeed;
+    
+    if(linePosition >= cachedBarHeight - cachedLineHeight || linePosition <= 0){
+        lineDirection *= -1;
+        linePosition = Math.max(0, Math.min(linePosition, cachedBarHeight - cachedLineHeight));
+    }
+    
+    squatDOM.line.style.transform = `translateY(${linePosition}px)`;
+    squatGameLoop = requestAnimationFrame(gameLoop);
+}function handleSquatClick(){if(!isSquatGameActive)return;const line=document.getElementById('squat-line');const greenZone=document.getElementById('squat-green-zone');const lineTop=line.getBoundingClientRect().top;const greenZoneTop=greenZone.getBoundingClientRect().top;const greenZoneBottom=greenZone.getBoundingClientRect().bottom;if(lineTop>=greenZoneTop&&lineTop<=greenZoneBottom){squatScore+=10;document.getElementById('squat-session-xp-val').innerText=squatScore;squatLineSpeed+=0.25;const charAfter=document.getElementById('squat-char-after');charAfter.style.opacity=1;charAfter.style.transform='translateY(10px)';setTimeout(()=>{charAfter.style.opacity=0;charAfter.style.transform='translateY(0)'},300);const pop=document.createElement('div');pop.className='xp-pop';pop.innerText='+10';pop.style.left='50%';pop.style.transform='translateX(-50%)';document.getElementById('squat-bar-container').appendChild(pop);setTimeout(()=>pop.remove(),800)}else{squatMistakes++;document.getElementById('squat-mistakes-val').innerText=`${squatMistakes} / 5`;const barContainer=document.getElementById('squat-bar-container');barContainer.classList.add('squat-bar-error');setTimeout(()=>barContainer.classList.remove('squat-bar-error'),300);if(squatMistakes>=5)finishSquatGame(!0);}}
 function closeSquatGame(){if(confirm(translations[currentLang].exit_confirm))finishSquatGame(!1);}
 function finishSquatGame(saveScore=!0){if(!isSquatGameActive)return;isSquatGameActive=!1;cancelAnimationFrame(squatGameLoop);document.getElementById('squat-game-modal').style.display='none';if(squatScore>0&&saveScore){showToast(`${translations[currentLang].game_over} +${squatScore} XP`);addXP(squatScore,'game','RGA_SECURE_998877','squat');updateStat('sq_score',squatScore,!0);updateQuestProgress('sq_score',squatScore)}else{showToast(translations[currentLang].good_luck)}}
 window.logHealthyMeal=async function(){const user=auth.currentUser;if(!user){showToast(currentLang==='en'?"Please login first!":"يجب تسجيل الدخول أولاً!");return}
 const t=translations[currentLang||'ar'];let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const now=Date.now();const lastMealTime=savedData.lastMealTime||0;const fourHoursMs=4*60*60*1000;if(now-lastMealTime<fourHoursMs){const timeLeftMs=fourHoursMs-(now-lastMealTime);const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.ceil((timeLeftMs%(1000*60*60))/(1000*60));let timeMsg='';if(hours>0){timeMsg=currentLang==='en'?`${hours}h ${minutes}m`:`${hours}س و ${minutes}د`}else{timeMsg=currentLang==='en'?`${minutes}m`:`${minutes} دقيقة`}
 showToast(`${t.meal_cooldown} ${timeMsg} ⏳`);return}
 const btn=window.event?window.event.target.closest('button'):null;let originalHtml='';if(btn){originalHtml=btn.innerHTML;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';btn.disabled=!0}
-try{const secureXPCall=firebase.functions().httpsCallable('secureAddXP');const result=await secureXPCall({actionType:'meal',amount:50});if(result.data.xpAdded>0){showToast(`${t.meal_success} +50 XP 🥗`);updateQuestProgress('meal',1);savedData.lastMealTime=Date.now();savedData.xp=(savedData.xp||0)+50;savedData.rank=Math.floor(savedData.xp/500)+1;savedData.maxXp=savedData.rank*500;localStorage.setItem('currentUser',JSON.stringify(savedData));if(typeof renderUI==="function")renderUI(savedData);if(typeof updateStat==="function"){updateStat('meals',1);updateStat('xpTotal',50,!0)}}}catch(e){console.error("خطأ:",e.message);if(e.message.includes('cooldown')){showToast(currentLang==='en'?"Please wait before logging again.":"انتظر قليلاً قبل التسجيل مجدداً.")}else{showToast(currentLang==='en'?"Error connecting to server":"حدث خطأ في الاتصال")}}finally{if(btn){btn.innerHTML=originalHtml;btn.disabled=!1}}};function openWorkoutModal(){const savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const modal=document.getElementById('workout-modal');document.getElementById('workout-step-1').style.display='none';document.getElementById('workout-step-2').style.display='none';document.getElementById('workout-step-3').style.display='none';let pendingMsg=document.getElementById('pending-workout-msg');if(!pendingMsg){pendingMsg=document.createElement('div');pendingMsg.id='pending-workout-msg';pendingMsg.innerHTML=`
+try{const secureXPCall=firebase.functions().httpsCallable('secureAddXP');const result=await secureXPCall({actionType:'meal',amount:50});if(result.data.xpAdded>0){showToast(`${t.meal_success} +50 XP 🥗`);updateQuestProgress('meal',1);savedData.lastMealTime=Date.now();savedData.xp=(savedData.xp||0)+50;savedData.rank=Math.floor(savedData.xp/500)+1;savedData.maxXp=savedData.rank*500;localStorage.setItem('currentUser',JSON.stringify(savedData));if(typeof renderUI==="function")renderUI(savedData);if(typeof updateStat==="function"){updateStat('meals',1);updateStat('xpTotal',50,!0)}}}catch(e){console.error("خطأ:",e.message);if(e.message.includes('cooldown')){showToast(currentLang==='en'?"Please wait before logging again.":"انتظر قليلاً قبل التسجيل مجدداً.")}else{showToast(currentLang==='en'?"Error connecting to server":"حدث خطأ في الاتصال")}}finally{if(btn){btn.innerHTML=originalHtml;btn.disabled=!1}}};
+
+function openWorkoutModal()
+
+    {const savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');
+            document.body.classList.add('no-scroll-modal');
+
+        const modal=document.getElementById('workout-modal');document.getElementById('workout-step-1').style.display='none';document.getElementById('workout-step-2').style.display='none';document.getElementById('workout-step-3').style.display='none';let pendingMsg=document.getElementById('pending-workout-msg');if(!pendingMsg){pendingMsg=document.createElement('div');pendingMsg.id='pending-workout-msg';pendingMsg.innerHTML=`
             <div style="text-align:center; padding: 40px;">
                 <i class="fa-solid fa-hourglass-half fa-spin fa-3x" style="color:var(--primary-color);"></i>
                 <p style="margin-top:20px; font-weight:900; color:white; font-size: 1.1rem;">⏳ تمرين أسطوري قيد المراجعة!</p>
@@ -802,7 +931,13 @@ try{const secureXPCall=firebase.functions().httpsCallable('secureAddXP');const r
             </div>`;document.querySelector('#workout-modal .modal-content').appendChild(pendingMsg)}
 if(savedData.isWorkoutPending){pendingMsg.style.display='block'}else{pendingMsg.style.display='none';document.getElementById('workout-step-1').style.display='block';document.getElementById('exercises-container').innerHTML=''}
 modal.classList.add('active')}
-function closeWorkoutModal(){document.getElementById('workout-modal').classList.remove('active')}
+function closeWorkoutModal()
+
+{document.getElementById('workout-modal').classList.remove('active')
+
+    document.body.classList.remove('no-scroll-modal');
+
+}
 function selectWorkoutSplit(split){currentWorkoutSplit=split;const t=translations[currentLang];if(split==='full'){selectWorkoutType(t.sys_full);return}
 document.getElementById('workout-step-1').style.display='none';document.getElementById('workout-step-2').style.display='block';const grid=document.getElementById('dynamic-muscle-grid');grid.innerHTML='';if(split==='bro'){const muscles=[{key:'chest',text:t.muscle_chest},{key:'back',text:t.muscle_back},{key:'shoulders',text:t.muscle_shoulders},{key:'biceps',text:t.muscle_biceps},{key:'triceps',text:t.muscle_triceps},{key:'legs',text:t.muscle_legs},{key:'core',text:t.muscle_core}];muscles.forEach(m=>{grid.innerHTML+=`<button class="workout-type-btn" onclick="selectWorkoutType('${m.text}')">${m.text}</button>`})}else if(split==='ppl'){const ppl=[{key:'push',text:t.sys_push},{key:'pull',text:t.sys_pull},{key:'legs',text:t.sys_legs}];ppl.forEach(m=>{grid.innerHTML+=`<button class="workout-type-btn" onclick="selectWorkoutType('${m.text}')">${m.text}</button>`})}}
 function backToStep1(){document.getElementById('workout-step-2').style.display='none';document.getElementById('workout-step-1').style.display='block'}
@@ -814,8 +949,11 @@ const workoutTemplates={ar:{"صدر":["بنش برس","تجميع دمبلز ع�
         <button class="remove-exercise-btn" onclick="this.parentElement.remove()" title="حذف">×</button>
     `;container.appendChild(row)};window.selectWorkoutType=function(type){document.getElementById('selected-workout-type').innerText=type;document.getElementById('workout-step-1').style.display='none';document.getElementById('workout-step-2').style.display='none';document.getElementById('workout-step-3').style.display='block';document.getElementById('exercises-container').innerHTML='';const templateBtn=document.getElementById('template-btn');const t=translations[currentLang||'ar'];if(templateBtn){if(workoutTemplates[currentLang]&&workoutTemplates[currentLang][type]){templateBtn.style.display='block';templateBtn.innerText=`${t.template_btn} (${type})`}else{templateBtn.style.display='none'}}
 addExerciseRow()};window.loadWorkoutTemplate=function(){const typeElement=document.getElementById('selected-workout-type');let type=typeElement?typeElement.innerText:'';let template=workoutTemplates.ar[type]||workoutTemplates.en[type];if(!template){const t=translations[currentLang==='en'?'ar':'en'];let reverseType=Object.keys(t).find(key=>t[key]===type);if(reverseType){let mappedKey=translations[currentLang][reverseType];template=workoutTemplates[currentLang][mappedKey]}}
-if(!template)return;const container=document.getElementById('exercises-container');container.innerHTML='';template.forEach(exName=>{addExerciseRow();const rows=container.querySelectorAll('.exercise-row');const lastRow=rows[rows.length-1];if(lastRow)lastRow.querySelector('.ex-name').value=exName});showToast(translations[currentLang].template_loaded)};let isSavingNormalWorkout=!1;async function saveWorkout(){if(isSavingNormalWorkout)return;isSavingNormalWorkout=!0;try{const rows=document.querySelectorAll('.exercise-row');let hasValidExercise=!1;let exercises=[];const typeElement=document.getElementById('selected-workout-type');const typeText=typeElement?typeElement.innerText:'تمرين';let needsProof=!1;let heavyWeight=0;let heavyExerciseName="";rows.forEach(row=>{const nameInput=row.querySelector('.ex-name');const repsInput=row.querySelector('.ex-reps');const weightInput=row.querySelector('.ex-weight');if(nameInput&&nameInput.value.trim()!==""){hasValidExercise=!0;let currentWeight=parseFloat(weightInput.value)||0;let exName=nameInput.value.trim();exercises.push({name:exName,reps:(repsInput&&repsInput.value.trim()!=="")?repsInput.value.trim():'-',weight:currentWeight>0?currentWeight:'-'});let threshold=999;if(typeText.includes("صدر")||typeText.includes("Chest"))threshold=60;if(typeText.includes("ظهر")||typeText.includes("Back"))threshold=80;if(typeText.includes("أكتاف")||typeText.includes("Shoulders"))threshold=50;if(typeText.includes("بايسبس")||typeText.includes("ترايسبس")||typeText.includes("Biceps")||typeText.includes("Triceps"))threshold=50;if(typeText.includes("بطن")||typeText.includes("Core"))threshold=80;if(typeText.includes("دفع")||typeText.includes("Push"))threshold=70;if(typeText.includes("سحب")||typeText.includes("Pull"))threshold=70;if(typeText.includes("أرجل")||typeText.includes("Legs"))threshold=120;if(typeText.includes("شامل")||typeText.includes("Full Body"))threshold=60;if(exName.includes("ديدليفت")||exName.toLowerCase().includes("deadlift"))threshold=120;if(exName.includes("سكوات")||exName.toLowerCase().includes("squat"))threshold=140;if(currentWeight>=threshold){needsProof=!0;if(currentWeight>heavyWeight){heavyWeight=currentWeight;heavyExerciseName=exName}}}});if(!hasValidExercise){showToast(translations[currentLang].ex_error||"يرجى إضافة تمرين واحد على الأقل.");return}
-if(needsProof){const t=translations[currentLang||'ar'];const confirmMsg=currentLang==='en'?`💪 You are a beast!!\nYou lifted ${heavyWeight}kg in ${heavyExerciseName}!\nSince you broke the record, you must upload a video to prove your strength.\nReady to upload?`:`💪 إنت وحش!!\nشلت ${heavyWeight}kg بتمرين ${heavyExerciseName}!\nلأنك قطعت الدنيا، لازم ترفع فيديو يثبت قوتك عشان نعتمدلك الرقم ونحطه بالليدربورد.\nجاهز ترفع الفيديو؟`;const confirmProof=confirm(confirmMsg);if(!confirmProof){showToast(t.cancel_upload);return}
+if(!template)return;const container=document.getElementById('exercises-container');container.innerHTML='';template.forEach(exName=>{addExerciseRow();const rows=container.querySelectorAll('.exercise-row');const lastRow=rows[rows.length-1];if(lastRow)lastRow.querySelector('.ex-name').value=exName});showToast(translations[currentLang].template_loaded)};let isSavingNormalWorkout=!1;async function saveWorkout(){if(isSavingNormalWorkout)return;isSavingNormalWorkout=!0;try{const rows=document.querySelectorAll('.exercise-row');let hasValidExercise=!1;let exercises=[];const typeElement=document.getElementById('selected-workout-type');const typeText=typeElement?typeElement.innerText:'تمرين';let needsProof=!1;let heavyWeight=0;let heavyExerciseName="";rows.forEach(row=>{const nameInput=row.querySelector('.ex-name');const repsInput=row.querySelector('.ex-reps');const weightInput=row.querySelector('.ex-weight');if(nameInput&&nameInput.value.trim()!==""){hasValidExercise=!0;let currentWeight=parseFloat(weightInput.value)||0;
+if(currentWeight > 1200) currentWeight = 1200; /* حماية من الأرقام الفلكية */
+let exName=nameInput.value.trim();exercises.push({name:exName,reps:(repsInput&&repsInput.value.trim()!=="")?repsInput.value.trim():'-',weight:currentWeight>0?currentWeight:'-'});let threshold = getMuscleThreshold(typeText, exName);if(currentWeight>=threshold){needsProof=!0;if(currentWeight>heavyWeight){heavyWeight=currentWeight;heavyExerciseName=exName}}}});if(!hasValidExercise){showToast(translations[currentLang].ex_error||"يرجى إضافة تمرين واحد على الأقل.");return}
+if(needsProof){const t=translations[currentLang||'ar'];const confirmMsg=currentLang==='en'?`💪 You are a beast!!\nYou lifted ${heavyWeight}kg in ${heavyExerciseName}!\nSince you broke the record, you must upload a video to prove your strength.\nReady to upload?`:`💪 إنت وحش!!\nشلت ${heavyWeight}kg بتمرين ${heavyExerciseName}!\nلأنك قطعت الدنيا، لازم ترفع فيديو يثبت قوتك عشان نعتمدلك الرقم ونحطه بالليدربورد.\nجاهز ترفع الفيديو؟`;const confirmProof = await window.rgaConfirm(confirmMsg, currentLang==='en' ? 'Legendary Lift!' : 'رفعة أسطورية! 👑');
+if(!confirmProof){ showToast(t.cancel_upload); return; }
 const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='video/*';let isUploadingProof=!1;fileInput.onchange=async(e)=>{if(isUploadingProof)return;const file=e.target.files[0];if(file){isUploadingProof=!0;if(file.size>30*1024*1024){showToast(t.video_size_error);isUploadingProof=!1;return}
 closeWorkoutModal();document.getElementById('workout-step-3').innerHTML=`
                         <div style="text-align:center; padding: 40px;">
@@ -914,7 +1052,7 @@ let lastPlayed=0;if(gameType==='deadlift')lastPlayed=data.lastDeadliftTime||0;el
 
 if(now-lastPlayed<cooldownMs){const minsLeft=Math.ceil((cooldownMs-(now-lastPlayed))/60000);showToast(`${t.game_cooldown} ${minsLeft} ${currentLang === 'en' ? 'm' : 'دقيقة'} `);return!1}
 return!0}
-window.workoutChartInstance=null;function openPerformanceCenter(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const mainContent=document.getElementById('main-content-area');if(!mainContent)return;const t=translations[currentLang||'ar'];if(!mainContent.dataset.originalContent){mainContent.dataset.originalContent=mainContent.innerHTML}
+window.workoutChartInstance=null;function openPerformanceCenter(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const mainContent=document.getElementById('main-content-area');if(!mainContent)return;mainContent.style.animation = 'none'; setTimeout(() => mainContent.style.animation = '', 10);const t=translations[currentLang||'ar'];if(!mainContent.dataset.originalContent){mainContent.dataset.originalContent=mainContent.innerHTML}
 mainContent.innerHTML=`
         <header class="top-bar" style="margin-bottom: 20px;">
             <div class="header-row">
@@ -1092,7 +1230,19 @@ if(!foundKey){for(const[key,value]of Object.entries(t_en)){if(value===savedType)
 if(foundKey&&translations[currentLang][foundKey]){return translations[currentLang][foundKey]}
 return savedType}
 function renderWorkoutLog(){let workoutHistory=[];try{workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[]}catch(e){}
-const container=document.getElementById('log-container');const emptyMsg=translations[currentLang||'ar'].empty_log;if(!Array.isArray(workoutHistory)||workoutHistory.length===0){container.innerHTML=`<p style="text-align:center; color: var(--slate); margin-top: 20px;">${emptyMsg}</p>`;return}
+const container=document.getElementById('log-container');const emptyMsg=translations[currentLang||'ar'].empty_log;if(!Array.isArray(workoutHistory)||workoutHistory.length===0){
+    container.innerHTML=`
+        <div style="text-align:center; padding: 40px 20px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 1px dashed var(--slate); margin-top: 20px;">
+            <i class="fa-solid fa-ghost fa-bounce" style="font-size: 4rem; color: var(--slate); opacity: 0.3; margin-bottom: 15px;"></i>
+            <h3 style="color: white; font-weight: 900; margin-bottom: 5px;">${currentLang === 'en' ? 'It is so quiet here...' : 'الهدوء يسبق العاصفة...'}</h3>
+            <p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 20px;">${emptyMsg}</p>
+            <button class="btn-primary" onclick="openWorkoutModal()" style="padding: 10px 25px; font-size: 0.9rem;">
+                <i class="fa-solid fa-bolt"></i> ${currentLang === 'en' ? 'Start First Workout' : 'ابدأ أول تمرين'}
+            </button>
+        </div>
+    `;
+    return;
+}
 container.innerHTML=workoutHistory.map((workout,index)=>{let translatedType=getTranslatedType(workout.type);return `
 
 
@@ -1171,7 +1321,7 @@ const title=currentLang==='en'?'Trophy Room':'غرفة الجوائز';const bac
 
 
 
-let globalCountriesData=[];async function openProfile(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const area=document.getElementById('main-content-area');if(!area.dataset.originalContent)area.dataset.originalContent=area.innerHTML;const challengesCard=document.getElementById('home-challenges-card')||document.querySelector('div[onclick="openGameSelection()"]');if(challengesCard)challengesCard.style.display='none';const user=auth.currentUser;let data=JSON.parse(localStorage.getItem('currentUser')||'{}');const t=translations[currentLang||'ar'];const earnedCount=(data.earnedBadges||[]).length;const bio=data.bio||t.bio_placeholder;const userPhoto=data.photoURL||"/Photos/adm.jpeg";const activeCover=data.currentCover||'';const coverHtml=activeCover?`<div class="profile-cover-image" style="background-image: url('${activeCover}');"></div>`:'';const activeBorder=data.currentBorder||'';const activeTitle=data.currentTitle||'';let earnedBadgesHTML=`<p style="text-align: center; color: var(--slate); font-size: 0.8rem; padding: 20px;">${t.no_badges_yet || 'لا توجد أوسمة بعد'}</p>`;if(data.earnedBadges&&data.earnedBadges.length>0&&typeof allBadges!=='undefined'){earnedBadgesHTML=allBadges.filter(b=>data.earnedBadges.includes(b.id)).map(b=>`
+let globalCountriesData=[];async function openProfile(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const area=document.getElementById('main-content-area');if(area){area.style.animation = 'none'; setTimeout(() => area.style.animation = '', 10);}if(!area.dataset.originalContent)area.dataset.originalContent=area.innerHTML;const challengesCard=document.getElementById('home-challenges-card')||document.querySelector('div[onclick="openGameSelection()"]');if(challengesCard)challengesCard.style.display='none';const user=auth.currentUser;let data=JSON.parse(localStorage.getItem('currentUser')||'{}');const t=translations[currentLang||'ar'];const earnedCount=(data.earnedBadges||[]).length;const bio=data.bio||t.bio_placeholder;const userPhoto=data.photoURL||"/Photos/adm.jpeg";const activeCover=data.currentCover||'';const coverHtml=activeCover?`<div class="profile-cover-image" style="background-image: url('${activeCover}');"></div>`:'';const activeBorder=data.currentBorder||'';const activeTitle=data.currentTitle||'';let earnedBadgesHTML=`<p style="text-align: center; color: var(--slate); font-size: 0.8rem; padding: 20px;">${t.no_badges_yet || 'لا توجد أوسمة بعد'}</p>`;if(data.earnedBadges&&data.earnedBadges.length>0&&typeof allBadges!=='undefined'){earnedBadgesHTML=allBadges.filter(b=>data.earnedBadges.includes(b.id)).map(b=>`
                 <div class="earned-badge-mini">
                     <div class="badge-icon" style="font-size: 2rem; -webkit-text-stroke: 0px;">${b.icon}</div>
                     <p>${currentLang === 'en' ? b.title_en : b.title_ar}</p>
@@ -1316,8 +1466,48 @@ area.innerHTML=`
 const editBtn=document.getElementById('edit-bio-btn');const saveBtn=document.getElementById('save-bio-btn');const displayBio=document.getElementById('display-bio');const displayLocation=document.getElementById('display-location');const displayGym=document.getElementById('display-gym');const editArea=document.getElementById('bio-edit-area');const countrySelect=document.getElementById('country-select');const citySelect=document.getElementById('city-select');if(globalCountriesData.length===0){countrySelect.innerHTML=`<option>جاري التحميل...</option>`;try{const res=await fetch('https://countriesnow.space/api/v0.1/countries');const json=await res.json();globalCountriesData=json.data}catch(e){console.error(e);countrySelect.innerHTML=`<option value="">فشل التحميل، حاول لاحقاً</option>`}}
 if(globalCountriesData.length>0){countrySelect.innerHTML=`<option value="">${t.country_select}</option>`;globalCountriesData.forEach(c=>{const option=document.createElement('option');option.value=c.country;option.innerText=c.country;if(data.country===c.country)option.selected=!0;countrySelect.appendChild(option)});if(data.country)populateCities(data.country,data.city,citySelect,t);}
 countrySelect.addEventListener('change',(e)=>populateCities(e.target.value,null,citySelect,t));if(editBtn){editBtn.onclick=()=>{displayBio.style.display='none';displayLocation.style.display='none';displayGym.style.display='none';editBtn.style.display='none';editArea.style.display='block'}}
-if(saveBtn){saveBtn.onclick=async()=>{const newBio=document.getElementById('bio-input').value.trim();const newGym=document.getElementById('gym-input').value.trim();const newCountry=countrySelect.value;const newCity=citySelect.value;await db.collection('users').doc(user.uid).update({bio:newBio,gym:newGym,country:newCountry,city:newCity});data.bio=newBio;data.gym=newGym;data.country=newCountry;data.city=newCity;localStorage.setItem('currentUser',JSON.stringify(data));displayBio.innerText=`"${newBio || t.bio_placeholder}"`;displayLocation.innerText=`📍 ${newCountry || t.undefined_country} - ${newCity || t.undefined_city}`;displayGym.innerHTML=`<i class="fa-solid fa-dumbbell"></i> ${newGym || t.no_gym}`;displayBio.style.display='block';displayLocation.style.display='block';displayGym.style.display='block';editBtn.style.display='inline-block';editArea.style.display='none';showToast("✅ تم حفظ البروفايل بنجاح!")};const btnToggleName=document.getElementById('btn-toggle-edit-name');const nameEditBox=document.getElementById('edit-name-box');const nameDisplay=document.getElementById('display-full-name');btnToggleName.onclick=()=>{nameEditBox.style.display='flex';nameDisplay.style.display='none'};document.getElementById('btn-save-name').onclick=async()=>{const now=Date.now();const lastUpdate=data.lastNameUpdate||0;const thirtyDays=30*24*60*60*1000;if(now-lastUpdate<thirtyDays){const daysLeft=Math.ceil((thirtyDays-(now-lastUpdate))/(1000*60*60*24));showToast(`${t.name_cooldown} (${daysLeft}d left)`);return}
-const f=document.getElementById('new-fname').value.trim();const l=document.getElementById('new-lname').value.trim();if(!f||!l)return;await db.collection('users').doc(user.uid).update({firstName:f,lastName:l,lastNameUpdate:now});data.firstName=f;data.lastName=l;data.lastNameUpdate=now;localStorage.setItem('currentUser',JSON.stringify(data));openProfile();showToast(t.profile_save_success)};if(saveBtn){saveBtn.onclick=async()=>{const now=Date.now();const lastLocUpdate=data.lastLocationUpdate||0;const oneDay=24*60*60*1000;const cityChanged=(countrySelect.value!==data.country||citySelect.value!==data.city);if(cityChanged&&(now-lastLocUpdate<oneDay)){const hrsLeft=Math.ceil((oneDay-(now-lastLocUpdate))/(1000*60*60));showToast(`${t.location_cooldown} (${hrsLeft}h left)`);return}
+if(saveBtn){saveBtn.onclick=async()=>{const newBio=document.getElementById('bio-input').value.trim();const newGym=document.getElementById('gym-input').value.trim();const newCountry=countrySelect.value;const newCity=citySelect.value;await db.collection('users').doc(user.uid).update({bio:newBio,gym:newGym,country:newCountry,city:newCity});data.bio=newBio;data.gym=newGym;data.country=newCountry;data.city=newCity;localStorage.setItem('currentUser',JSON.stringify(data));displayBio.innerText=`"${newBio || t.bio_placeholder}"`;displayLocation.innerText=`📍 ${newCountry || t.undefined_country} - ${newCity || t.undefined_city}`;displayGym.innerHTML=`<i class="fa-solid fa-dumbbell"></i> ${newGym || t.no_gym}`;displayBio.style.display='block';displayLocation.style.display='block';displayGym.style.display='block';editBtn.style.display='inline-block';editArea.style.display='none';showToast("✅ تم حفظ البروفايل بنجاح!")};const btnToggleName=document.getElementById('btn-toggle-edit-name');const nameEditBox=document.getElementById('edit-name-box');const nameDisplay=document.getElementById('display-full-name');btnToggleName.onclick=()=>{nameEditBox.style.display='flex';nameDisplay.style.display='none'};
+
+document.getElementById('btn-save-name').onclick=async()=>{
+    const f=document.getElementById('new-fname').value.trim();
+    const l=document.getElementById('new-lname').value.trim();
+    if(!f||!l) return;
+    
+    try {
+        const userRef = db.collection('users').doc(user.uid);
+        const docSnap = await userRef.get();
+        const serverData = docSnap.data();
+        const lastUpdate = serverData.lastNameUpdateServer ? serverData.lastNameUpdateServer.toMillis() : 0;
+        const now = Date.now();
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        
+        if(now - lastUpdate < thirtyDays){
+            const daysLeft = Math.ceil((thirtyDays - (now - lastUpdate)) / (1000 * 60 * 60 * 24));
+            showToast(`${t.name_cooldown} (${daysLeft}d left)`);
+            return;
+        }
+
+        // استخدام وقت السيرفر الفعلي
+        await userRef.update({
+            firstName: f, 
+            lastName: l, 
+            lastNameUpdateServer: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        data.firstName=f; 
+        data.lastName=l; 
+        // تحديث وهمي لليوزر إكسبيرينس لتجنب إعادة التحميل
+        data.lastNameUpdateServer = { toMillis: () => Date.now() }; 
+        localStorage.setItem('currentUser',JSON.stringify(data));
+        openProfile();
+        showToast(t.profile_save_success);
+    } catch (e) {
+        console.error("Name update error:", e);
+        showToast("حدث خطأ أثناء الاتصال بالسيرفر!");
+    }
+};
+
+if(saveBtn){saveBtn.onclick=async()=>{const now=Date.now();const lastLocUpdate=data.lastLocationUpdate||0;const oneDay=24*60*60*1000;const cityChanged=(countrySelect.value!==data.country||citySelect.value!==data.city);if(cityChanged&&(now-lastLocUpdate<oneDay)){const hrsLeft=Math.ceil((oneDay-(now-lastLocUpdate))/(1000*60*60));showToast(`${t.location_cooldown} (${hrsLeft}h left)`);return}
 const updates={bio:document.getElementById('bio-input').value.trim(),gym:document.getElementById('gym-input').value.trim(),country:countrySelect.value,city:citySelect.value};if(cityChanged)updates.lastLocationUpdate=now;await db.collection('users').doc(user.uid).update(updates);Object.assign(data,updates);localStorage.setItem('currentUser',JSON.stringify(data));openProfile();showToast(t.profile_save_success)}}}
 function populateCities(selectedCountry,selectedCity,citySelectElement,t){citySelectElement.innerHTML=`<option value="">${t.city_select}</option>`;if(!selectedCountry){citySelectElement.disabled=!0;return}
 const countryData=globalCountriesData.find(c=>c.country===selectedCountry);if(countryData&&countryData.cities){citySelectElement.disabled=!1;countryData.cities.forEach(city=>{const option=document.createElement('option');option.value=city;option.innerText=city;if(selectedCity===city)option.selected=!0;citySelectElement.appendChild(option)})}}}
@@ -1374,7 +1564,7 @@ if(userData.clanId){try{const clanRef=db.collection('clans').doc(userData.clanId
 const pendingSnap=await db.collection('pending_workouts').where('userId','==',uid).get();for(const doc of pendingSnap.docs){if(doc.data().videoUrl){try{await storage.refFromURL(doc.data().videoUrl).delete()}catch(e){}}
 await doc.ref.delete()}
 await db.collection('users').doc(uid).delete();await user.delete();localStorage.clear();alert(isEn?"Your account has been completely wiped. Farewell!":"تم مسح حسابك بالكامل. وداعاً أيها البطل!");window.location.href='index.html'}catch(error){console.error("Delete Error:",error);if(error.code==='auth/requires-recent-login'){alert(isEn?"Security Timeout: Please logout, login again, and retry deletion.":"فحص أمني: يرجى تسجيل الخروج والدخول مجدداً ثم المحاولة مرة أخرى.")}else{alert(isEn?"An error occurred during deletion.":"حدث خطأ أثناء محاولة الحذف.")}}};window.toggleNotifications=async function(event){event.stopPropagation();const dropdown=document.getElementById('notif-dropdown');dropdown.classList.toggle('show');if(Notification.permission!=='granted'&&Notification.permission!=='denied'){await requestNotificationPermission()}}
-document.addEventListener('click',function(event){const dropdown=document.getElementById('notif-dropdown');const notifBtn=document.getElementById('notif-btn');if(dropdown&&dropdown.classList.contains('show')){if(!dropdown.contains(event.target)&&!notifBtn.contains(event.target)){dropdown.classList.remove('show')}}});function openFriendsCenter(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const mainContent=document.getElementById('main-content-area');if(!mainContent)return;if(!mainContent.dataset.originalContent){mainContent.dataset.originalContent=mainContent.innerHTML}
+document.addEventListener('click',function(event){const dropdown=document.getElementById('notif-dropdown');const notifBtn=document.getElementById('notif-btn');if(dropdown&&dropdown.classList.contains('show')){if(!dropdown.contains(event.target)&&!notifBtn.contains(event.target)){dropdown.classList.remove('show')}}});function openFriendsCenter(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const mainContent=document.getElementById('main-content-area');if(!mainContent)return;mainContent.style.animation = 'none'; setTimeout(() => mainContent.style.animation = '', 10);if(!mainContent.dataset.originalContent){mainContent.dataset.originalContent=mainContent.innerHTML}
 const t=translations[currentLang||'ar'];mainContent.innerHTML=`
         <header class="top-bar" style="margin-bottom: 20px;">
             <div class="header-row">
@@ -1630,7 +1820,7 @@ closeProfileAndOpenClan(clanId)};let currentChatUnsubscribe=null;let currentChat
         <div id="chat-modal" class="chat-modal" style="display: none;">
             <div class="chat-header">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <img id="chat-user-img" src="" alt="User">
+                    <img id="chat-user-img" src="" alt="User" onerror="this.src='/Photos/adm.jpeg'">
                     <h3 id="chat-user-name">User</h3>
                 </div>
                 <button onclick="closeChat()" class="close-chat-btn">&times;</button>
@@ -1647,7 +1837,7 @@ async function clearMessageNotifications(friendId){const currentUser=auth.curren
 function closeChat(){document.getElementById('chat-modal').style.display='none';if(currentChatUnsubscribe){currentChatUnsubscribe();currentChatUnsubscribe=null}}
 async function sendMessage(){const currentUser=auth.currentUser;const input=document.getElementById('chat-input');const msgText=input.value.trim();if(!msgText||!currentUser||!currentChatId)return;input.value='';updateQuestProgress('chat',1);try{const userDoc=await db.collection('users').doc(currentUser.uid).get();const userData=userDoc.data();const myName=userData.firstName?`${userData.firstName} ${userData.lastName}`:"User";const myPhoto=userData.photoURL||"/Photos/adm.jpeg";await db.collection('chats').doc(currentChatId).collection('messages').add({senderId:currentUser.uid,text:msgText,timestamp:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('users').doc(currentTargetId).collection('notifications').add({type:'message',senderId:currentUser.uid,senderName:myName,senderPhoto:myPhoto,text:msgText,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()})}catch(error){console.error(error)}}
 function handleChatEnter(e){if(e.key==='Enter')sendMessage();}
-let currentMapFilter='maxWeight';async function openCityMonster(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const mainContent=document.getElementById('main-content-area');if(!mainContent)return;if(!mainContent.dataset.originalContent){mainContent.dataset.originalContent=mainContent.innerHTML}
+let currentMapFilter='maxWeight';async function openCityMonster(){if(window.innerWidth<768)document.getElementById('sidebar').classList.add('collapsed');const mainContent=document.getElementById('main-content-area');if(!mainContent)return;mainContent.style.animation = 'none'; setTimeout(() => mainContent.style.animation = '', 10);if(!mainContent.dataset.originalContent){mainContent.dataset.originalContent=mainContent.innerHTML}
 const t=translations[currentLang||'ar'];const currentUserData=JSON.parse(localStorage.getItem('currentUser')||'{}');const userCity=currentUserData.city||'Amman';const userCountry=currentUserData.country||'Jordan';mainContent.innerHTML=`
         <header class="top-bar" style="margin-bottom: 20px;">
             <div class="header-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -1824,7 +2014,7 @@ let selectedGraveAction='respect';let currentGraveListener=null;window.openGrave
                             </span>
                             <span style="color: #8892b0; font-size: 0.7rem;">${timeStr}</span>
                         </div>
-                        <p style="color: #ddd; font-size: 0.85rem; margin: 0; line-height: 1.4;" dir="auto">${data.text.replace(/</g, "&lt;")}</p>
+                        <p style="color: #ddd; font-size: 0.85rem; margin: 0; line-height: 1.4;" dir="auto">${escapeHTML(data.text)}</p>
                     </div>
                 `});commentsHtml+=`
                 <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid #222; margin-top: 10px;">
@@ -1946,7 +2136,10 @@ btn.innerHTML=originalText;btn.disabled=!1};function showMonsterRules(){const t=
 
         </div>
     `;document.body.appendChild(modal)}
-Object.assign(translations.ar,{live_workout_btn:"تمرين لايف",live_focus_title:"تمرين لايف ",log_set:"تسجيل الجولة",finish_live:"إنهاء التمرين",rest_time:"وقت الراحة",skip_rest:"تخطي الراحة ",beast_alert:" دمار! وزنك كسر الرقم القياسي. كمل تمرينك وركز، رح نطلب الإثبات بس تخلص!",proof_required_notif:" سجلت وزن أسطوري اليوم! ارفع فيديو الإثبات الآن لاستلام العرش.",upload_now:"رفع الفيديو "});Object.assign(translations.en,{live_workout_btn:"Live Workout",live_focus_title:"Live Workout ",log_set:"Log Set",finish_live:"Finish Workout",rest_time:"Rest Time",skip_rest:"Skip Rest ",beast_alert:" BEAST! You broke the record. Keep focusing, we'll ask for proof later!",proof_required_notif:" You logged a legendary weight today! Upload proof now to claim the throne.",upload_now:"Upload Video 🎥"});let liveWorkoutActive=!1;let liveDurationTimer;let liveSeconds=0;let restInterval;let liveExercises=[];let pendingProofData=null;function confirmExitLive(){if(confirm(currentLang==='en'?"Cancel live workout?":"إلغاء التمرين اللايف؟")){closeLiveWorkout()}}
+Object.assign(translations.ar,{live_workout_btn:"تمرين لايف",live_focus_title:"تمرين لايف ",log_set:"تسجيل الجولة",finish_live:"إنهاء التمرين",rest_time:"وقت الراحة",skip_rest:"تخطي الراحة ",beast_alert:" دمار! وزنك كسر الرقم القياسي. كمل تمرينك وركز، رح نطلب الإثبات بس تخلص!",proof_required_notif:" سجلت وزن أسطوري اليوم! ارفع فيديو الإثبات الآن لاستلام العرش.",upload_now:"رفع الفيديو "});Object.assign(translations.en,{live_workout_btn:"Live Workout",live_focus_title:"Live Workout ",log_set:"Log Set",finish_live:"Finish Workout",rest_time:"Rest Time",skip_rest:"Skip Rest ",beast_alert:" BEAST! You broke the record. Keep focusing, we'll ask for proof later!",proof_required_notif:" You logged a legendary weight today! Upload proof now to claim the throne.",upload_now:"Upload Video 🎥"});let liveWorkoutActive=!1;let liveDurationTimer;let liveSeconds=0;let restInterval;let liveExercises=[];let pendingProofData=null;async function confirmExitLive(){
+    const confirmed = await window.rgaConfirm(currentLang==='en' ? "Cancel live workout?" : "هل أنت متأكد من إلغاء التمرين اللايف؟", currentLang==='en' ? "Warning" : "تحذير!");
+    if(confirmed){ closeLiveWorkout(); }
+}
 function populateLiveMuscles(){const select=document.getElementById('live-muscle-select');const t=translations[currentLang||'ar'];if(select){select.innerHTML=`
             <option value="">-- ${t.live_select_muscle || 'اختر العضلة'} --</option>
             <option value="صدر">${t.muscle_chest || 'صدر'}</option>
@@ -1961,10 +2154,41 @@ window.cityMonsterMaxWeight=0;function startLiveWorkout(){liveWorkoutActive=!0;l
 populateLiveMuscles();const muscleSelect=document.getElementById('live-muscle-select');if(muscleSelect){muscleSelect.disabled=!1;muscleSelect.value=""}
 const oldAiMsg=document.getElementById('ai-live-prediction');if(oldAiMsg)oldAiMsg.remove();const overlay=document.getElementById('live-workout-overlay');overlay.style.display='flex';setTimeout(()=>overlay.classList.add('active'),10);const canvas=document.getElementById('stardust-canvas');if(canvas){canvas.style.zIndex='30001';canvas.style.pointerEvents='none'}
 requestWakeLock();liveStartTimeStamp=Date.now();document.getElementById('live-timer').innerText=`00:00`;clearInterval(liveDurationTimer);liveDurationTimer=setInterval(()=>{liveSeconds=Math.floor((Date.now()-liveStartTimeStamp)/1000);const m=String(Math.floor(liveSeconds/60)).padStart(2,'0');const s=String(liveSeconds%60).padStart(2,'0');document.getElementById('live-timer').innerText=`${m}:${s}`},1000)}
-function startRestTimer(seconds){const restOverlay=document.getElementById('rest-timer-overlay');const restText=document.getElementById('rest-countdown');restOverlay.style.display='flex';restTargetTimeStamp=Date.now()+(seconds*1000);restText.innerText=seconds;clearInterval(restInterval);restInterval=setInterval(()=>{let timeLeft=Math.ceil((restTargetTimeStamp-Date.now())/1000);if(timeLeft<=0){timeLeft=0;skipRest();if('vibrate' in navigator)navigator.vibrate(500);}
+function startRestTimer(seconds){const restOverlay=document.getElementById('rest-timer-overlay');const restText=document.getElementById('rest-countdown');restOverlay.style.display='flex';restTargetTimeStamp=Date.now()+(seconds*1000);restText.innerText=seconds;clearInterval(restInterval);restInterval=setInterval(()=>{let timeLeft=Math.ceil((restTargetTimeStamp-Date.now())/1000);if (timeLeft <= 0) {
+    timeLeft = 0;
+    skipRest();
+    
+    // 1. الاهتزاز الطويل
+    if ('vibrate' in navigator) navigator.vibrate([500, 200, 500]);
+    
+    // 2. إصدار صوت رياضي (Beep) باستخدام AudioContext بدون الحاجة لملف صوتي خارجي!
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // تردد عالي منبه
+        
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.5);
+    } catch(e) { console.log("Audio not supported"); }
+}
 restText.innerText=timeLeft},1000)}
 window.logLiveSet=function(isSuperset=!1){const muscleSelect=document.getElementById('live-muscle-select');const selectedMuscleText=muscleSelect.options[muscleSelect.selectedIndex].text;const muscleVal=muscleSelect.value;const exName=document.getElementById('live-ex-name').value.trim();const weight=parseFloat(document.getElementById('live-ex-weight').value)||0;let reps=parseInt(document.getElementById('live-ex-reps').value)||0;if(!muscleVal||!exName||weight<=0||reps<=0){showToast(currentLang==='en'?"Please select a muscle and enter valid details":"يرجى تحديد العضلة وإدخال بيانات صحيحة");return}
 if(reps>25){reps=25;document.getElementById('live-ex-reps').value=25;showToast(currentLang==='en'?"Max 25 reps allowed per set!":"الحد الأقصى للعدات هو 25 فقط!")}
+
+if(weight > 1200){
+    showToast(currentLang==='en' ? "Unrealistic weight! Please enter valid data." : "وزن غير واقعي! يرجى إدخال وزن منطقي.");
+    return;
+}
+
 liveExercises.push({name:exName,weight:weight,reps:reps,type:selectedMuscleText});if(liveExercises.length===1){muscleSelect.disabled=!0}
 let restTime=90;const exLower=exName.toLowerCase();if(muscleVal==='أرجل'||muscleVal==='ظهر'||exLower.includes('squat')||exLower.includes('deadlift')){restTime=weight>=100?180:120}else if(muscleVal==='صدر'||exLower.includes('bench')){restTime=weight>=80?120:90}else{restTime=weight>=40?90:60}
 const oldAiMsg=document.getElementById('ai-live-prediction');if(oldAiMsg)oldAiMsg.remove();document.getElementById('live-sets-log').insertAdjacentHTML('afterbegin',`
@@ -1985,7 +2209,7 @@ if(aiMessage){const aiBoxHtml=`
                     ${aiMessage}
                 </div>
             `;document.getElementById('live-sets-log').insertAdjacentHTML('afterbegin',aiBoxHtml)}}
-let threshold=999;if(muscleVal==="صدر")threshold=60;if(muscleVal==="ظهر")threshold=80;if(muscleVal==="أكتاف"||muscleVal==="أذرع")threshold=50;if(muscleVal==="بطن")threshold=80;if(muscleVal==="أرجل")threshold=120;if(muscleVal==="شامل")threshold=60;if(exLower.includes("ديدليفت")||exLower.includes("deadlift"))threshold=120;if(exLower.includes("سكوات")||exLower.includes("squat"))threshold=140;if(weight>=threshold){if(!pendingProofData){pendingProofData={name:exName,weight:weight,reps:reps,type:selectedMuscleText};showToast(translations[currentLang||'ar'].beast_alert)}else if(weight>pendingProofData.weight){pendingProofData={name:exName,weight:weight,reps:reps,type:selectedMuscleText};let msg=translations[currentLang||'ar'].new_max_alert||`دمار! الإثبات سيكون للوزن الأعلى ({weight}kg)`;showToast(msg.replace('{weight}',weight))}}
+let threshold = getMuscleThreshold(muscleVal, exLower);if(weight>=threshold){if(!pendingProofData){pendingProofData={name:exName,weight:weight,reps:reps,type:selectedMuscleText};showToast(translations[currentLang||'ar'].beast_alert)}else if(weight>pendingProofData.weight){pendingProofData={name:exName,weight:weight,reps:reps,type:selectedMuscleText};let msg=translations[currentLang||'ar'].new_max_alert||`دمار! الإثبات سيكون للوزن الأعلى ({weight}kg)`;showToast(msg.replace('{weight}',weight))}}
 document.getElementById('live-ex-reps').value='';if(!isSuperset){const restOverlay=document.getElementById('rest-timer-overlay');restOverlay.style.display='flex';setTimeout(()=>restOverlay.classList.add('active'),10);startRestTimer(restTime)}else{showToast(currentLang==='en'?"Superset Logged! No rest.":"تم تسجيل السوبرسيت! استمر بالجلد.")}};function closeLiveWorkout(){liveWorkoutActive=!1;clearInterval(liveDurationTimer);clearInterval(restInterval);releaseWakeLock();const overlay=document.getElementById('live-workout-overlay');overlay.classList.remove('active');setTimeout(()=>{overlay.style.display='none';const canvas=document.getElementById('stardust-canvas');if(canvas)canvas.style.zIndex='-1'},500);document.getElementById('rest-timer-overlay').classList.remove('active')}
 function skipRest(){clearInterval(restInterval);const restOverlay=document.getElementById('rest-timer-overlay');restOverlay.classList.remove('active');setTimeout(()=>restOverlay.style.display='none',500)}
 function animateValue(obj,start,end,duration){let startTimestamp=null;const step=(timestamp)=>{if(!startTimestamp)startTimestamp=timestamp;const progress=Math.min((timestamp-startTimestamp)/duration,1);obj.innerHTML=Math.floor(progress*(end-start)+start);if(progress<1)window.requestAnimationFrame(step);};window.requestAnimationFrame(step)}
@@ -2897,7 +3121,7 @@ renderNoGuildScreen(t)}}catch(e){console.error("Error fetching guild data: ",e);
 try{const friendsDataPromises=myFriends.map(async(friend)=>{const friendDoc=await db.collection('users').doc(friend.id).get();if(friendDoc.exists){const freshData=friendDoc.data();const freshName=(freshData.firstName+" "+(freshData.lastName||"")).trim();const freshImg=freshData.photoURL||"/Photos/adm.jpeg";const freshLevel=freshData.rank||1;return `
                         <div class="friend-card" style="animation: fadeIn 0.4s;">
                             <div class="friend-info" style="cursor: pointer;" onclick="viewPlayerProfile('${friend.id}')">
-                                <img src="${freshImg}">
+                                <img src="${freshImg}" onerror="this.src='/Photos/adm.jpeg'">
                                 <div>
                                     <h4>${freshName.replace(/</g, "&lt;")}</h4>
                                     <p>Level ${freshLevel} 🔥</p>
@@ -3068,8 +3292,8 @@ membersArr.sort((a,b)=>(b.volume||0)-(a.volume||0));if(membersArr.length===0)ret
             `}})};let chatUnsubscribe=null;window.initClanChat=function(clanId,myUid){const chatBox=document.getElementById('clan-chat-messages');if(!chatBox)return;if(chatUnsubscribe)chatUnsubscribe();let twoDaysAgo=new Date();twoDaysAgo.setHours(twoDaysAgo.getHours()-48);chatUnsubscribe=db.collection('clans').doc(clanId).collection('chat').where('timestamp','>=',twoDaysAgo).orderBy('timestamp','asc').onSnapshot(snapshot=>{let lang=localStorage.getItem('lang')||'ar';chatBox.innerHTML='';if(snapshot.empty){chatBox.innerHTML=`<div style="text-align:center; color:var(--slate); margin-top:50px;"><i class="fa-solid fa-comments fa-2x"></i><p>${lang === 'en' ? 'No recent messages.' : 'لا يوجد رسائل حديثة.'}</p></div>`;return}
 snapshot.forEach(doc=>{let msg=doc.data();let isMine=msg.senderId===myUid;chatBox.innerHTML+=`
                     <div class="chat-bubble ${isMine ? 'mine' : 'others'}">
-                        <div class="chat-sender-name">${msg.senderName}</div>
-                        ${msg.text}
+                        <div class="chat-sender-name">${escapeHTML(msg.senderName)}</div>
+                        ${escapeHTML(msg.text)}
                     </div>
                 `});chatBox.scrollTop=chatBox.scrollHeight})};window.sendClanMessage=async function(clanId,myUid){const input=document.getElementById('clan-chat-input');const text=input.value.trim();let lang=localStorage.getItem('lang')||'ar';if(!text)return;let userData=JSON.parse(localStorage.getItem('currentUser')||'{}');let senderName=userData.firstName||(lang==='en'?'Captain':'الكابتن');input.value='';try{await db.collection('clans').doc(clanId).collection('chat').add({text:text,senderId:myUid,senderName:senderName,timestamp:firebase.firestore.FieldValue.serverTimestamp()})}catch(e){console.error(e);showToast(lang==='en'?"Failed to send message!":"فشل إرسال الرسالة!")}};const emblemIcons=['fa-dragon','fa-shield-halved','fa-skull','fa-fire-flame-curved','fa-bolt','fa-ghost','fa-khanda','fa-crow','fa-paw','fa-moon','fa-meteor','fa-crown','fa-jedi','fa-spider','fa-biohazard','fa-radiation','fa-mask','fa-user-ninja','fa-hat-wizard','fa-gem'];const emblemColors=['#FFD700','#00f2a7','#ff4d4d','#00d4ff','#b5179e','#ff9f43','#ffffff','#a8a8a8'];
 
@@ -3390,7 +3614,7 @@ membersArr.sort((a,b)=>b.volume-a.volume);if(membersArr.length===0)return `<p st
             </div>
         </div>
     `};
-window.loadActiveGuild=async function(clanId,myUid){window.scrollTo(0,0);const area=document.getElementById('guild-content-area');if(!area)return;let lang=localStorage.getItem('lang')||'ar';const t=(typeof translations!=='undefined'&&translations[lang])?translations[lang]:{};db.collection('clans').doc(clanId).onSnapshot(async doc=>{try{if(!doc.exists){let userData=JSON.parse(localStorage.getItem('currentUser')||'{}');userData.clanId=null;localStorage.setItem('currentUser',JSON.stringify(userData));if(myUid)await db.collection('users').doc(myUid).update({clanId:null});if(typeof renderNoGuildScreen==='function')renderNoGuildScreen(t);return}
+window.clanHubUnsubscribe=null;window.loadActiveGuild=async function(clanId,myUid){window.scrollTo(0,0);const area=document.getElementById('guild-content-area');if(!area)return;let lang=localStorage.getItem('lang')||'ar';const t=(typeof translations!=='undefined'&&translations[lang])?translations[lang]:{};if(window.clanHubUnsubscribe){window.clanHubUnsubscribe();window.clanHubUnsubscribe=null;}window.clanHubUnsubscribe=db.collection('clans').doc(clanId).onSnapshot(async doc=>{try{if(!doc.exists){let userData=JSON.parse(localStorage.getItem('currentUser')||'{}');userData.clanId=null;localStorage.setItem('currentUser',JSON.stringify(userData));if(myUid)await db.collection('users').doc(myUid).update({clanId:null});if(typeof renderNoGuildScreen==='function')renderNoGuildScreen(t);return}
 const clan=doc.data()||{};
 
 
@@ -3632,7 +3856,8 @@ function recalculateStatsAndRefreshUI() {
 
 window.deleteSingleWorkout = async function(index) {
     const t = translations[currentLang || 'ar'];
-    if (!confirm(t.delete_confirm_single)) return;
+    const confirmed = await window.rgaConfirm(t.delete_confirm_single, currentLang==='en' ? 'Delete Workout' : 'حذف التمرين');
+if (!confirmed) return;
 
     try {
         let workoutHistory = JSON.parse(localStorage.getItem('userWorkouts') || '[]');
@@ -3655,7 +3880,8 @@ window.deleteSingleWorkout = async function(index) {
  */
 window.deleteAllWorkouts = async function() {
     const t = translations[currentLang || 'ar'];
-    if (!confirm(t.delete_confirm_all)) return;
+    const confirmed = await window.rgaConfirm(t.delete_confirm_all, currentLang==='en' ? 'Reset All Data' : 'مسح السجلات');
+if (!confirmed) return;
 
     try {
         localStorage.setItem('userWorkouts', '[]');
@@ -4393,3 +4619,83 @@ const applicationData = {
         };
     }
 });
+/* --- RGA Custom Modals --- */
+window.rgaConfirm = function(message, title) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('rga-custom-modal');
+        if (!modal) {
+            resolve(confirm(message));
+            return;
+        }
+
+        // فحص لغة التطبيق الحالية
+        const isEn = currentLang === 'en';
+
+        // تعيين النصوص بناءً على اللغة
+        document.getElementById('rga-modal-title').innerText = title || (isEn ? "Confirmation" : "تأكيد الإجراء");
+        document.getElementById('rga-modal-text').innerText = message;
+        
+        const confirmBtn = document.getElementById('rga-modal-confirm');
+        const cancelBtn = document.getElementById('rga-modal-cancel');
+        
+        confirmBtn.innerText = isEn ? "Yes" : "نعم";
+        cancelBtn.innerText = isEn ? "Cancel" : "إلغاء";
+
+        cancelBtn.style.display = 'block';
+        modal.style.display = 'flex';
+        
+        confirmBtn.onclick = () => {
+            modal.style.display = 'none';
+            resolve(true);
+        };
+        
+        cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+            resolve(false);
+        };
+    });
+};
+
+window.rgaAlert = function(message, title) {
+    const modal = document.getElementById('rga-custom-modal');
+    if (!modal) {
+        alert(message);
+        return;
+    }
+
+    const isEn = currentLang === 'en';
+
+    document.getElementById('rga-modal-title').innerText = title || (isEn ? "Alert" : "تنبيه");
+    document.getElementById('rga-modal-text').innerText = message;
+    
+    const confirmBtn = document.getElementById('rga-modal-confirm');
+    confirmBtn.innerText = isEn ? "OK" : "حسناً";
+    
+    document.getElementById('rga-modal-cancel').style.display = 'none'; 
+    modal.style.display = 'flex';
+    
+    confirmBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+};
+
+// --- نظام مراقبة جودة الإنترنت (RGA Network Monitor) ---
+window.addEventListener('online', () => {
+    const isEn = currentLang === 'en';
+    showToast(isEn ? "🟢 Connection Restored!" : "🟢 عاد الاتصال بالإنترنت!");
+});
+
+window.addEventListener('offline', () => {
+    const isEn = currentLang === 'en';
+    showToast(isEn ? "🔴 You are offline! Some features may not work." : "🔴 انقطع الاتصال! قد لا يتم حفظ بياناتك.");
+});
+
+// حماية أزرار الحفظ إذا كان النت مفصول
+const originalSaveWorkout = window.saveWorkout;
+window.saveWorkout = async function() {
+    if (!navigator.onLine) {
+        showToast(currentLang === 'en' ? "Cannot save while offline!" : "لا يمكن الحفظ بدون إنترنت!");
+        return;
+    }
+    return originalSaveWorkout.apply(this, arguments);
+};

@@ -110,5 +110,16 @@
         </button>
     </div>
 </div>
+<!-- RGA Custom Alert/Confirm Modal -->
+<div id="rga-custom-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 20, 41, 0.9); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div style="background: linear-gradient(145deg, rgba(17, 34, 64, 0.98), rgba(10, 20, 41, 0.98)); border: 1px solid var(--primary-color); border-radius: 15px; width: 90%; max-width: 400px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,242,167,0.2); animation: popEpic 0.3s ease-out;">
+        <h3 id="rga-modal-title" style="color: var(--primary-color); font-weight: 900; margin-bottom: 15px;">تنبيه</h3>
+        <p id="rga-modal-text" style="color: white; font-size: 1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="rga-modal-confirm" class="btn-primary" style="flex: 1; padding: 10px;">نعم</button>
+            <button id="rga-modal-cancel" class="btn-primary" style="flex: 1; padding: 10px; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: #ff4d4d;">إلغاء</button>
+        </div>
+    </div>
+</div>
 
 <script src="main.js"></script></body></html>
