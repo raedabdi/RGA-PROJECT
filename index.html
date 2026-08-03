@@ -197,33 +197,33 @@
 
 
 
-#help-modal, #legal-modal, #job-modal {
-    display: none !important; /* إخفاء إجباري في البداية */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(10, 20, 41, 0.9);
-    z-index: 99999; /* عشان تطلع فوق كل شي */
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px);
-}
 
-#help-modal.active, #legal-modal.active, #job-modal.active {
-    display: flex !important; 
-}
+        #help-modal, #legal-modal {
+            display: none !important; /* إخفاء إجباري في البداية */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 20, 41, 0.9);
+            z-index: 99999; /* عشان تطلع فوق كل شي */
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
 
-#help-modal .modal-content, #legal-modal .modal-content, #job-modal .modal-content {
-    background: linear-gradient(145deg, rgba(17, 34, 64, 0.98), rgba(10, 20, 41, 0.98));
-    border: 1px solid var(--primary-color);
-    border-radius: 15px;
-    width: 90%;
-    position: relative;
-}
+        #help-modal.active, #legal-modal.active {
+            display: flex !important; 
+        }
 
-
+        #help-modal .modal-content, #legal-modal .modal-content {
+            background: linear-gradient(145deg, rgba(17, 34, 64, 0.98), rgba(10, 20, 41, 0.98));
+            border: 1px solid var(--primary-color);
+            border-radius: 15px;
+            width: 90%;
+            position: relative;
+        }
         
         #faq-container .accordion-header {
             background: rgba(255, 255, 255, 0.05);
@@ -478,9 +478,7 @@
 
 
 <div class="reveal cta-buttons">
-<a href="#" class="btn-primary" id="join-empire-btn" onclick="openJobModal(); return false;" data-translate="btn_join_empire" style="font-size: 1.1rem; padding: 15px 40px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); border-color: #FFD700; color: #FFD700; background: rgba(255, 215, 0, 0.1);">
-    <i class="fa-solid fa-crown"></i> انضم إلينا
-</a>
+                <a href="#" class="btn-primary" id="start-challenge-btn" data-translate="btn_start">ابدأ التحدي الآن</a>
             </div>
 
 
@@ -724,189 +722,6 @@
     </div>
 
 
-<!-- نافذة التوظيف الذكية -->
-<div id="job-modal" class="modal-overlay">
-    <div class="modal-content glass-card" style="max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 2rem;">
-        <button class="close-modal-btn" onclick="closeJobModal()">&times;</button>
-        <h2 data-translate="job_modal_title" style="color: #FFD700; font-weight: 900; margin-bottom: 5px; text-align: center; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
-            <i class="fa-solid fa-handshake-angle"></i> انضم لفريق RGA
-        </h2>
-        <p data-translate="job_modal_subtitle" style="text-align: center; color: var(--slate); font-size: 0.85rem; margin-bottom: 25px;">نحن لا نبحث عن موظفين، بل عن شركاء نجاح لبناء إمبراطورية اللياقة الأولى عالمياً.</p>
-        
-        <form id="job-application-form">
-            <div class="input-group">
-                <input type="text" id="job-name" class="input-field" placeholder="الاسم الكامل" data-translate-ph="job_name" required>
-            </div>
-<div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 1.5rem;">
-    <input type="email" id="job-email" class="input-field" placeholder="البريد الإلكتروني" data-translate-ph="job_email" required style="margin-bottom: 0;">
-    <input type="tel" id="job-phone" class="input-field" placeholder="رقم الواتساب" data-translate-ph="job_phone" required style="margin-bottom: 0;">
-</div>
-
-<!-- تحديد الجنس -->
-            <div class="input-group">
-                <select id="job-gender" class="input-field" required style="cursor: pointer;">
-                    <option value="" disabled selected data-translate="job_gender_select">-- اختر الجنس --</option>
-                    <option value="male" data-translate="job_gender_male">ذكر</option>
-                    <option value="female" data-translate="job_gender_female">أنثى</option>
-                </select>
-            </div>
-
-            <!-- المنصب -->
-            <div class="input-group">
-                <select id="job-role" class="input-field" required onchange="handleJobRoleChange()" style="cursor: pointer; color: var(--primary-color); font-weight: bold;">
-                    <option value="" disabled selected data-translate="job_role_select">-- اختر المنصب الذي تبدع فيه --</option>
-                    <option value="support" data-translate="role_support"> دعم فني وخدمة عملاء</option>
-                    <option value="referee" data-translate="role_referee"> مُحكم أداء (تدقيق فيديوهات الأوزان)</option>
-                    <option value="creator" data-translate="role_creator"> صانع محتوى (تصميم / مونتاج)</option>
-                    <option value="coordinator" data-translate="role_coordinator"> منسق أندية (تسويق وعلاقات عامة)</option>
-                </select>
-            </div>
-
-            <!-- الأسئلة الديناميكية تظهر هنا -->
-            <div id="dynamic-job-fields" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border-right: 3px solid var(--primary-color); display: none;">
-            </div>
-
-            <!-- توقعات الراتب -->
-            <div class="input-group">
-                <select id="job-salary" class="input-field" required onchange="handleSalaryChange()" style="cursor: pointer;">
-                    <option value="" disabled selected data-translate="job_salary_select">-- ما هي توقعاتك المالية؟ --</option>
-                    <option value="fixed" data-translate="salary_fixed"> راتب شهري ثابت</option>
-                    <option value="commission" data-translate="salary_commission"> نسبة وعمولات على الأرباح/الاشتراكات</option>
-                    <option value="prove_first" data-translate="salary_prove"> إثبات نفسي أولاً (فترة تجريبية) ثم نحدد</option>
-                </select>
-            </div>
-            
-            <!-- حقل الراتب المخفي -->
-            <div class="input-group hidden" id="salary-amount-group">
-                <input type="number" id="job-salary-amount" class="input-field" placeholder="كم تتوقع الراتب؟ (بالدولار $)" data-translate-ph="salary_amount">
-            </div>
-
-<!-- زر إنشاء بطاقة السحب الفخمة -->
-            <div style="text-align: center; margin-bottom: 25px;">
-                <button type="button" class="btn-primary" style="width: 100%; background: linear-gradient(145deg, #FFD700, #b38728); color: #0A1429; border: none; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); font-size: 1.1rem; font-weight: 900;" onclick="openVipStoryCard(event)">
-                    <i class="fa-solid fa-ticket"></i> <span data-translate="btn_generate_ticket">إنشاء بطاقة السحب ($1000)</span>
-                </button>
-            </div>
-
-
-            <button type="submit" id="submit-job-btn" class="btn-primary" style="width: 100%; font-size: 1.1rem; box-shadow: 0 0 20px rgba(0, 242, 167, 0.4);" data-translate="job_submit_btn">إرسال الطلب </button>
-        </form>
-    </div>
-</div>
-
-
-
-
-<!-- شاشة بطاقة الستوري الفخمة جداً (VIP Black Card) -->
-<div id="vip-story-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
-    
-    <style>
-        @keyframes sweepGlare {
-            0% { transform: translateX(-150%) skewX(-45deg); }
-            100% { transform: translateX(200%) skewX(-45deg); }
-        }
-        @keyframes goldShine {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes floatLuxury {
-            0% { transform: translateY(0px); box-shadow: 0 20px 40px rgba(0,0,0,0.9); }
-            50% { transform: translateY(-15px); box-shadow: 0 35px 50px rgba(0,0,0,0.9); }
-            100% { transform: translateY(0px); box-shadow: 0 20px 40px rgba(0,0,0,0.9); }
-        }
-        .vip-card-wrapper {
-            padding: 3px; background: linear-gradient(60deg, #bf953f, #fcf6ba, #b38728, #fcf6ba, #aa771c);
-            background-size: 300% 300%; border-radius: 28px;
-            animation: goldShine 4s linear infinite, floatLuxury 5s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255,215,0,0.5); position: relative;
-        }
-        .vip-luxury-card {
-            width: 330px; height: 580px; background: linear-gradient(145deg, #0a0a0a 0%, #1a1a1a 100%);
-            border-radius: 25px; position: relative; overflow: hidden; display: flex; flex-direction: column;
-            align-items: center; padding: 40px 20px 20px 20px;
-        }
-        .vip-glare {
-            position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-45deg); animation: sweepGlare 5s infinite; z-index: 10; pointer-events: none;
-        }
-        .vip-watermark {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 18rem; color: rgba(255, 215, 0, 0.03); z-index: 0; pointer-events: none;
-        }
-        .vip-qr-frame {
-            background: linear-gradient(135deg, #bf953f, #aa771c); padding: 5px; border-radius: 20px;
-            margin: 15px 0; z-index: 2; box-shadow: 0 10px 30px rgba(0,0,0,0.9); position: relative;
-        }
-    </style>
-
-    <!-- زر الإغلاق -->
-    <button onclick="closeVipStoryCard()" style="position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #8892b0; font-size: 2.5rem; cursor: pointer; z-index: 20; transition: 0.3s; line-height: 1;">&times;</button>
-    
-    <h3 style="color: #FFD700; font-family: 'Cairo', sans-serif; font-weight: 900; margin-bottom: 25px; text-align: center; text-shadow: 0 0 20px rgba(255,215,0,0.6); animation: pulseXP 1.5s infinite alternate;" data-translate="vip_instruction">
-         خذ سكرين شوت وانشرها ستوري!
-    </h3>
-
-    <div class="vip-card-wrapper">
-        <div class="vip-luxury-card">
-            
-            <!-- زر القوانين (i) الجديد -->
-            <button onclick="openVipRules(event)" style="position: absolute; top: 18px; left: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); color: #FFD700; width: 35px; height: 35px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; transition: 0.3s;" onmouseover="this.style.background='rgba(255,215,0,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                <i class="fa-solid fa-info"></i>
-            </button>
-
-            <div class="vip-glare"></div>
-            <i class="fa-solid fa-crown vip-watermark"></i>
-            
-            <i class="fa-solid fa-chess-king" style="font-size: 2.2rem; color: #FFD700; margin-bottom: 12px; z-index: 2; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));"></i>
-            <div style="background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fcf6ba, #aa771c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: 900; letter-spacing: 4px; margin-bottom: 5px; text-align: center; z-index: 2; font-family: 'Montserrat', sans-serif;">ROYAL GRAVITAS</div>
-            <div style="color: #8892b0; font-size: 0.8rem; letter-spacing: 6px; z-index: 2; margin-bottom: 15px; font-weight: 700; font-family: 'Montserrat', sans-serif;">ARENA</div>
-            
-            <div style="width: 80%; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.6), transparent); margin-bottom: 10px; z-index: 2;"></div>
-
-            <!-- الجائزة (تم التصغير) -->
-            <div style="font-size: 3.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 5px 10px rgba(0,0,0,0.9); margin: 0; z-index: 2; font-family: 'Montserrat', sans-serif;">$1,000</div>
-            
-            <!-- شريط السحب -->
-            <div style="background: linear-gradient(90deg, rgba(255,215,0,0.1), rgba(255,215,0,0.2), rgba(255,215,0,0.1)); border: 1px solid rgba(255,215,0,0.4); padding: 4px 20px; border-radius: 50px; color: #FFD700; font-weight: 900; font-size: 0.85rem; letter-spacing: 1px; z-index: 2; margin-bottom: 5px; box-shadow: 0 0 15px rgba(255,215,0,0.2);" data-translate="vip_prize_title">السحب الإمبراطوري</div>
-
-            <!-- إطار الباركود (منع النسخ بالكامل) -->
-            <div class="vip-qr-frame">
-                <!-- تم إضافة أكواد الحماية لمنع النسخ أو الحفظ -->
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.rga360.com/&color=111111&bgcolor=FFFFFF&margin=2" alt="RGA QR" width="150" height="150" style="border-radius: 15px; display: block; pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
-            </div>
-
-            <p style="color: #fff; font-size: 0.9rem; font-family: 'Cairo', sans-serif; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.9); z-index: 2; margin-bottom: auto;" data-translate="vip_scan_me">امسح الكود لدخول الساحة</p>
-            
-            <!-- ضوء خافت في الأسفل -->
-            <div style="position: absolute; bottom: 0; width: 100%; height: 50px; background: linear-gradient(to top, rgba(255,215,0,0.15), transparent); z-index: 1;"></div>
-            
-            <!-- الفوتر (تم الإبعاد عن الباركود) -->
-            <div style="width: 100%; text-align: center; color: rgba(255,215,0,0.8); font-family: 'Montserrat', sans-serif; letter-spacing: 4px; font-size: 0.75rem; font-weight: 900; z-index: 2; padding-top: 15px;">
-                WWW.rga360.com
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- نافذة الشروط المنبثقة (Rules Modal) -->
-<div id="vip-rules-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: linear-gradient(145deg, #0A1429, #112240); max-width: 400px; width: 100%; border: 1px solid #FFD700; border-radius: 20px; position: relative; padding: 30px 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
-        <button onclick="closeVipRules()" style="position: absolute; top: 15px; left: 20px; background: none; border: none; color: #8892b0; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
-        
-        <h2 style="color: #FFD700; text-align: center; margin-bottom: 25px; font-weight: 900; font-family: 'Cairo', sans-serif;" data-translate="vip_rules_title">الشروط والأحكام </h2>
-        
-        <ul id="vip-rules-list" style="color: white; font-size: 0.95rem; line-height: 1.8; text-align: right; font-family: 'Cairo', sans-serif; padding-right: 20px; list-style-type: disc;" dir="rtl">
-            <li data-translate="vip_rule_1" style="margin-bottom: 15px;">يجب أخذ لقطة شاشة (Screenshot) للبطاقة ونشرها في الستوري الخاص بك.</li>
-            <li data-translate="vip_rule_2" style="margin-bottom: 15px;">شرط أساسي لدخول السحب: عمل منشن لحساب المنصة الرسمي <span style="color:#FFD700;">@ROYALGRAVITASARENA</span>.</li>
-            <li data-translate="vip_rule_3" style="margin-bottom: 15px;">سيتم إجراء السحب بشفافية تامة عبر حسابنا الرسمي في انستغرام.</li>
-            <li data-translate="vip_rule_4" style="margin-bottom: 15px;">سيتم التواصل مع الفائز عبر الإيميل المسجل لدينا لتسليمه الجائزة.</li>
-        </ul>
-        
-        <button class="btn-primary" style="width: 100%; background: linear-gradient(145deg, #FFD700, #b38728); color: #000; border: none; margin-top: 25px; font-weight: 900; font-size: 1.1rem; box-shadow: 0 5px 15px rgba(255,215,0,0.3);" onclick="closeVipRules()" data-translate="vip_rules_btn">موافق، أنا جاهز!</button>
-    </div>
-</div>
 
     <!-- Auth Modal -->
 <div id="toast-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;"></div>
