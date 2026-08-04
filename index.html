@@ -158,7 +158,15 @@
         .feature-card .icon svg { width: 48px; height: 48px; filter: drop-shadow(0 0 5px var(--primary-color)); }
         .feature-card h3 { color: var(--white); font-size: 1.5rem; margin-bottom: 0.5rem; }
         
-        #main-footer { padding: 4rem 0; background: var(--light-navy); text-align: center; }
+        /* --- الكود الجديد للفوتر (شفاف ليظهر الفيديو تحته) --- */
+#main-footer { 
+    padding: 4rem 0; 
+    background: rgba(10, 20, 41, 0.75); /* لون كحلي شفاف */
+    backdrop-filter: blur(15px); /* تغبيش الفيديو تحته */
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center; 
+}
         .copyright { margin-top: 2rem; font-size: 0.9rem; }
         .accordion { max-width: 700px; margin: 0 auto 2rem; text-align: right; }
         .accordion-item { border-bottom: 1px solid var(--light-navy); }
@@ -417,17 +425,45 @@
 .comparison-column > h3 {
     text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;
 }
+/* --- الكود الجديد لقسم المقارنة (فخامة الزجاج) --- */
+.comparison-column {
+    padding: 1.5rem; 
+    border-radius: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1.5rem;
+    backdrop-filter: blur(15px); /* التغبيش القوي اللي بيعزل الفيديو */
+    -webkit-backdrop-filter: blur(15px);
+}
 /* الطريقة القديمة */
-.old-way { background: rgba(50, 50, 50, 0.1); border: 1px solid rgba(100, 100, 100, 0.2); }
+.old-way { 
+    background: rgba(15, 20, 30, 0.6); /* لون كحلي غامق شفاف */
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 .old-way > h3 { color: #8892b0; }
-.old-way .comparison-card { filter: grayscale(1); opacity: 0.7; }
+.old-way .comparison-card { filter: grayscale(1); opacity: 0.8; }
 .old-way .comp-icon { color: #777; }
+
 /* طريقة RGA */
-.rga-way { background: rgba(17, 34, 64, 0.5); border: 1px solid rgba(0, 242, 167, 0.3); }
+.rga-way { 
+    background: rgba(0, 242, 167, 0.05); 
+    border: 1px solid rgba(0, 242, 167, 0.2); 
+    box-shadow: 0 10px 30px rgba(0, 242, 167, 0.1);
+}
 .rga-way > h3 { color: var(--primary-color); }
 .rga-way .comp-icon { color: var(--primary-color); }
 
-.comparison-card { display: flex; align-items: center; gap: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; }
+/* الكروت الداخلية */
+.comparison-card { 
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+    background: rgba(0, 0, 0, 0.5); /* تغميق الكرت الداخلي لبروز النص */
+    padding: 1rem; 
+    border-radius: 12px; 
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
 .comp-icon { font-size: 1.8rem; min-width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.05); }
 .comp-text h4 { color: white; font-weight: bold; margin-bottom: 5px; }
 .comp-text p { font-size: 0.85rem; color: var(--slate); margin: 0; }
@@ -436,9 +472,23 @@
 .features-wrapper { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: flex-start; }
 @media (min-width: 992px) { .features-wrapper { grid-template-columns: 1fr 1fr; } }
 .features-list { display: flex; flex-direction: column; gap: 4rem; }
-.feature-item { padding: 1.5rem; border-radius: 15px; border-left: 4px solid rgba(0, 242, 167, 0.2); transition: all 0.4s ease; }
+/* --- الكود الجديد لكروت الميزات --- */
+.feature-item { 
+    padding: 1.5rem; 
+    border-radius: 15px; 
+    border-left: 4px solid rgba(0, 242, 167, 0.2); 
+    transition: all 0.4s ease; 
+    background: rgba(10, 20, 41, 0.5); /* خلفية معتمة قليلاً */
+    backdrop-filter: blur(12px); /* تغبيش */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.03); 
+}
 [dir="ltr"] .feature-item { border-left: none; border-right: 4px solid rgba(0, 242, 167, 0.2); }
-.feature-item.is-visible { background: rgba(17, 34, 64, 0.5); border-left-color: var(--primary-color); }
+.feature-item.is-visible { 
+    background: rgba(10, 20, 41, 0.85); /* تعتيم أكثر عند تفعيل الكرت */
+    border-left-color: var(--primary-color); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+}
 [dir="ltr"] .feature-item.is-visible { border-right-color: var(--primary-color); }
 .feature-item .icon { color: var(--primary-color); margin-bottom: 1rem; font-size: 1.5rem; }
 .feature-item h3 { color: var(--white); font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 900; }
@@ -453,7 +503,63 @@
 
 
 
+<!-- خلفية الفيديو الثابتة لكل الموقع -->
+<div id="global-video-bg" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background-color: var(--secondary-color);">
+    
+    <!-- الفيديو الأول -->
+    <video id="bg-vid-1" muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.5s ease-in-out; opacity: 1;">
+        <source src="/Photos/bg-video.mp4" type="video/mp4">
+    </video>
 
+    <!-- الفيديو الثاني (مخفي في البداية) -->
+    <video id="bg-vid-2" muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.5s ease-in-out; opacity: 0;">
+        <source src="/Photos/bg-video.mp4" type="video/mp4">
+    </video>
+
+    <!-- الطبقة الكحلية الشفافة (مهمة لبروز النصوص) -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 20, 41, 0.85);"></div>
+</div>
+
+<!-- السكربت السحري لدمج الفيديوهين (Crossfade Illusion) -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const v1 = document.getElementById('bg-vid-1');
+        const v2 = document.getElementById('bg-vid-2');
+        let activeVid = v1;
+        let nextVid = v2;
+        const fadeTime = 1.5; // مدة التداخل ثانية ونصف (لجعل الركض متصل كالسحر)
+
+        // تشغيل الفيديو الأول
+        v1.play();
+
+        function checkVideoLoop() {
+            // إذا اقترب الفيديو من النهاية بثانية ونصف
+            if (activeVid.duration > 0 && (activeVid.duration - activeVid.currentTime) <= fadeTime) {
+                // شغل الفيديو الثاني من البداية
+                nextVid.currentTime = 0;
+                nextVid.play();
+                
+                // أظهر الثاني وأخفِ الأول ببطء (تداخل سينمائي)
+                nextVid.style.opacity = '1';
+                activeVid.style.opacity = '0';
+                
+                // تبديل الأدوار للدورة القادمة
+                let temp = activeVid;
+                activeVid = nextVid;
+                nextVid = temp;
+                
+                // إيقاف مؤقت حتى ينتهي التداخل ثم نعاود المراقبة
+                setTimeout(checkVideoLoop, fadeTime * 1000 + 100);
+            } else {
+                // استمر بالمراقبة
+                requestAnimationFrame(checkVideoLoop);
+            }
+        }
+        
+        // بدء المراقبة
+        requestAnimationFrame(checkVideoLoop);
+    });
+</script>
 
     <canvas id="stardust-canvas"></canvas>
 
@@ -467,25 +573,16 @@
             </nav>
         </div>
     </header>
+<section id="hero" style="background: transparent; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="container" style="position: relative; z-index: 2; width: 100%;">
+        <h1 class="reveal"><span data-translate="hero_subtitle">حوّل لياقتك إلى لعبة</span><div data-translate="hero_title">ارتقِ بقوتك</div></h1>
+        <p class="reveal subtitle" data-translate="hero_desc">انضم إلى ثورة اللياقة البدنية. اكتسب نقاط خبرة، تنافس مع الأصدقاء، وحقق أهدافك بطريقة لم تتخيلها من قبل.</p>
 
-
-    <section id="hero">
-        <div class="container">
-            <h1 class="reveal"><span data-translate="hero_subtitle">حوّل لياقتك إلى لعبة</span><div data-translate="hero_title">ارتقِ بقوتك</div></h1>
-            <p class="reveal subtitle" data-translate="hero_desc">انضم إلى ثورة اللياقة البدنية. اكتسب نقاط خبرة، تنافس مع الأصدقاء، وحقق أهدافك بطريقة لم تتخيلها من قبل.</p>
-
-
-
-
-<div class="reveal cta-buttons">
-                <a href="#" class="btn-primary" id="start-challenge-btn" data-translate="btn_start">ابدأ التحدي الآن</a>
-            </div>
-
-
-
-            </div>
+        <div class="reveal cta-buttons">
+            <a href="#" class="btn-primary" id="start-challenge-btn" data-translate="btn_start">ابدأ التحدي الآن</a>
         </div>
-    </section>
+    </div>
+</section>
 
     <section id="stats" class="reveal">
         <div class="container stats-container">

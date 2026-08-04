@@ -1414,55 +1414,67 @@ area.innerHTML=`
             ${earnedBadgesHTML}
         </div>
 
-<h3 style="margin-top: 20px; color: #8892b0; margin-bottom: 15px; font-size: 0.9rem;">${currentLang === 'en' ? 'Settings & Help' : 'الإعدادات والمساعدة'}</h3>
 
-        <div style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 30px;">
+
+<h3 style="margin-top: 30px; color: var(--primary-color); margin-bottom: 15px; font-size: 0.9rem; font-weight: 900; letter-spacing: 1px;"><i class="fa-solid fa-gem"></i> ${currentLang === 'en' ? 'PREMIUM VAULT' : 'الخزنة الملكية'}</h3>
+        
+        <!-- كرت الخزنة الأسطوري -->
+        <div class="epic-vault-card" onclick="openInventory()">
+            <div class="vault-icon"><i class="fa-solid fa-box-open"></i></div>
+            <div class="vault-info">
+                <h4>${currentLang === 'en' ? 'My Inventory' : 'مخزون الغنائم'}</h4>
+                <p>${currentLang === 'en' ? 'Equip Titles, Auras & Covers' : 'تجهيز الألقاب، الهالات، والأغلفة'}</p>
+            </div>
+            <i class="fa-solid fa-chevron-left vault-arrow"></i>
+        </div>
+
+        <h3 style="margin-top: 30px; color: var(--slate); margin-bottom: 15px; font-size: 0.9rem; font-weight: 900;"><i class="fa-solid fa-sliders"></i> ${currentLang === 'en' ? 'SYSTEM CONTROLS' : 'أدوات النظام'}</h3>
+        
+        <!-- نظام الكروت الشبكية (Grid Cards) للإعدادات -->
+        <div class="profile-settings-grid">
             
-
-            <button class="btn-primary" onclick="openInventory()" style="width: 100%; padding: 15px; background: linear-gradient(145deg, rgba(155, 89, 182, 0.2), rgba(0, 0, 0, 0.4)); border-color: #9b59b6; color: #d8b4fe; display: flex; justify-content: space-between; align-items: center; font-weight: 900; box-shadow: 0 0 15px rgba(155, 89, 182, 0.2);">
-                <span style="display: flex; align-items: center; gap: 8px;">${currentLang === 'en' ? 'My Inventory' : 'خزنة الغنائم (مخزوني)'} <i class="fa-solid fa-box-open"></i></span>
-                <i class="fa-solid fa-chevron-left" style="font-size: 0.8rem;"></i>
-            </button>
-
-
-
-            
-            <div style="position: relative; width: 100%;">
-                <button class="btn-primary" onclick="toggleProfileLangMenu(event)" style="width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2); color: white; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="display: flex; align-items: center; gap: 8px;">${t.language_btn || 'اللغة الأساسية'} <i class="fa-solid fa-globe"></i></span>
-                    <i class="fa-solid fa-chevron-down" style="font-size: 0.8rem; transition: 0.3s;" id="profile-lang-icon"></i>
-                </button>
-                
-                <div id="profile-lang-dropdown" style="display: none; position: absolute; top: calc(100% + 5px); left: 0; width: 100%; background: rgba(17, 34, 64, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--primary-color); border-radius: 12px; z-index: 100; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                    <button onclick="changeLanguageFromProfile('ar')" style="width: 100%; padding: 15px; background: ${currentLang === 'ar' ? 'rgba(0, 242, 167, 0.1)' : 'transparent'}; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); color: ${currentLang === 'ar' ? 'var(--primary-color)' : 'white'}; font-family: var(--font-main); font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
-                        <span>العربية</span>
-                        ${currentLang === 'ar' ? '<i class="fa-solid fa-check"></i>' : ''}
-                    </button>
-                    <button onclick="changeLanguageFromProfile('en')" style="width: 100%; padding: 15px; background: ${currentLang === 'en' ? 'rgba(0, 242, 167, 0.1)' : 'transparent'}; border: none; color: ${currentLang === 'en' ? 'var(--primary-color)' : 'white'}; font-family: var(--font-main); font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
-                        <span>English</span>
-                        ${currentLang === 'en' ? '<i class="fa-solid fa-check"></i>' : ''}
-                    </button>
-                </div>
+            <div class="pro-setting-card" onclick="toggleProfileLangMenu(event)">
+                <i class="fa-solid fa-globe setting-icon" style="color: #3498db; text-shadow: 0 0 15px rgba(52, 152, 219, 0.5);"></i>
+                <span>${t.language_btn || 'تغيير اللغة'}</span>
             </div>
 
-            <button class="btn-primary" onclick="openHelpSupport()" style="width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2); color: white; display: flex; justify-content: space-between; align-items: center;">
-                <span style="display: flex; align-items: center; gap: 8px;">${currentLang === 'en' ? 'Help & Support' : 'الدعم والمساعدة'} <i class="fa-solid fa-headset"></i></span>
-            </button>
+            <div class="pro-setting-card" onclick="openHelpSupport()">
+                <i class="fa-solid fa-headset setting-icon" style="color: #00f2a7; text-shadow: 0 0 15px rgba(0, 242, 167, 0.5);"></i>
+                <span>${currentLang === 'en' ? 'Support' : 'الدعم الفني'}</span>
+            </div>
 
-            <button class="btn-primary" onclick="confirmDeleteAccount()" style="width: 100%; padding: 15px; background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.3); color: #ff4d4d; display: flex; justify-content: space-between; align-items: center;">
-                <span style="display: flex; align-items: center; gap: 8px;">${currentLang === 'en' ? 'Delete Account Permanently' : 'حذف الحساب نهائياً'} <i class="fa-solid fa-user-xmark"></i></span>
-            </button>
+        </div>
 
-            <button id="profile-admin-btn" class="btn-primary" onclick="openAdminPanel()" style="display: none; width: 100%; padding: 15px; border-color: #ff9f43; color: #ff9f43; background: rgba(255, 159, 67, 0.05); justify-content: space-between; align-items: center;">
-                <span style="display: flex; align-items: center; gap: 8px;">${t.admin_panel || 'لوحة الإدارة'} <i class="fa-solid fa-crown"></i></span>
-                <i class="fa-solid fa-chevron-left" style="font-size: 0.8rem;"></i>
-            </button>
+        <!-- قائمة اللغة (تظهر عند الضغط على زر اللغة) -->
+        <div id="profile-lang-dropdown" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid var(--primary-color); border-radius: 12px; margin-bottom: 15px; overflow: hidden; animation: fadeIn 0.3s ease;">
+            <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: ${currentLang === 'ar' ? 'var(--primary-color)' : 'white'}; cursor: pointer; display: flex; justify-content: space-between;" onclick="changeLanguageFromProfile('ar')">
+                <b>العربية</b> ${currentLang === 'ar' ? '<i class="fa-solid fa-check"></i>' : ''}
+            </div>
+            <div style="padding: 15px; color: ${currentLang === 'en' ? 'var(--primary-color)' : 'white'}; cursor: pointer; display: flex; justify-content: space-between;" onclick="changeLanguageFromProfile('en')">
+                <b>English</b> ${currentLang === 'en' ? '<i class="fa-solid fa-check"></i>' : ''}
+            </div>
+        </div>
 
-            <button class="btn-primary" onclick="logoutFromProfile()" style="width: 100%; padding: 15px; border-color: rgba(255, 77, 77, 0.3); color: #ff4d4d; background: rgba(255, 77, 77, 0.05); display: flex; justify-content: center; align-items: center; margin-top: 10px;">
-                <span style="display: flex; align-items: center; gap: 8px;">${t.logout || 'تسجيل الخروج'} <i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+        <!-- زر الإدارة (يظهر فقط للأدمن) -->
+        <div id="profile-admin-btn" class="pro-setting-card full-width" onclick="openAdminPanel()" style="display: none; border-color: #ff9f43; background: rgba(255, 159, 67, 0.05);">
+            <i class="fa-solid fa-crown setting-icon" style="color: #ff9f43; text-shadow: 0 0 15px rgba(255, 159, 67, 0.5);"></i>
+            <span style="color: #ff9f43;">${t.admin_panel || 'لوحة الإدارة'}</span>
+        </div>
+
+        <h3 style="margin-top: 30px; color: #ff4d4d; margin-bottom: 15px; font-size: 0.9rem; font-weight: 900;"></i> ${currentLang === 'en' ? 'ACCOUNT ACTIONS' : 'الأمان والحساب'}</h3>
+        
+        <!-- أزرار الخطر بتصميم جديد -->
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px;">
+            <button class="pro-danger-btn" onclick="logoutFromProfile()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> ${t.logout || 'تسجيل الخروج'}
+            </button>
+            
+            <button class="pro-danger-btn outline" onclick="confirmDeleteAccount()">
+                <i class="fa-solid fa-user-xmark"></i> ${currentLang === 'en' ? 'Delete Account' : 'حذف الحساب نهائياً'}
             </button>
         </div>
-    `;document.getElementById('back-to-dash-btn').onclick=backToDashboard;const adminBtn=document.getElementById('profile-admin-btn');if(adminBtn&&user&&user.email==="raedabdi9@gmail.com"){adminBtn.style.display='flex'}
+    `;document.getElementById('back-to-dash-btn').
+        onclick=backToDashboard;const adminBtn=document.getElementById('profile-admin-btn');if(adminBtn&&user&&user.email==="raedabdi9@gmail.com"){adminBtn.style.display='flex'}
 const editBtn=document.getElementById('edit-bio-btn');const saveBtn=document.getElementById('save-bio-btn');const displayBio=document.getElementById('display-bio');const displayLocation=document.getElementById('display-location');const displayGym=document.getElementById('display-gym');const editArea=document.getElementById('bio-edit-area');const countrySelect=document.getElementById('country-select');const citySelect=document.getElementById('city-select');if(globalCountriesData.length===0){countrySelect.innerHTML=`<option>جاري التحميل...</option>`;try{const res=await fetch('https://countriesnow.space/api/v0.1/countries');const json=await res.json();globalCountriesData=json.data}catch(e){console.error(e);countrySelect.innerHTML=`<option value="">فشل التحميل، حاول لاحقاً</option>`}}
 if(globalCountriesData.length>0){countrySelect.innerHTML=`<option value="">${t.country_select}</option>`;globalCountriesData.forEach(c=>{const option=document.createElement('option');option.value=c.country;option.innerText=c.country;if(data.country===c.country)option.selected=!0;countrySelect.appendChild(option)});if(data.country)populateCities(data.country,data.city,citySelect,t);}
 countrySelect.addEventListener('change',(e)=>populateCities(e.target.value,null,citySelect,t));if(editBtn){editBtn.onclick=()=>{displayBio.style.display='none';displayLocation.style.display='none';displayGym.style.display='none';editBtn.style.display='none';editArea.style.display='block'}}
