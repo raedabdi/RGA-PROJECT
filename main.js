@@ -219,11 +219,19 @@ async function approveWorkout(docId) {
                 }
             }
         }
-
-        // 3. المقبرة والإشعارات
+// 3. المقبرة والإشعارات (مع نظام المطلوبين)
         if (dethronedVictim) {
             showToast(`✅ تم العثور على ضحية: ${dethronedVictim.firstName}. جاري إضافته للمقبرة...`);
             let xpReward = 1000;
+            
+            // --- فحص نظام الجوائز (Bounty) ---
+            let claimedBounty = false;
+            // إذا كان الضحية هو المركز الأول (وحش المدينة) وعنده ستريك 3 أو أكثر
+            if ((rankLostName === "City Monster" || rankLostName === "وحش المدينة") && dethronedVictim.streak >= 3) {
+                claimedBounty = true;
+                updatePayload.ironCoins = firebase.firestore.FieldValue.increment(300); // 💰 إضافة 300 عملة للي كسر الرقم
+            }
+
             updatePayload.xp = firebase.firestore.FieldValue.increment(xpReward);
 
             try {
@@ -239,7 +247,18 @@ async function approveWorkout(docId) {
                 });
             } catch (err) { console.error("Valhalla Error:", err); }
 
-            const selfMsg = currentLang === 'en' ? `👑 You crushed a record in ${userData.city}! You took down a map legend with ${maxW}kg and earned +1000 XP!` : `👑 لقد حطمت عرشاً في ${userData.city}! حصلت على +1000 XP وأنت الآن ملك الخريطة بوزن ${maxW}kg!`;
+            // تحديد رسالة الإشعار حسب إذا كسب المكافأة أم لا
+            let selfMsg = "";
+            if (claimedBounty) {
+                selfMsg = currentLang === 'en' 
+                    ? `💀 BOUNTY CLAIMED! You dethroned ${dethronedVictim.firstName}, took the map, earned +1000 XP AND +300 Iron Coins!` 
+                    : `💀 تم تحصيل المكافأة! لقد أسقطت ${dethronedVictim.firstName}، وحصلت على +1000 XP و +300 عملة حديدية! أنت الملك الآن!`;
+            } else {
+                selfMsg = currentLang === 'en' 
+                    ? `👑 You crushed a record in ${userData.city}! You took down a map legend with ${maxW}kg and earned +1000 XP!` 
+                    : `👑 لقد حطمت عرشاً في ${userData.city}! حصلت على +1000 XP وأنت الآن ملك الخريطة بوزن ${maxW}kg!`;
+            }
+
             await userRef.collection('notifications').add({ type: 'throne_win', text: selfMsg, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
 
         } else {
@@ -2134,12 +2153,99 @@ const countryData=globalCountriesData.find(c=>c.country===country);if(countryDat
 function loadCityMapData(city,country){const t=translations[currentLang||'ar'];const infoContainer=document.getElementById('monster-info');infoContainer.innerHTML=`<i class="fa-solid fa-spinner fa-spin fa-2x"></i> ${t.moving_to} ${city}...`;if(window.monsterMap){window.monsterMap.off();window.monsterMap.remove();window.monsterMap=null}
 setTimeout(async()=>{let cityCoords=[31.9522,35.9334];try{const geoRes=await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&country=${country}&format=json`);const geoData=await geoRes.json();if(geoData&&geoData.length>0){cityCoords=[parseFloat(geoData[0].lat),parseFloat(geoData[0].lon)]}}catch(e){console.error(e)}
 window.monsterMap=L.map('monster-map',{attributionControl:!1}).setView(cityCoords,12);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{}).addTo(window.monsterMap);fetchCityMonster(city,cityCoords)},300)}
-async function fetchCityMonster(city,coords){const t=translations[currentLang||'ar'];const infoContainer=document.getElementById('monster-info');try{let orderByField='stats.maxWeight';if(currentMapFilter==='streak')orderByField='streak';if(currentMapFilter==='level')orderByField='xp';const snapshot=await db.collection('users').where('city','==',city).orderBy(orderByField,'desc').limit(3).get();if(snapshot.empty){infoContainer.innerHTML=`<p style="color: var(--slate); font-weight: bold; font-size: 1.1rem;">${t.no_monster_yet}</p>`;return}
-const topPlayers=[];snapshot.forEach(doc=>topPlayers.push({id:doc.id,...doc.data()}));const pinOffsets=[[0,0],[-0.015,-0.015],[-0.015,0.015]];const coordsList=[];topPlayers.forEach((player,index)=>{let displayValue='';let displayLabel='';let auraRadius=1500;if(currentMapFilter==='maxWeight'){let maxW=player.stats?.maxWeight||0;let bestMuscle=t.general_muscle;if(player.workouts&&Array.isArray(player.workouts)){player.workouts.forEach(w=>{w.details.forEach(ex=>{let wgt=parseFloat(ex.weight);if(!isNaN(wgt)&&wgt===maxW)bestMuscle=w.type})})}
-bestMuscle=getTranslatedType(bestMuscle);displayValue=`${maxW} kg`;displayLabel=`${t.max_weight_label} (${bestMuscle}):`;auraRadius=maxW*12}else if(currentMapFilter==='streak'){let currentStreak=player.streak||0;displayValue=`${currentStreak} ${currentLang === 'en' ? 'Days' : 'أيام'} 🔥`;displayLabel=t.continuous_streak;auraRadius=currentStreak*50>1000?currentStreak*50:1000}else if(currentMapFilter==='level'){let currentLevel=player.rank||1;displayValue=`${t.map_level} ${currentLevel}`;displayLabel=t.current_rank;auraRadius=currentLevel>1?(currentLevel*50)+1000:1000}
-const pinCoords=[coords[0]+pinOffsets[index][0],coords[1]+pinOffsets[index][1]];coordsList.push(pinCoords);if(index===0){L.circle(pinCoords,{color:'#00f2a7',fillColor:'#00f2a7',fillOpacity:0.15,radius:auraRadius}).addTo(window.monsterMap)}
-let crownTitle=index===0?t.city_monster_crown:(index===1?t.silver_guard_crown:t.bronze_guard_crown);let extraClass=index===1?'crown-silver':(index===2?'crown-bronze':'');let isWantedHTML='';if(index===0&&player.streak>=3){isWantedHTML=`<div class="wanted-label">${t.wanted_dead}</div>`}
-const icon=L.divIcon({className:`neon-crown-marker ${extraClass}`,html:`
+async function fetchCityMonster(city, coords) {
+    const t = translations[currentLang || 'ar'];
+    const infoContainer = document.getElementById('monster-info');
+    
+    try {
+        let orderByField = 'stats.maxWeight';
+        if (currentMapFilter === 'streak') orderByField = 'streak';
+        if (currentMapFilter === 'level') orderByField = 'xp';
+        
+        // جلب أفضل 3 لاعبين في المدينة حسب الفلتر
+        const snapshot = await db.collection('users')
+            .where('city', '==', city)
+            .orderBy(orderByField, 'desc')
+            .limit(3)
+            .get();
+            
+        if (snapshot.empty) {
+            infoContainer.innerHTML = `<p style="color: var(--slate); font-weight: bold; font-size: 1.1rem;">${t.no_monster_yet}</p>`;
+            return;
+        }
+        
+        const topPlayers = [];
+        snapshot.forEach(doc => topPlayers.push({ id: doc.id, ...doc.data() }));
+        
+        const pinOffsets = [[0, 0], [-0.015, -0.015], [-0.015, 0.015]];
+        const coordsList = [];
+        
+        topPlayers.forEach((player, index) => {
+            let displayValue = '';
+            let displayLabel = '';
+            let auraRadius = 1500;
+            
+            // 🔥 هنا كان الخطأ، تم إصلاح قراءة الـ Max Weight
+            if (currentMapFilter === 'maxWeight') {
+                // قراءة الوزن بشكل آمن جداً
+                let maxW = 0;
+                if (player.stats && typeof player.stats.maxWeight !== 'undefined') {
+                    maxW = Number(player.stats.maxWeight) || 0;
+                }
+                
+                let bestMuscle = t.general_muscle;
+                
+                if (player.workouts && Array.isArray(player.workouts)) {
+                    player.workouts.forEach(w => {
+                        w.details.forEach(ex => {
+                            let wgt = parseFloat(ex.weight);
+                            if (!isNaN(wgt) && wgt === maxW) bestMuscle = w.type;
+                        });
+                    });
+                }
+                
+                bestMuscle = getTranslatedType(bestMuscle);
+                displayValue = `${maxW} kg`;
+                displayLabel = `${t.max_weight_label} (${bestMuscle}):`;
+                auraRadius = maxW * 12;
+            } 
+            else if (currentMapFilter === 'streak') {
+                let currentStreak = player.streak || 0;
+                displayValue = `${currentStreak} ${currentLang === 'en' ? 'Days' : 'أيام'} 🔥`;
+                displayLabel = t.continuous_streak;
+                auraRadius = currentStreak * 50 > 1000 ? currentStreak * 50 : 1000;
+            } 
+            else if (currentMapFilter === 'level') {
+                let currentLevel = player.rank || 1;
+                displayValue = `${t.map_level} ${currentLevel}`;
+                displayLabel = t.current_rank;
+                auraRadius = currentLevel > 1 ? (currentLevel * 50) + 1000 : 1000;
+            }
+            
+            const pinCoords = [coords[0] + pinOffsets[index][0], coords[1] + pinOffsets[index][1]];
+            coordsList.push(pinCoords);
+            
+            if (index === 0) {
+                L.circle(pinCoords, { color: '#00f2a7', fillColor: '#00f2a7', fillOpacity: 0.15, radius: auraRadius }).addTo(window.monsterMap);
+            }
+            
+            let crownTitle = index === 0 ? t.city_monster_crown : (index === 1 ? t.silver_guard_crown : t.bronze_guard_crown);
+            let extraClass = index === 1 ? 'crown-silver' : (index === 2 ? 'crown-bronze' : '');
+            
+            // إضافة شارة المطلوبين للمركز الأول إذا كان الستريك أعلى من 3
+            let isWantedHTML = '';
+            if (index === 0 && player.streak >= 3) {
+                // إرسال الوزن الصحيح للنافذة المنبثقة
+                let targetMaxWeight = player.stats?.maxWeight || 0;
+                isWantedHTML = `
+                    <div class="wanted-badge-pro" onclick="openBountyPoster('${player.firstName}', '${player.photoURL}', ${targetMaxWeight})">
+                        <i class="fa-solid fa-skull"></i> WANTED: 300 <i class="fa-solid fa-coins" style="color: gold;"></i>
+                    </div>`;
+            }
+            
+            const icon = L.divIcon({
+                className: `neon-crown-marker ${extraClass}`,
+                html: `
                     <div class="emblem-wrapper">
                         <div class="emblem-shield">
                             <i class="fa-solid fa-crown" style="${index > 0 ? 'font-size:20px;' : 'font-size:30px inter;'}"></i>
@@ -2149,27 +2255,56 @@ const icon=L.divIcon({className:`neon-crown-marker ${extraClass}`,html:`
                         </div>
                         ${isWantedHTML}
                     </div>
-                `,iconSize:index===0?[70,85]:[55,65],iconAnchor:index===0?[35,75]:[27,60],popupAnchor:[0,-60]});let gymNameHTML=player.gym?`<p style="color:var(--slate); font-size:0.75rem; margin-top:2px;"><i class="fa-solid fa-dumbbell"></i> ${t.gym_label} ${player.gym}</p>`:'';let actionBtn=`<button class="monster-challenge-btn" onclick="openChat('${player.id}', '${player.firstName}', '${player.photoURL}')">${t.challenge_sword}</button>`;if(index===0&&auth.currentUser&&player.id===auth.currentUser.uid){actionBtn=`<button class="monster-challenge-btn" style="background:#FFD700; color:black; margin-top:5px;" onclick="claimTribute()">${t.tribute_btn}</button>`}
-const popupHTML=`
+                `,
+                iconSize: index === 0 ? [70, 85] : [55, 65],
+                iconAnchor: index === 0 ? [35, 75] : [27, 60],
+                popupAnchor: [0, -60]
+            });
+            
+            let gymNameHTML = player.gym ? `<p style="color:var(--slate); font-size:0.75rem; margin-top:2px;"><i class="fa-solid fa-dumbbell"></i> ${t.gym_label} ${player.gym}</p>` : '';
+            let actionBtn = `<button class="monster-challenge-btn" onclick="openChat('${player.id}', '${player.firstName}', '${player.photoURL}')">${t.challenge_sword}</button>`;
+            
+            if (index === 0 && auth.currentUser && player.id === auth.currentUser.uid) {
+                actionBtn = `<button class="monster-challenge-btn" style="background:#FFD700; color:black; margin-top:5px;" onclick="claimTribute()">${t.tribute_btn}</button>`;
+            }
+            
+            const popupHTML = `
                 <div>
-                    <img src="${player.photoURL || '/Photos/adm.jpeg'}" class="monster-popup-img" style="${index===0 ? 'border-color:#FFD700;' : 'border-color:#C0C0C0;'}">
-                    <p class="monster-popup-name">${player.firstName} ${player.lastName}</p>
+                    <img src="${player.photoURL || '/Photos/adm.jpeg'}" class="monster-popup-img" style="${index === 0 ? 'border-color:#FFD700;' : 'border-color:#C0C0C0;'}">
+                    <p class="monster-popup-name">${player.firstName} ${player.lastName || ''}</p>
                     ${gymNameHTML}
                     <p class="monster-popup-record" style="margin-top: 5px; margin-bottom: 10px;">
                         <span style="color: var(--slate); font-size: 0.8rem;">${displayLabel}</span><br>
-                        <span style="color: ${index===0 ? '#FFD700' : '#C0C0C0'}; font-size: 1.1rem; font-weight: 900;">${displayValue}</span>
+                        <span style="color: ${index === 0 ? '#FFD700' : '#C0C0C0'}; font-size: 1.1rem; font-weight: 900;">${displayValue}</span>
                     </p>
                     ${actionBtn}
                 </div>
-            `;L.marker(pinCoords,{icon:icon}).addTo(window.monsterMap).bindPopup(popupHTML)});if(topPlayers.length>=2){L.polyline([coordsList[0],coordsList[1]],{color:'#ff4d4d',weight:4,dashArray:'10, 15',className:'rivalry-line'}).addTo(window.monsterMap)}
-let bottomTextLabel=currentMapFilter==='maxWeight'?t.map_weights:(currentMapFilter==='streak'?t.map_streak:t.map_level);let bottomValue=currentMapFilter==='maxWeight'?`${topPlayers[0].stats?.maxWeight || 0} kg`:(currentMapFilter==='streak'?`${topPlayers[0].streak || 0} ${currentLang === 'en' ? 'Days' : 'أيام'}`:`${t.map_level} ${topPlayers[0].rank || 1}`);infoContainer.innerHTML=`
-        <div style="background: rgba(0,0,0,0.5); display: inline-block; padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.5); box-shadow: 0 0 15px rgba(255,215,0,0.2);">
-            <p style="color: #FFD700; font-weight: 900; font-size: 1.1rem; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; direction: ${currentLang === 'ar' ? 'rtl' : 'ltr'};">
-                <span>👑 ${t.champion_of} ${bottomTextLabel}:</span> 
-                <span style="color: white; direction: ltr; unicode-bidi: embed;">${topPlayers[0].firstName}</span> 
-                <span style="color: var(--primary-color);"> ❖ ${bottomValue} </span>
-            </p>
-        </div>`}catch(error){console.error("Error fetching monsters:",error);infoContainer.innerHTML=`<p style="color: #ff4d4d; font-weight:bold;">${t.monster_error}</p>`}}
+            `;
+            
+            L.marker(pinCoords, { icon: icon }).addTo(window.monsterMap).bindPopup(popupHTML);
+        });
+        
+        if (topPlayers.length >= 2) {
+            L.polyline([coordsList[0], coordsList[1]], { color: '#ff4d4d', weight: 4, dashArray: '10, 15', className: 'rivalry-line' }).addTo(window.monsterMap);
+        }
+        
+        let bottomTextLabel = currentMapFilter === 'maxWeight' ? t.map_weights : (currentMapFilter === 'streak' ? t.map_streak : t.map_level);
+        let bottomValue = currentMapFilter === 'maxWeight' ? `${topPlayers[0].stats?.maxWeight || 0} kg` : (currentMapFilter === 'streak' ? `${topPlayers[0].streak || 0} ${currentLang === 'en' ? 'Days' : 'أيام'}` : `${t.map_level} ${topPlayers[0].rank || 1}`);
+        
+        infoContainer.innerHTML = `
+            <div style="background: rgba(0,0,0,0.5); display: inline-block; padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.5); box-shadow: 0 0 15px rgba(255,215,0,0.2);">
+                <p style="color: #FFD700; font-weight: 900; font-size: 1.1rem; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; direction: ${currentLang === 'ar' ? 'rtl' : 'ltr'};">
+                    <span>👑 ${t.champion_of} ${bottomTextLabel}:</span> 
+                    <span style="color: white; direction: ltr; unicode-bidi: embed;">${topPlayers[0].firstName}</span> 
+                    <span style="color: var(--primary-color);"> ❖ ${bottomValue} </span>
+                </p>
+            </div>
+        `;
+    } catch (error) {
+        console.error("Error fetching monsters:", error);
+        infoContainer.innerHTML = `<p style="color: #ff4d4d; font-weight:bold;">${t.monster_error}</p>`;
+    }
+}
 window.claimTribute=async function(){const btn=event.target;const originalText=btn.innerHTML;btn.disabled=!0;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';const success=await addXP(100,'tribute');if(success){showToast(currentLang==='en'?"💰 +100 XP King's tribute claimed!":"💰 تم تحصيل +100 XP ضريبة الملك!");updateQuestProgress('tribute',1);localStorage.setItem('lastTributeClaim',new Date().toDateString())}else{showToast(currentLang==='en'?"Claimed today 👑":"الضريبة محصلة اليوم 👑")}
 btn.innerHTML=originalText;btn.disabled=!1};function showMonsterRules(){const t=currentLang==='ar'?{title:"كيف تسيطر على المدينة؟ 👑",steps:["اكسر الرقم: لازم تسجل أعلى وزن (Max Weight) في مدينتك في أي تمرين.","أثبت وحشنتك: الأوزان العالية بتحتاج فيديو إثبات عشان الإدارة تعتمدك.","سقوط العرش: أول ما تكسر رقم الملك الحالي، رح نبعث إنذار لكل لاعبين المدينة إنك دعست عالعرش!","مطلوب للعدالة: إذا حافظت على ستريك 3 أيام وأنت الملك، رح تصير 'مطلوب'، والكل رح يحاول يكسر رقمك!","ضريبة الملك: كملك للمدينة، إلك مكافأة XP يومية بتقدر تحصلها من الخريطة."]}:{title:"How to Rule the City? 👑",steps:["Break the Record:** You must log the highest Max Weight in your city.","Prove It: Heavy lifts require video proof for admin approval.","Throne Fall: Once you beat the current King, we'll alert everyone in the city!","Wanted Status: Stay King for 3 days to become 'Wanted'—everyone will target you!","King's Tribute: Collect a daily XP bonus from the map as long as you hold the throne."]};const rulesHtml=t.steps.map(step=>`<li style="margin-bottom:10px; text-align:right;">${step}</li>`).join('');const modal=document.createElement('div');modal.className='modal-overlay active';modal.style.zIndex='30000';modal.innerHTML=`
         <div class="modal-content" style="max-width:400px; padding:25px;">
@@ -4934,3 +5069,53 @@ setTimeout(() => {
         openDailySpin();
     }
 }, 2500);
+
+/* --- عرض لوحة المطلوبين (Bounty Poster) --- */
+window.openBountyPoster = function(targetName, targetPhoto, targetWeight) {
+    if (window.event) window.event.stopPropagation(); 
+    
+    let modal = document.getElementById('bounty-poster-modal');
+    const isEn = (localStorage.getItem('lang') || 'ar') === 'en';
+    
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'bounty-poster-modal';
+        modal.className = 'bounty-overlay';
+        document.body.appendChild(modal);
+    }
+    
+    modal.innerHTML = `
+        <div class="bounty-glass-card">
+            <button onclick="document.getElementById('bounty-poster-modal').classList.remove('active'); setTimeout(()=>document.getElementById('bounty-poster-modal').style.display='none', 400);" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--slate); font-size: 1.5rem; cursor: pointer; z-index: 10;">&times;</button>
+            
+            <h3 style="color: #ff4d4d; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; font-size: 1.5rem;">
+                ${isEn ? 'DEAD OR ALIVE' : 'مطلوب حياً أو ميتاً'}
+            </h3>
+            
+            <div class="bounty-avatar-wrapper">
+                <img src="${targetPhoto || '/Photos/adm.jpeg'}" class="bounty-avatar">
+                <div class="bounty-target-crosshair"></div>
+            </div>
+            
+            <h2 style="color: white; font-weight: 900; font-size: 1.8rem; margin: 0; position: relative; z-index: 1;">${targetName}</h2>
+            <p style="color: var(--slate); font-size: 0.9rem; margin-top: 5px; position: relative; z-index: 1;">
+                ${isEn ? 'Target Weight to Beat:' : 'الوزن المطلوب كسره:'} <span style="color: #00f2a7; font-weight: bold; font-size: 1.1rem;">${targetWeight}kg</span>
+            </p>
+            
+            <div class="bounty-reward-box">
+                <p style="color: #FFD700; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px;">${isEn ? 'Bounty Reward' : 'المكافأة الكبرى'}</p>
+                <div style="font-size: 2rem; color: white; font-weight: bold;">
+                    300 <i class="fa-solid fa-coins" style="color: #FFD700; filter: drop-shadow(0 0 10px #FFD700);"></i>
+                </div>
+            </div>
+            
+            <button class="btn-primary" style="width: 100%; background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; color: #ff4d4d; font-size: 1.1rem; box-shadow: 0 0 20px rgba(255,77,77,0.3); position: relative; z-index: 1;" onclick="document.getElementById('bounty-poster-modal').classList.remove('active'); setTimeout(()=>document.getElementById('bounty-poster-modal').style.display='none', 400); openWorkoutModal();">
+                <i class="fa-solid fa-crosshairs"></i> ${isEn ? 'Hunt Target' : 'اصطياد الهدف'}
+            </button>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+};
