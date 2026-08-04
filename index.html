@@ -126,6 +126,33 @@
 
         #main-header { position: fixed; width: 100%; top: 0; z-index: 1000; padding: 0.75rem 0; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
         #main-header .container { display: flex; justify-content: space-between; align-items: center; }
+        /* --- إعدادات الشعار الرسمي الجديد --- */
+#main-header .logo { 
+    display: flex; 
+    align-items: center; 
+    text-decoration: none; 
+}
+.official-logo {
+    height: 70px; /* تم التكبير للشاشات العادية */
+    width: auto;
+    object-fit: contain;
+    transition: all 0.3s ease-in-out;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1)); 
+}
+
+/* لمسة فخامة: الشعار يلمع ويتحرك قليلاً عند تأشير الماوس عليه */
+.official-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 15px var(--primary-color)); 
+}
+
+/* الحجم الخاص بشاشات الموبايل */
+@media (max-width: 768px) {
+    .official-logo {
+        height: 55px; /* تم تكبيره ليكون واضحاً وبارزاً في الموبايل */
+        margin-top: 4px; 
+    }
+}
         #main-header .logo { font-weight: 700; font-size: 1.4rem; color: var(--white); text-decoration: none; }
         #main-header .logo span { color: var(--primary-color); }
         .main-nav { display: flex; align-items: center; gap: 5px; }
@@ -496,7 +523,54 @@
 .features-visual { position: sticky; top: 120px; height: 70vh; display: none; }
 @media (min-width: 992px) { .features-visual { display: block; } }
 .features-visual img { width: 100%; height: 100%; object-fit: contain; border-radius: 20px; transition: opacity 0.4s ease-in-out; }
+/* =========================================
+   ✨ RGA WORLD-CLASS MODAL ANIMATIONS ✨
+   ========================================= */
 
+/* 1. أنيميشن للخلفية المظلمة (ظهور ناعم مع تغبيش) */
+.modal-overlay.active,
+#auth-modal.active,
+#help-modal.active,
+#legal-modal.active {
+    display: flex !important;
+    animation: smoothOverlayFade 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+}
+
+/* 2. أنيميشن للنافذة نفسها (تأثير ارتداد فخم وصعود من الأسفل) */
+.modal-overlay.active .modal-content,
+#auth-modal.active .modal-content,
+#help-modal.active .modal-content,
+#legal-modal.active .modal-content {
+    animation: smoothModalPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+/* 3. تعريف الحركات (Keyframes) */
+
+/* حركة الخلفية */
+@keyframes smoothOverlayFade {
+    0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+    100% {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+}
+
+/* حركة المربع الداخلي (البطاقة) */
+@keyframes smoothModalPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(30px); /* يبدأ أصغر قليلاً ومن الأسفل */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0); /* يستقر في حجمه ومكانه الطبيعي */
+    }
+}
     </style>
 </head>
 <body>
@@ -563,10 +637,14 @@
 
     <canvas id="stardust-canvas"></canvas>
 
-    <header id="main-header">
-        <div class="container">
-            <a href="#" class="logo">RGA<span>FIT</span></a>
-            <nav class="main-nav">
+ <header id="main-header">
+    <div class="container">
+        <!-- كود الشعار -->
+        <a href="#" class="logo">
+            <img src="/Photos/Logo2.png" alt="Royal Gravitas Arena Logo" class="official-logo">
+        </a>
+        
+        <nav class="main-nav">
                 <a href="#features" data-translate="nav_features">الميزات</a>
                 <a href="#stats" data-translate="nav_stats">الإحصائيات</a>
                 <a href="#" onclick="openHelpModal(); return false;" data-translate="nav_help">المساعدة</a>
@@ -752,10 +830,15 @@
     </section>
 
 
+<footer id="main-footer">
+    <div class="container">
+        
+        <!-- إضافة الشعار في الفوتر -->
+        <div style="margin-bottom: 30px;">
+            <img src="/Photos/Logo2.png" alt="RGA Logo" style="height: 60px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1));">
+        </div>
 
-    <footer id="main-footer">
-        <div class="container">
-<div class="corporate-footer-links">
+        <div class="corporate-footer-links">
                 <a href="#" onclick="openLegalModal('privacy'); return false;" data-translate="ft_privacy">سياسة الخصوصية</a>
                 <a href="#" onclick="openLegalModal('terms'); return false;" data-translate="ft_terms">شروط الخدمة</a>
                 <a href="#" onclick="openLegalModal('refund'); return false;" data-translate="ft_refund">سياسة الاسترجاع </a>
