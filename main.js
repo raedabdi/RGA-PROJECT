@@ -139,7 +139,6 @@ window.deleteAdminMessage=async function(docId){if(!confirm("حذف الرسال
 
 let isApprovingWorkout = false;
 async function approveWorkout(docId) {
-
     const t = translations[currentLang || 'ar'];
     if (!confirm(t.confirm_approve)) return;
     if (isApprovingWorkout) return;
@@ -159,17 +158,17 @@ async function approveWorkout(docId) {
         const userSnap = await userRef.get();
         let userData = userSnap.data();
 
-        // 1. حساب الوزن الجديد والقديم
-        let oldMaxW = userData.stats?.maxWeight || 0;
+        // 1. إصلاح مشكلة الأرقام (تحويل إجباري إلى Number لمنع مشكلة 99 > 200)
+        let oldMaxW = Number(userData.stats?.maxWeight) || 0;
         let maxW = oldMaxW;
         data.details.forEach(ex => {
-            if (parseFloat(ex.weight) > maxW) maxW = parseFloat(ex.weight);
+            let currentWeight = Number(ex.weight);
+            if (currentWeight > maxW) maxW = currentWeight;
         });
 
         let dethronedVictim = null;
         let rankLostName = "Fallen Hero";
 
-        // 🔥 **التشخيص يبدأ هنا**
         if (maxW > oldMaxW && userData.city) {
             const top3Snap = await db.collection('users').where('city', '==', userData.city).orderBy('stats.maxWeight', 'desc').limit(3).get();
             let top3 = [];
@@ -177,9 +176,8 @@ async function approveWorkout(docId) {
 
             for (let i = 0; i < top3.length; i++) {
                 let rival = top3[i];
-                let rivalWeight = rival.stats?.maxWeight || 0;
+                let rivalWeight = Number(rival.stats?.maxWeight) || 0;
 
-                // هذا هو الشرط الذي قد يفشل بصمت
                 if (maxW > rivalWeight && rival.id !== data.userId && oldMaxW <= rivalWeight) {
                     dethronedVictim = rival;
                     if (i === 0) rankLostName = currentLang === 'en' ? "City Monster" : "وحش المدينة";
@@ -193,15 +191,36 @@ async function approveWorkout(docId) {
         let updatePayload = {
             workouts: firebase.firestore.FieldValue.arrayUnion({ date: data.date, type: data.type, details: data.details }),
             isWorkoutPending: false,
-            'stats.maxWeight': maxW
+            'stats.maxWeight': maxW // سيتم الحفظ كرقم حقيقي الآن
         };
         
+        // 2. إصلاح مشكلة حرب العصابات (حساب الحجم وتوجيهه لكلان اللاعب)
         let totalVol = 0;
-        data.details.forEach(ex => { totalVol += (parseFloat(ex.weight) * parseInt(ex.reps)) || 0; });
+        data.details.forEach(ex => { totalVol += (Number(ex.weight) * Number(ex.reps)) || 0; });
         
-        // ... (بقية الكود الخاص بالحروب والمهام يبقى كما هو)
+        if (totalVol > 0 && userData.clanId) {
+            const clanDoc = await db.collection('clans').doc(userData.clanId).get();
+            if (clanDoc.exists) {
+                const clanData = clanDoc.data();
+                if (clanData.warStatus === 'in_war' && clanData.currentWarId) {
+                    const warRef = db.collection('wars').doc(clanData.currentWarId);
+                    const warDocLocal = await warRef.get();
+                    if (warDocLocal.exists && warDocLocal.data().status === 'active') {
+                        let isClan1 = warDocLocal.data().clan1.id === userData.clanId;
+                        let updateField = isClan1 ? 'clan1.score' : 'clan2.score';
+                        let memberField = isClan1 ? `clan1.members.${data.userId}` : `clan2.members.${data.userId}`;
+                        
+                        await warRef.update({
+                            [updateField]: firebase.firestore.FieldValue.increment(totalVol),
+                            [`${memberField}.name`]: userData.firstName || 'Hero',
+                            [`${memberField}.volume`]: firebase.firestore.FieldValue.increment(totalVol)
+                        });
+                    }
+                }
+            }
+        }
 
-        // 🔥 **الرسائل التشخيصية**
+        // 3. المقبرة والإشعارات
         if (dethronedVictim) {
             showToast(`✅ تم العثور على ضحية: ${dethronedVictim.firstName}. جاري إضافته للمقبرة...`);
             let xpReward = 1000;
@@ -212,31 +231,24 @@ async function approveWorkout(docId) {
                     city: userData.city,
                     kingName: dethronedVictim.firstName + " " + (dethronedVictim.lastName || ''),
                     kingPhoto: dethronedVictim.photoURL || '/Photos/adm.jpeg',
-                    weight: dethronedVictim.stats?.maxWeight || 0,
+                    weight: Number(dethronedVictim.stats?.maxWeight) || 0,
                     slayerName: userData.firstName + " " + (userData.lastName || ''),
                     slayerWeight: maxW,
                     rankLost: rankLostName,
                     fallDate: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                showToast("🪦 تم تسجيل الملك الساقط في المقبرة بنجاح!");
-            } catch (err) {
-                console.error("Valhalla Error:", err);
-                showToast("❌ فشل تسجيل الملك الساقط في المقبرة!");
-            }
+            } catch (err) { console.error("Valhalla Error:", err); }
 
-const selfMsg = currentLang === 'en' ? `👑 You crushed a record in ${userData.city}! You took down a map legend with ${maxW}kg and earned +1000 XP!` : `👑 لقد حطمت عرشاً في ${userData.city}! حصلت على +1000 XP وأنت الآن ملك الخريطة بوزن ${maxW}kg!`;
+            const selfMsg = currentLang === 'en' ? `👑 You crushed a record in ${userData.city}! You took down a map legend with ${maxW}kg and earned +1000 XP!` : `👑 لقد حطمت عرشاً في ${userData.city}! حصلت على +1000 XP وأنت الآن ملك الخريطة بوزن ${maxW}kg!`;
             await userRef.collection('notifications').add({ type: 'throne_win', text: selfMsg, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
 
         } else {
-
-            showToast(" تم اعتماد التمرين، لكنه لم يكسر أي رقم قياسي على الخريطة.");
+            showToast(" تم اعتماد التمرين بنجاح.");
             updatePayload.xp = firebase.firestore.FieldValue.increment(50);
             await userRef.collection('notifications').add({ type: 'admin_alert', senderName: t.admin_name, text: t.admin_notif_approve, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
         await userRef.update(updatePayload);
-
-
 
         try { await storage.refFromURL(data.videoUrl).delete(); } catch (err) {}
         await docRef.delete();
@@ -251,7 +263,6 @@ const selfMsg = currentLang === 'en' ? `👑 You crushed a record in ${userData.
         isApprovingWorkout = false;
     }
 }
-
 
 
 window.openGameSelection=function(){const modal=document.getElementById('game-selection-modal');applyLanguage();modal.style.display='flex';document.body.classList.add('no-scroll');document.documentElement.classList.add('no-scroll');setTimeout(()=>{modal.classList.add('active')},10);if(window.innerWidth<768){const sidebar=document.getElementById('sidebar');if(sidebar)sidebar.classList.add('collapsed');}};window.closeGameSelection=function(){const modal=document.getElementById('game-selection-modal');modal.classList.remove('active');document.body.classList.remove('no-scroll');document.documentElement.classList.remove('no-scroll');setTimeout(()=>{modal.style.display='none'},400)};window.showUltimateHelp=function(gameType){const t=translations[currentLang||'ar'];let title="",text="",color="",icon="";if(gameType==='deadlift'){title=t.help_deadlift_title;text=t.help_deadlift_text;color="#ff4d4d";icon="fa-arrow-up-right-dots"}else if(gameType==='squat'){title=t.help_squat_title;text=t.help_squat_text;color="#00f2a7";icon="fa-arrows-down-to-line"}else if(gameType==='reflex'){title=t.help_reflex_title;text=t.help_reflex_text;color="#ff9f43";icon="fa-bolt-lightning"}
@@ -931,12 +942,16 @@ function openWorkoutModal()
             </div>`;document.querySelector('#workout-modal .modal-content').appendChild(pendingMsg)}
 if(savedData.isWorkoutPending){pendingMsg.style.display='block'}else{pendingMsg.style.display='none';document.getElementById('workout-step-1').style.display='block';document.getElementById('exercises-container').innerHTML=''}
 modal.classList.add('active')}
-function closeWorkoutModal()
-
-{document.getElementById('workout-modal').classList.remove('active')
-
-    document.body.classList.remove('no-scroll-modal');
-
+function closeWorkoutModal() {
+    document.getElementById('workout-modal').classList.remove('active');
+    
+    // فحص ذكي: لا تلغي إيقاف السكرول إلا إذا كانت كل النوافذ مغلقة
+    setTimeout(() => {
+        const anyModalOpen = document.querySelectorAll('.modal-overlay.active, .ultimate-game-lobby.active, #chat-modal[style*="flex"]').length > 0;
+        if (!anyModalOpen) {
+            document.body.classList.remove('no-scroll-modal');
+        }
+    }, 100);
 }
 function selectWorkoutSplit(split){currentWorkoutSplit=split;const t=translations[currentLang];if(split==='full'){selectWorkoutType(t.sys_full);return}
 document.getElementById('workout-step-1').style.display='none';document.getElementById('workout-step-2').style.display='block';const grid=document.getElementById('dynamic-muscle-grid');grid.innerHTML='';if(split==='bro'){const muscles=[{key:'chest',text:t.muscle_chest},{key:'back',text:t.muscle_back},{key:'shoulders',text:t.muscle_shoulders},{key:'biceps',text:t.muscle_biceps},{key:'triceps',text:t.muscle_triceps},{key:'legs',text:t.muscle_legs},{key:'core',text:t.muscle_core}];muscles.forEach(m=>{grid.innerHTML+=`<button class="workout-type-btn" onclick="selectWorkoutType('${m.text}')">${m.text}</button>`})}else if(split==='ppl'){const ppl=[{key:'push',text:t.sys_push},{key:'pull',text:t.sys_pull},{key:'legs',text:t.sys_legs}];ppl.forEach(m=>{grid.innerHTML+=`<button class="workout-type-btn" onclick="selectWorkoutType('${m.text}')">${m.text}</button>`})}}
@@ -962,7 +977,14 @@ closeWorkoutModal();document.getElementById('workout-step-3').innerHTML=`
                             <h1 id="upload-progress" style="color:var(--primary-color); font-size: 2.5rem; margin-top: 15px;">0%</h1>
                         </div>`;document.getElementById('workout-modal').classList.add('active');const user=auth.currentUser;const cleanFileName=file.name.replace(/[^a-zA-Z0-9.]/g,"_");const videoRef=storage.ref(`proofs/${user.uid}_${Date.now()}_${cleanFileName}`);const uploadTask=videoRef.put(file);uploadTask.on('state_changed',(snapshot)=>{const progress=(snapshot.bytesTransferred/snapshot.totalBytes)*100;const progressText=document.getElementById('upload-progress');if(progressText)progressText.innerText=Math.round(progress)+'%'},(error)=>{closeWorkoutModal();showToast(t.upload_fail_storage)},async()=>{try{const videoURL=await uploadTask.snapshot.ref.getDownloadURL();let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});await db.collection('pending_workouts').add({userId:user.uid,userName:JSON.parse(localStorage.getItem('currentUser')).firstName,date:dateStr,type:typeText,details:exercises,videoUrl:videoURL,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('users').doc(user.uid).update({isWorkoutPending:!0});let savedData=JSON.parse(localStorage.getItem('currentUser'));savedData.isWorkoutPending=!0;localStorage.setItem('currentUser',JSON.stringify(savedData));closeWorkoutModal();showToast(t.upload_success_wait)}catch(dbError){closeWorkoutModal();showToast(t.save_db_error)}})}};fileInput.click();return}
 let workoutHistory=[];try{workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[]}catch(e){}
-let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});workoutHistory.unshift({date:dateStr,type:typeText,details:exercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));let totalVol=0;let totalReps=0;exercises.forEach(ex=>{totalVol+=(parseFloat(ex.weight)*parseInt(ex.reps))||0;totalReps+=parseInt(ex.reps)||0});await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});addVolumeToClanWar(totalVol);if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
+let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});workoutHistory.unshift({date:dateStr,type:typeText,details:exercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));let totalVol=0;let totalReps=0;exercises.forEach(ex=>{totalVol+=(parseFloat(ex.weight)*parseInt(ex.reps))||0;totalReps+=parseInt(ex.reps)||0});
+// سقف الحماية: لا يمكن لأي إنسان طبيعي رفع أكثر من 30,000 كجم كحجم تدريبي في تمرين واحد
+    if (totalVol > 30000) {
+        totalVol = 30000;
+        showToast(currentLang === 'en' ? "Volume capped at 30,000kg (Anti-Cheat system)." : "تم تقييد الحجم بـ 30,000 كجم كحد أقصى (نظام الحماية من الغش).");
+    }
+
+await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});addVolumeToClanWar(totalVol);if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
 const user=auth.currentUser;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));let timeMsg=currentLang==='en'?`${hours}h ${minutes}m`:`${hours} س و ${minutes} د`;db.collection('users').doc(user.uid).update({workouts:workoutHistory});showToast(currentLang==='en'?`Workout Saved! XP resets in ${timeMsg}`:`تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`)}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');showToast(currentLang==='en'?`Saved! +50 XP`:`تم الحفظ! +50 XP`)}}
 closeWorkoutModal();if(document.getElementById('log-container')){renderWorkoutLog();if(typeof initWorkoutChart==="function")setTimeout(initWorkoutChart,200);}}finally{setTimeout(()=>{isSavingNormalWorkout=!1},2000)}}
 
@@ -2193,7 +2215,14 @@ function startRestTimer(seconds){const restOverlay=document.getElementById('rest
     } catch(e) { console.log("Audio not supported"); }
 }
 restText.innerText=timeLeft},1000)}
-window.logLiveSet=function(isSuperset=!1){const muscleSelect=document.getElementById('live-muscle-select');const selectedMuscleText=muscleSelect.options[muscleSelect.selectedIndex].text;const muscleVal=muscleSelect.value;const exName=document.getElementById('live-ex-name').value.trim();const weight=parseFloat(document.getElementById('live-ex-weight').value)||0;let reps=parseInt(document.getElementById('live-ex-reps').value)||0;if(!muscleVal||!exName||weight<=0||reps<=0){showToast(currentLang==='en'?"Please select a muscle and enter valid details":"يرجى تحديد العضلة وإدخال بيانات صحيحة");return}
+window.logLiveSet=function(isSuperset=!1){
+    // حماية Anti-Spam (يمنع تسجيل جولة قبل مرور 3 ثوانٍ على الأقل)
+    if (window.lastLiveSetTime && Date.now() - window.lastLiveSetTime < 3000) {
+        showToast(currentLang === 'en' ? "Don't spam! Wait a few seconds." : "على مهلك يا وحش! انتظر ثواني بين الجولات.");
+        return;
+    }
+    window.lastLiveSetTime = Date.now();
+    const muscleSelect=document.getElementById('live-muscle-select');const selectedMuscleText=muscleSelect.options[muscleSelect.selectedIndex].text;const muscleVal=muscleSelect.value;const exName=document.getElementById('live-ex-name').value.trim();const weight=parseFloat(document.getElementById('live-ex-weight').value)||0;let reps=parseInt(document.getElementById('live-ex-reps').value)||0;if(!muscleVal||!exName||weight<=0||reps<=0){showToast(currentLang==='en'?"Please select a muscle and enter valid details":"يرجى تحديد العضلة وإدخال بيانات صحيحة");return}
 if(reps>25){reps=25;document.getElementById('live-ex-reps').value=25;showToast(currentLang==='en'?"Max 25 reps allowed per set!":"الحد الأقصى للعدات هو 25 فقط!")}
 
 if(weight > 1200){
@@ -4711,3 +4740,13 @@ window.saveWorkout = async function() {
     }
     return originalSaveWorkout.apply(this, arguments);
 };
+
+// حماية اللاعب من إغلاق الصفحة بالخطأ أثناء التمرين المباشر
+window.addEventListener('beforeunload', function (e) {
+    if (typeof liveWorkoutActive !== 'undefined' && liveWorkoutActive) {
+        // هذه الرسالة المعيارية ستجبر المتصفح على إظهار تحذير "هل أنت متأكد من المغادرة؟"
+        var confirmationMessage = 'أنت في منتصف تمرين لايف! إذا غادرت ستفقد بياناتك.';
+        e.returnValue = confirmationMessage; 
+        return confirmationMessage;
+    }
+});
