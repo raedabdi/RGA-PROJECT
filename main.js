@@ -220,6 +220,24 @@ async function approveWorkout(docId) {
             }
         }
 
+        // 2.5 صب الأوزان المعتمدة في حلبة 1v1 إن وجدت
+        if (userData.activeClashId && totalVol > 0) {
+            try {
+                const clashRef = db.collection('hero_clashes').doc(userData.activeClashId);
+                const clashDocLocal = await clashRef.get();
+                if (clashDocLocal.exists && clashDocLocal.data().status === 'active') {
+                    let isPlayer1 = clashDocLocal.data().player1.uid === data.userId;
+                    let pKey = isPlayer1 ? 'player1' : 'player2';
+                    if (clashDocLocal.data()[pKey].workoutsCount < 2) {
+                        await clashRef.update({
+                            [`${pKey}.workoutsCount`]: firebase.firestore.FieldValue.increment(1),
+                            [`${pKey}.score`]: firebase.firestore.FieldValue.increment(totalVol)
+                        });
+                    }
+                }
+            } catch (err) { console.error("Error adding approved weight to 1v1 clash:", err); }
+        }
+
         // 3. المقبرة والإشعارات
         if (dethronedVictim) {
             showToast(`✅ تم العثور على ضحية: ${dethronedVictim.firstName}. جاري إضافته للمقبرة...`);
@@ -987,7 +1005,7 @@ let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',y
         showToast(currentLang === 'en' ? "Volume capped at 30,000kg (Anti-Cheat system)." : "تم تقييد الحجم بـ 30,000 كجم كحد أقصى (نظام الحماية من الغش).");
     }
 
-await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});addVolumeToClanWar(totalVol);if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
+await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});addVolumeToClanWar(totalVolume); addVolumeToHeroClash(totalVolume);if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
 const user=auth.currentUser;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));let timeMsg=currentLang==='en'?`${hours}h ${minutes}m`:`${hours} س و ${minutes} د`;db.collection('users').doc(user.uid).update({workouts:workoutHistory});showToast(currentLang==='en'?`Workout Saved! XP resets in ${timeMsg}`:`تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`)}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');showToast(currentLang==='en'?`Saved! +50 XP`:`تم الحفظ! +50 XP`)}}
 closeWorkoutModal();if(document.getElementById('log-container')){renderWorkoutLog();if(typeof initWorkoutChart==="function")setTimeout(initWorkoutChart,200);}}finally{setTimeout(()=>{isSavingNormalWorkout=!1},2000)}}
 
@@ -2259,7 +2277,7 @@ function skipRest(){clearInterval(restInterval);const restOverlay=document.getEl
 function animateValue(obj,start,end,duration){let startTimestamp=null;const step=(timestamp)=>{if(!startTimestamp)startTimestamp=timestamp;const progress=Math.min((timestamp-startTimestamp)/duration,1);obj.innerHTML=Math.floor(progress*(end-start)+start);if(progress<1)window.requestAnimationFrame(step);};window.requestAnimationFrame(step)}
 let isSavingLiveWorkout=!1;async function finishLiveWorkout(){if(liveExercises.length===0){closeLiveWorkout();return}
 if(isSavingLiveWorkout)return;isSavingLiveWorkout=!0;releaseWakeLock();try{const user=auth.currentUser;const totalSets=liveExercises.length;const totalVolume=liveExercises.reduce((sum,ex)=>sum+(ex.weight*ex.reps),0);let liveReps=0;liveExercises.forEach(ex=>liveReps+=parseInt(ex.reps)||0);const m=String(Math.floor(liveSeconds/60)).padStart(2,'0');const s=String(liveSeconds%60).padStart(2,'0');const finalTime=`${m}:${s}`;let xpMessage="";let xpGained=!1;if(pendingProofData){if(user){await db.collection('users').doc(user.uid).collection('notifications').add({type:'pending_proof',text:translations[currentLang].proof_required_notif,exerciseData:pendingProofData,fullWorkoutData:liveExercises,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()})}
-xpMessage=currentLang==='en'?"Pending Approval ⏳":"بانتظار الإثبات ⏳";xpGained=!1}else{await updateQuestProgressBatch({volume:totalVolume,reps:liveReps,workout_days:1});addVolumeToClanWar(totalVolume);if(typeof updateStat==="function"){updateStat('workouts',1);liveExercises.forEach(ex=>{let w=parseFloat(ex.weight)||0;if(w>0)updateStat('maxWeight',w,!0);})}
+xpMessage=currentLang==='en'?"Pending Approval ⏳":"بانتظار الإثبات ⏳";xpGained=!1}else{await updateQuestProgressBatch({volume:totalVolume,reps:liveReps,workout_days:1});addVolumeToClanWar(totalVolume); addVolumeToHeroClash(totalVolume);if(typeof updateStat==="function"){updateStat('workouts',1);liveExercises.forEach(ex=>{let w=parseFloat(ex.weight)||0;if(w>0)updateStat('maxWeight',w,!0);})}
 let workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[];let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});let typeStr=liveExercises[0]?.type||"تمرين لايف";workoutHistory.unshift({date:dateStr,type:typeStr,details:liveExercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));xpMessage=currentLang==='en'?`XP resets in ${hours}h ${minutes}m`:`تتجدد المكافأة بعد ${hours}س و${minutes}د`;await db.collection('users').doc(user.uid).update({workouts:workoutHistory})}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));await db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');xpGained=!0;xpMessage="+50 XP"}}}
 clearInterval(liveDurationTimer);clearInterval(restInterval);const overlay=document.getElementById('live-workout-overlay');overlay.classList.remove('active');setTimeout(()=>overlay.style.display='none',500);document.getElementById('rest-timer-overlay').classList.remove('active');const summaryOverlay=document.getElementById('live-summary-overlay');if(summaryOverlay){document.getElementById('sum-time').innerText=finalTime;document.getElementById('sum-sets').innerText=totalSets;document.getElementById('sum-volume').innerText="0";const xpRewardBox=document.querySelector('.xp-reward-box');if(xpRewardBox){xpRewardBox.innerText=xpMessage;xpRewardBox.style.fontSize=xpGained?'2.5rem':(pendingProofData?'1.5rem':'1.1rem');xpRewardBox.style.color=xpGained?'var(--primary-color)':(pendingProofData?'#FFD700':'var(--slate)');xpRewardBox.style.textShadow=xpGained?'0 0 20px rgba(0, 242, 167, 0.6)':(pendingProofData?'0 0 15px rgba(255, 215, 0, 0.5)':'none');xpRewardBox.style.animation=xpGained?'pulseXP 1.5s infinite alternate':'none'}
 summaryOverlay.style.display='flex';setTimeout(()=>{summaryOverlay.classList.add('active');animateValue(document.getElementById('sum-volume'),0,totalVolume,1500)},50)}else{showToast(currentLang==='en'?`Workout Saved! ${xpMessage}`:`تم الحفظ! ${xpMessage}`);closeLiveSummary()}}finally{setTimeout(()=>{isSavingLiveWorkout=!1},2000)}}
@@ -3303,7 +3321,31 @@ isInitialLoad=!1;body.innerHTML='';snapshot.forEach(doc=>{const notif=doc.data()
                                   <button class="reject-btn" onclick="rejectFriendRequest('${notifId}')">${t.reject}</button>
                               </div>
                           </div>
-                      </div>`)}else if(notif.type==='clan_invite'){const txtAccept=currentLang==='en'?'View Clan':'استطلاع العصابة';const txtReject=currentLang==='en'?'Reject':'رفض';body.insertAdjacentHTML('beforeend',`
+                      </div>`)
+                    
+                    } else if (notif.type === 'clash_challenge') {
+    const wIcon = notif.wagerType === 'xp' ? '<i class="fa-solid fa-gem" style="color:#00f2a7;"></i>' : '<i class="fa-solid fa-coins" style="color:#FFD700;"></i>';
+    const wText = notif.wagerType === 'xp' ? '1000 XP' : '50 Coins';
+    body.insertAdjacentHTML('beforeend', `
+        <div class="notif-item" id="${notifId}" style="background: rgba(255, 77, 77, 0.1); border-left: 3px solid #ff4d4d;">
+            <div class="notif-icon"><img src="${notif.senderPhoto}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
+            <div class="notif-content">
+                <p style="color: white;"><strong>${notif.senderName}</strong> ${currentLang === 'en' ? 'challenged you to a 1v1 battle!' : 'تحداك في معركة 1 ضد 1!'}</p>
+                <p style="color: #ff4d4d; font-size: 0.85rem; font-weight: bold; margin-top: 5px;">
+                    ${currentLang === 'en' ? 'Wager:' : 'الرهان:'} ${wText} ${wIcon}
+                </p>
+                <div class="notif-actions" style="margin-top: 10px;">
+                    <button class="accept-btn" style="background:#ff4d4d; color:white; border:none; width: 48%;" onclick="acceptClashChallenge('${notifId}', '${notif.senderId}', '${notif.wagerType}', ${notif.wagerAmount})">${currentLang === 'en' ? 'Accept & Fight' : 'قبول وسحق'}</button>
+                    <button class="reject-btn" style="width: 48%;" onclick="rejectClashChallenge('${notifId}', '${notif.senderId}')">${currentLang === 'en' ? 'Decline' : 'رفض'}</button>
+                </div>
+            </div>
+        </div>
+    `);
+                    
+                    }
+                      
+                      
+                      else if(notif.type==='clan_invite'){const txtAccept=currentLang==='en'?'View Clan':'استطلاع العصابة';const txtReject=currentLang==='en'?'Reject':'رفض';body.insertAdjacentHTML('beforeend',`
                       <div class="notif-item" id="${notifId}" style="background: rgba(0, 242, 167, 0.05); border-left: 3px solid var(--primary-color);">
                           <div class="notif-icon"><img src="${notif.senderPhoto || '/Photos/adm.jpeg'}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
                           <div class="notif-content">
@@ -5032,4 +5074,616 @@ window.giveSpinReward = function(reward) {
     setTimeout(() => {
         window.closeEpicSpin();
     }, 2000);
+};/* =========================================
+   ⚔️ 1v1 HERO CLASH - ADVANCED SYSTEM (FIXED) ⚔️
+   ========================================= */
+
+window.clashUnsubscribe = null;
+window.clashTimerInterval = null;
+window.currentWagerType = 'coins'; 
+window.currentWagerAmount = 50;
+window.isFinishingClash = false; 
+
+
+// تم ربطها بالـ window لتمنع الـ Crash
+window.selectWagerType = function(type) {
+    window.currentWagerType = type;
+    window.currentWagerAmount = type === 'coins' ? 50 : 1000;
+    
+    const btnCoins = document.getElementById('wager-btn-coins');
+    const btnXp = document.getElementById('wager-btn-xp');
+    
+    if(btnCoins && btnXp) {
+        btnCoins.classList.remove('active', 'coins');
+        btnXp.classList.remove('active', 'xp');
+        
+        if(type === 'coins') {
+            btnCoins.classList.add('active', 'coins');
+        } else {
+            btnXp.classList.add('active', 'xp');
+        }
+    }
+};
+window.renderClashIdleScreen = function(userData) {
+    const view = document.getElementById('clash-main-view');
+    if(!view) return;
+    const isEn = currentLang === 'en';
+    
+    let friendsHtml = `<p style="text-align:center; color:gray; font-size:0.8rem;">${isEn ? 'No friends to challenge.' : 'لا يوجد أصدقاء لتحديهم.'}</p>`;
+    if(userData.myFriendsList && userData.myFriendsList.length > 0) {
+        friendsHtml = userData.myFriendsList.map(f => `
+            <div class="clash-friend-item">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${f.photoURL || '/Photos/adm.jpeg'}" style="width:35px; height:35px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.1);">
+                    <span style="color:white; font-weight:bold; font-size:0.9rem;">${f.name}</span>
+                </div>
+                <button class="btn-primary" style="padding: 6px 12px; font-size:0.8rem; background:rgba(255,77,77,0.1); color:#ff4d4d; border-color:#ff4d4d;" onclick="sendFriendClashChallenge('${f.id}')">
+                    <i class="fa-solid fa-crosshairs"></i> ${isEn ? 'Challenge' : 'تحدي'}
+                </button>
+            </div>
+        `).join('');
+    }
+
+    view.innerHTML = `
+        <div class="clash-glass-container" style="text-align: center;">
+            <i class="fa-solid fa-bolt" style="font-size: 5rem; color: var(--slate); margin-bottom: 20px; opacity: 0.5;"></i>
+            <h2 style="color: white; font-weight: 900; margin-bottom: 10px; font-size: 1.8rem;">
+                ${isEn ? '1v1 Showdown' : 'مواجهة 1 ضد 1'}
+            </h2>
+            <p style="color: #a0aec0; margin-bottom: 25px; line-height: 1.6; font-size: 0.95rem;">
+                ${isEn ? 'Enter the arena. The winner takes the prize pool. You have exactly 12 hours and a maximum of 2 exercises to lift heavier than your opponent.' : 'ادخل الحلبة والفائز يغنم الجائزة الكبرى. أمامك 12 ساعة و تمرينين (2/2) فقط كحد أقصى لسحق خصمك بالأوزان.'}
+            </p>
+            
+            <h3 style="color: white; text-align: center; margin-bottom: 15px;">${isEn ? 'Select Entry Fee' : 'اختر رسوم الدخول'}</h3>
+            <div class="wager-selector">
+                <button id="wager-btn-coins" class="wager-btn active coins" onclick="window.selectWagerType('coins')">
+                    50 <i class="fa-solid fa-coins"></i>
+                </button>
+                <button id="wager-btn-xp" class="wager-btn" onclick="window.selectWagerType('xp')">
+                    1000 <i class="fa-solid fa-gem"></i> XP
+                </button>
+            </div>
+
+            <button class="btn-primary" id="btn-find-clash" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,242,167,0.2);" onclick="searchForHeroClash()">
+                <i class="fa-solid fa-earth-americas"></i> ${isEn ? 'Find Random Opponent' : 'بحث عن خصم عشوائي'}
+            </button>
+
+            <h4 style="color: var(--primary-color); margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                <i class="fa-solid fa-user-group"></i> ${isEn ? 'Challenge Friends' : 'تحدي الأصدقاء'}
+            </h4>
+            <div style="max-height: 250px; overflow-y: auto;">
+                ${friendsHtml}
+            </div>
+        </div>
+    `;
+    window.selectWagerType('coins');
+};
+function hasEnoughBalance(data, type, amount) {
+    if (type === 'coins') return (data.ironCoins || 0) >= amount;
+    if (type === 'xp') return ((data.xp || 0) - (data.spentXp || 0)) >= amount;
+    return false;
+}
+
+window.sendFriendClashChallenge = async function(friendId) {
+    const user = auth.currentUser;
+    if(!user) return;
+    const isEn = currentLang === 'en';
+    let userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if(!hasEnoughBalance(userData, window.currentWagerType, window.currentWagerAmount)) {
+        showToast(isEn ? "Not enough balance!" : "الرصيد غير كافٍ لدفع الرسوم!");
+        return;
+    }
+
+    const now = Date.now();
+    if (userData.clashCooldowns && userData.clashCooldowns[friendId]) {
+        const cooldownEnd = userData.clashCooldowns[friendId];
+        if (now < cooldownEnd) {
+            const timeLeft = Math.ceil((cooldownEnd - now) / (1000 * 60)); 
+            showToast(isEn ? `Friend unavailable. Wait ${timeLeft}m.` : `صديقك غير متاح. انتظر ${timeLeft} دقيقة.`);
+            return;
+        }
+    }
+
+    const btn = event.target.closest('button');
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+        const friendDoc = await db.collection('users').doc(friendId).get();
+        const fData = friendDoc.data();
+        
+        if(fData.activeClashId) {
+            const clashCheck = await db.collection('hero_clashes').doc(fData.activeClashId).get();
+            if(clashCheck.exists && clashCheck.data().status !== 'completed') {
+                showToast(isEn ? "Friend is in a battle!" : "صديقك في معركة حالياً!");
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+                return;
+            } else {
+                await db.collection('users').doc(friendId).update({ activeClashId: firebase.firestore.FieldValue.delete() });
+            }
+        }
+
+        await db.collection('users').doc(friendId).collection('notifications').doc('clash_' + user.uid).set({
+            type: 'clash_challenge',
+            senderId: user.uid,
+            senderName: userData.firstName || 'Hero',
+            senderPhoto: userData.photoURL || '/Photos/adm.jpeg',
+            wagerType: window.currentWagerType,
+            wagerAmount: window.currentWagerAmount,
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showToast(isEn ? "Challenge Sent! ⚔️" : "تم إرسال التحدي! ⚔️ بانتظار قبوله.");
+        btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+        
+    } catch(e) {
+        console.error(e);
+        showToast("Error!");
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+    }
+};
+
+window.rejectClashChallenge = async function(notifId, senderId) {
+    const user = auth.currentUser;
+    if(!user) return;
+    try {
+        await db.collection('users').doc(user.uid).collection('notifications').doc(notifId).delete();
+        await db.collection('users').doc(senderId).update({
+            [`clashCooldowns.${user.uid}`]: Date.now() + 7200000 
+        });
+        showToast(currentLang === 'en' ? "Challenge Declined." : "تم رفض التحدي.");
+    } catch(e) { console.error(e); }
+};
+
+window.acceptClashChallenge = async function(notifId, senderId, wagerType, wagerAmount) {
+    const user = auth.currentUser;
+    if(!user) return;
+    const isEn = currentLang === 'en';
+    
+    let myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if(!hasEnoughBalance(myData, wagerType, wagerAmount)) {
+        showToast(isEn ? "You don't have enough balance!" : "أنت لا تملك رصيد كافٍ لقبول التحدي!");
+        return;
+    }
+
+    try {
+        showToast(isEn ? "Entering Arena..." : "جاري تجهيز الحلبة...");
+        const senderDoc = await db.collection('users').doc(senderId).get();
+        const sData = senderDoc.data();
+        
+        let senderBalValid = false;
+        if (wagerType === 'coins') senderBalValid = (sData.ironCoins || 0) >= wagerAmount;
+        if (wagerType === 'xp') senderBalValid = ((sData.xp || 0) - (sData.spentXp || 0)) >= wagerAmount;
+
+        if(!senderBalValid || sData.activeClashId) {
+            showToast(isEn ? "Sender is busy or out of balance!" : "الخصم مشغول أو لا يملك رصيد كافٍ الآن!");
+            await db.collection('users').doc(user.uid).collection('notifications').doc(notifId).delete();
+            return;
+        }
+
+        const batch = db.batch();
+        const clashId = 'CLASH_' + generateShortID();
+        
+        let myUpdate = { activeClashId: clashId };
+        let senderUpdate = { activeClashId: clashId };
+        
+        if (wagerType === 'coins') {
+            myUpdate.ironCoins = firebase.firestore.FieldValue.increment(-wagerAmount);
+            senderUpdate.ironCoins = firebase.firestore.FieldValue.increment(-wagerAmount);
+            myData.ironCoins -= wagerAmount;
+        } else {
+            myUpdate.spentXp = firebase.firestore.FieldValue.increment(wagerAmount);
+            senderUpdate.spentXp = firebase.firestore.FieldValue.increment(wagerAmount);
+            myData.spentXp = (myData.spentXp || 0) + wagerAmount;
+        }
+
+        batch.update(db.collection('users').doc(user.uid), myUpdate);
+        batch.update(db.collection('users').doc(senderId), senderUpdate);
+        batch.delete(db.collection('users').doc(user.uid).collection('notifications').doc(notifId));
+
+        const endTime = Date.now() + (12 * 60 * 60 * 1000); // 12 ساعة 
+        batch.set(db.collection('hero_clashes').doc(clashId), {
+            status: 'active',
+            wagerType: wagerType,
+            wagerAmount: wagerAmount,
+            endTime: endTime,
+            player1: { uid: senderId, name: sData.firstName, photo: sData.photoURL || '/Photos/adm.jpeg', score: 0, workoutsCount: 0 },
+            player2: { uid: user.uid, name: myData.firstName, photo: myData.photoURL || '/Photos/adm.jpeg', score: 0, workoutsCount: 0 }
+        });
+
+        await batch.commit();
+
+        myData.activeClashId = clashId;
+        localStorage.setItem('currentUser', JSON.stringify(myData));
+        
+        const dropdown = document.getElementById('notif-dropdown');
+        if(dropdown) dropdown.classList.remove('show');
+        
+        window.openHeroClashHub();
+
+    } catch(e) {
+        console.error(e);
+        showToast("Error accepting clash!");
+    }
+};
+
+window.searchForHeroClash = async function() {
+    const user = auth.currentUser;
+    if(!user) return;
+    const isEn = currentLang === 'en';
+    let userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if(!hasEnoughBalance(userData, window.currentWagerType, window.currentWagerAmount)) {
+        showToast(isEn ? "Not enough balance!" : "الرصيد غير كافٍ لدفع الرسوم!");
+        return;
+    }
+
+    const btn = document.getElementById('btn-find-clash');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-radar fa-spin"></i> ${isEn ? 'Scanning...' : 'جاري البحث...'}`;
+    
+    try {
+        if(window.currentWagerType === 'coins') userData.ironCoins -= window.currentWagerAmount;
+        else userData.spentXp = (userData.spentXp || 0) + window.currentWagerAmount;
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        
+        let upObj = window.currentWagerType === 'coins' 
+            ? { ironCoins: firebase.firestore.FieldValue.increment(-window.currentWagerAmount) }
+            : { spentXp: firebase.firestore.FieldValue.increment(window.currentWagerAmount) };
+        await db.collection('users').doc(user.uid).update(upObj);
+
+        const playerObj = {
+            uid: user.uid, name: userData.firstName || 'Hero', photo: userData.photoURL || '/Photos/adm.jpeg', score: 0, workoutsCount: 0
+        };
+
+        const clashSnap = await db.collection('hero_clashes')
+            .where('status', '==', 'searching')
+            .where('wagerType', '==', window.currentWagerType)
+            .where('wagerAmount', '==', window.currentWagerAmount)
+            .limit(1).get();
+
+        if (!clashSnap.empty) {
+            const clashDoc = clashSnap.docs[0];
+            const clashId = clashDoc.id;
+            const endTime = Date.now() + (12 * 60 * 60 * 1000); // 12 ساعة 
+
+            await db.collection('hero_clashes').doc(clashId).update({
+                player2: playerObj, status: 'active', endTime: endTime
+            });
+            
+            await db.collection('users').doc(user.uid).update({ activeClashId: clashId });
+            userData.activeClashId = clashId;
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            
+            window.listenToCentralClashRoom(clashId);
+
+        } else {
+            const newClashId = 'CLASH_' + generateShortID();
+            await db.collection('hero_clashes').doc(newClashId).set({
+                status: 'searching', wagerType: window.currentWagerType, wagerAmount: window.currentWagerAmount,
+                player1: playerObj, player2: null, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            await db.collection('users').doc(user.uid).update({ activeClashId: newClashId });
+            userData.activeClashId = newClashId;
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            
+            window.listenToCentralClashRoom(newClashId);
+        }
+    } catch (e) {
+        console.error(e);
+        showToast(isEn ? "Matchmaking Error!" : "خطأ في النظام!");
+        btn.disabled = false;
+    }
+};
+// 1. الدخول للغرفة ورسم الواجهة (مُحصن ضد التعليق)
+window.openHeroClashHub = async function() {
+    if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('collapsed');
+    const mainContent = document.getElementById('main-content-area');
+    if(!mainContent) return;
+    
+    const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
+    if(!mainContent.dataset.originalContent) mainContent.dataset.originalContent = mainContent.innerHTML;
+    
+    mainContent.innerHTML = `
+        <header class="top-bar" style="margin-bottom: 20px;">
+            <div class="header-row">
+                <button id="back-to-dash-btn" class="btn-primary" style="padding: 5px 15px;">${isEn ? 'Back' : 'رجوع'}</button>
+                <h1 style="margin: 0 15px; font-weight: 900; color: #ff4d4d; text-shadow: 0 0 15px rgba(255,77,77,0.4);">
+                    <i class="fa-solid fa-khanda"></i> ${isEn ? 'Arena 1v1' : 'حلبة الأبطال'}
+                </h1>
+            </div>
+        </header>
+        <section class="performance-container" id="clash-main-view" style="animation: fadeIn 0.4s;">
+            <div style="text-align:center; padding: 50px;">
+                <i class="fa-solid fa-spinner fa-spin fa-3x" style="color:#ff4d4d; margin-bottom:15px;"></i>
+                <p style="color:var(--slate); font-weight:bold;">${isEn ? 'Securing connection...' : 'جاري تأمين الاتصال بالحلبة...'}</p>
+            </div>
+        </section>
+    `;
+    document.getElementById('back-to-dash-btn').onclick = backToDashboard;
+
+    try {
+        let userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        
+        // نظام التنظيف الذاتي (Anti-Stuck)
+        if(userData.activeClashId) {
+            // التحقق من السيرفر إذا كانت الحلبة موجودة فعلاً
+            const clashDoc = await db.collection('hero_clashes').doc(userData.activeClashId).get();
+            
+            if(clashDoc.exists && clashDoc.data().status !== 'completed') {
+                window.listenToCentralClashRoom(userData.activeClashId);
+            } else {
+                // الحلبة وهمية أو منتهية! يتم تنظيف الحساب فوراً
+                userData.activeClashId = null;
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+                if (auth.currentUser) {
+                    await db.collection('users').doc(auth.currentUser.uid).update({ activeClashId: firebase.firestore.FieldValue.delete() });
+                }
+                window.renderClashIdleScreen(userData);
+            }
+        } else {
+            window.renderClashIdleScreen(userData);
+        }
+    } catch (error) {
+        console.error("Clash Hub Error:", error);
+        // في حال فشل الإنترنت أو السيرفر، يفتح الشاشة الافتراضية بدلاً من التعليق
+        window.renderClashIdleScreen(JSON.parse(localStorage.getItem('currentUser') || '{}'));
+    }
+};
+window.listenToCentralClashRoom = function(clashId) {
+    let userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const userId = auth.currentUser ? auth.currentUser.uid : userData.uid;
+    if(!clashId || !userId) return;
+
+    if(window.clashUnsubscribe) window.clashUnsubscribe();
+
+    window.clashUnsubscribe = db.collection('hero_clashes').doc(clashId).onSnapshot(doc => {
+        const view = document.getElementById('clash-main-view');
+        if(!view) return;
+
+        if(!doc.exists) {
+            userData.activeClashId = null;
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            window.renderClashIdleScreen(userData);
+            if(window.clashTimerInterval) clearInterval(window.clashTimerInterval);
+            return;
+        }
+
+        const data = doc.data();
+        const isEn = (typeof currentLang !== 'undefined' && currentLang === 'en');
+
+        if (data.status === 'searching') {
+            view.innerHTML = `
+                <div class="clash-glass-container" style="text-align: center; border-color: #FFD700; box-shadow: 0 0 40px rgba(255,215,0,0.15);">
+                    <i class="fa-solid fa-radar fa-spin" style="font-size: 4rem; color: #FFD700; margin-bottom: 20px;"></i>
+                    <h2 style="color: #FFD700; font-weight: 900;">${isEn ? 'Waiting for Challenger...' : 'بانتظار دخول وحش آخر...'}</h2>
+                    <p style="color: #ff4d4d; font-weight:bold; margin-top: 10px; font-size: 1.1rem;">
+                        ${isEn?'Entry Fee:':'رسوم الدخول:'} ${data.wagerAmount} ${data.wagerType === 'xp' ? '<i class="fa-solid fa-gem"></i> XP' : '<i class="fa-solid fa-coins"></i> Coins'}
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        if (data.status === 'active') {
+            if (!data.player1 || !data.player2) return;
+
+            let myData = data.player1.uid === userId ? data.player1 : data.player2;
+            let enemyData = data.player1.uid === userId ? data.player2 : data.player1;
+
+            let totalScore = myData.score + enemyData.score;
+            let myPct = 50, enemyPct = 50;
+            if (totalScore > 0) {
+                myPct = (myData.score / totalScore) * 100;
+                enemyPct = (enemyData.score / totalScore) * 100;
+                if(myPct < 10) { myPct = 10; enemyPct = 90; }
+                if(enemyPct < 10) { enemyPct = 10; myPct = 90; }
+            }
+
+            const getDots = (count, isMine) => {
+                let d1 = count >= 1 ? `active-${isMine?'mine':'enemy'}` : '';
+                let d2 = count >= 2 ? `active-${isMine?'mine':'enemy'}` : '';
+                return `<div class="workout-dots"><div class="w-dot ${d1}"></div><div class="w-dot ${d2}"></div></div>`;
+            };
+
+            const wIcon = data.wagerType === 'xp' ? '<i class="fa-solid fa-gem"></i> XP' : '<i class="fa-solid fa-coins"></i> Coins';
+
+            // 🚨 حساب الوقت الحقيقي مع إضافة خانة الساعات 🚨
+            let initialTimerStr = "12:00:00";
+            if (data.endTime) {
+                let distance = data.endTime - Date.now();
+                if (distance > 0) {
+                    let h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    let s = Math.floor((distance % (1000 * 60)) / 1000);
+                    let hStr = h < 10 ? "0" + h : h;
+                    let mStr = m < 10 ? "0" + m : m;
+                    let sStr = s < 10 ? "0" + s : s;
+                    initialTimerStr = `${hStr}:${mStr}:${sStr}`;
+                } else {
+                    initialTimerStr = "00:00:00";
+                }
+            }
+
+            view.innerHTML = `
+                <div class="clash-glass-container">
+                    <div style="text-align:center; margin-bottom: 15px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 12px; color: #FFD700; font-weight: bold; border: 1px solid rgba(255,215,0,0.2);">
+                        ${isEn ? 'Prize Pool' : 'الجائزة الكبرى'}: ${data.wagerAmount * 2} ${wIcon}
+                    </div>
+
+                    <div id="clash-timer-display" class="clash-timer" style="font-size: 2.2rem;">${initialTimerStr}</div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div class="clash-player-card mine">
+                            <img src="${myData.photo}" class="clash-avatar">
+                            <h4 style="color: white; margin: 0; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${myData.name}</h4>
+                            <div class="clash-score">${myData.score.toLocaleString()}</div>
+                            <span style="font-size: 0.7rem; color: gray;">KG</span>
+                            ${getDots(myData.workoutsCount, true)}
+                        </div>
+
+                        <div style="font-size: 1.8rem; font-weight: 900; color: #FFD700; font-style: italic; opacity: 0.8;">VS</div>
+
+                        <div class="clash-player-card enemy">
+                            <img src="${enemyData.photo}" class="clash-avatar">
+                            <h4 style="color: white; margin: 0; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${enemyData.name}</h4>
+                            <div class="clash-score">${enemyData.score.toLocaleString()}</div>
+                            <span style="font-size: 0.7rem; color: gray;">KG</span>
+                            ${getDots(enemyData.workoutsCount, false)}
+                        </div>
+                    </div>
+
+                    <div class="clash-tug-bar">
+                        <div class="clash-tug-mine" style="width: ${myPct}%;"></div>
+                        <div class="clash-tug-enemy" style="width: ${enemyPct}%;"></div>
+                    </div>
+                </div>
+            `;
+
+            if(data.endTime) {
+                if(window.clashTimerInterval) clearInterval(window.clashTimerInterval);
+                window.clashTimerInterval = setInterval(() => {
+                    let now = Date.now();
+                    let distance = data.endTime - now;
+                    const timerEl = document.getElementById('clash-timer-display');
+                    
+                    if(distance <= 0) {
+                        clearInterval(window.clashTimerInterval);
+                        if(timerEl) timerEl.innerText = "00:00:00";
+                        window.finishHeroClash(clashId, data, myData, enemyData);
+                    } else {
+                        // تحديث العداد ليشمل الساعات في التحديث الحي
+                        let h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        let m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        let s = Math.floor((distance % (1000 * 60)) / 1000);
+                        let hStr = h < 10 ? "0" + h : h;
+                        let mStr = m < 10 ? "0" + m : m;
+                        let sStr = s < 10 ? "0" + s : s;
+                        if(timerEl) timerEl.innerText = `${hStr}:${mStr}:${sStr}`;
+                    }
+                }, 1000);
+            }
+        }
+    }, (error) => {
+        console.error("Clash Snapshot Error:", error);
+    });
+};
+window.addVolumeToHeroClash = async function(volume) {
+    const user = auth.currentUser;
+    if(!user || volume <= 0) return;
+    let userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if(!userData.activeClashId) return;
+
+    const clashRef = db.collection('hero_clashes').doc(userData.activeClashId);
+    const isEn = currentLang === 'en';
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const clashDoc = await transaction.get(clashRef);
+            if (!clashDoc.exists || clashDoc.data().status !== 'active') throw "NOT_ACTIVE";
+
+            const data = clashDoc.data();
+            let isPlayer1 = data.player1.uid === user.uid;
+            let pKey = isPlayer1 ? 'player1' : 'player2';
+
+            if (data[pKey].workoutsCount >= 2) throw "MAX_WORKOUTS";
+
+            let newCount = data[pKey].workoutsCount + 1;
+            let newScore = data[pKey].score + volume;
+
+            transaction.update(clashRef, {
+                [`${pKey}.workoutsCount`]: newCount,
+                [`${pKey}.score`]: newScore
+            });
+        });
+        showToast(isEn ? "⚔️ Weight injected into Battle!" : "⚔️ تم صب الأوزان في الحلبة مباشرة!");
+    } catch (e) {
+        if (e === "MAX_WORKOUTS") {
+            showToast(isEn ? "Limit Reached (2/2)! Weight ignored for war." : "تنبيه: استنفذت الحد (تمرينين)! لم يُحسب هذا الوزن.");
+        }
+    }
+};
+
+window.finishHeroClash = async function(clashId, clashData, myData, enemyData) {
+    const user = auth.currentUser;
+    if(!user || window.isFinishingClash) return;
+    
+    window.isFinishingClash = true;
+    const isEn = currentLang === 'en';
+
+    try {
+        let userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (!userData.activeClashId) {
+            window.isFinishingClash = false;
+            return; 
+        }
+        
+        userData.activeClashId = null;
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        await db.collection('users').doc(user.uid).update({ activeClashId: firebase.firestore.FieldValue.delete() });
+
+        let winState = 'draw';
+        if (myData.score > enemyData.score) winState = 'win';
+        if (myData.score < enemyData.score) winState = 'lose';
+
+        const wagerAmount = clashData.wagerAmount;
+        const wagerType = clashData.wagerType;
+        const prize = wagerAmount * 2;
+        let wIcon = wagerType === 'xp' ? 'XP' : 'Coins';
+
+        let notifTitle = "", notifBody = "";
+
+        if (winState === 'win') {
+            notifTitle = isEn ? "🏆 Clash Victory!" : "🏆 انتصار ساحق!";
+            notifBody = isEn ? `You crushed ${enemyData.name} and won ${prize} ${wIcon}!` : `سحقت ${enemyData.name} وغنمت ${prize} ${wIcon}!`;
+            
+            if(wagerType === 'coins') {
+                userData.ironCoins = (userData.ironCoins || 0) + prize;
+                await db.collection('users').doc(user.uid).update({ ironCoins: firebase.firestore.FieldValue.increment(prize) });
+            } else {
+                if(typeof addXP === 'function') addXP(prize, 'quest'); 
+            }
+        } else if (winState === 'draw') {
+            notifTitle = isEn ? "⚖️ Clash Draw!" : "⚖️ تعادل!";
+            notifBody = isEn ? `Fierce battle. Your ${wagerAmount} ${wIcon} fee was refunded.` : `معركة طاحنة. استعدت رسوم الدخول.`;
+            
+            if(wagerType === 'coins') {
+                userData.ironCoins = (userData.ironCoins || 0) + wagerAmount;
+                await db.collection('users').doc(user.uid).update({ ironCoins: firebase.firestore.FieldValue.increment(wagerAmount) });
+            } else {
+                if(typeof addXP === 'function') addXP(wagerAmount, 'quest');
+            }
+        } else {
+            notifTitle = isEn ? "💀 Clash Defeat" : "💀 هزيمة!";
+            notifBody = isEn ? `You lost to ${enemyData.name}. Train harder!` : `خسرت التحدي لصالح ${enemyData.name}. عُد أقوى!`;
+        }
+
+        await db.collection('users').doc(user.uid).collection('notifications').add({
+            type: 'system_reward',
+            title: notifTitle,
+            text: notifBody,
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        if (clashData.status === 'active') {
+            db.collection('hero_clashes').doc(clashId).update({ status: 'completed' }).catch(()=>{});
+        }
+
+        showToast(notifTitle); 
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        window.renderClashIdleScreen(userData); 
+
+    } catch (e) {
+        console.error("Finish Clash Error:", e);
+    } finally {
+        setTimeout(() => { window.isFinishingClash = false; }, 2000);
+    }
 };

@@ -1082,3 +1082,114 @@ html, body, .main-content, .perf-tab-content, .chat-messages-area {
 .spin-item.gold { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
 .spin-item.neon { border-color: #00f2a7; color: #00f2a7; background: rgba(0,242,167,0.1); text-shadow: 0 0 10px rgba(0,242,167,0.5); }
 .spin-item.mythic { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255,77,77,0.1); text-shadow: 0 0 10px rgba(255,77,77,0.5); }
+
+
+/* =========================================
+   ⚔️ 1v1 HERO CLASH - APPLE GLASS UI (ULTRA PREMIUM) ⚔️
+   ========================================= */
+.clash-glass-container {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.4));
+    backdrop-filter: blur(35px) saturate(200%);
+    -webkit-backdrop-filter: blur(35px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    padding: 30px 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 25px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.clash-player-card {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 15px;
+    text-align: center;
+    width: 42%;
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.clash-player-card.mine { border-color: rgba(0, 242, 167, 0.3); box-shadow: inset 0 0 20px rgba(0, 242, 167, 0.05), 0 10px 20px rgba(0,0,0,0.4); }
+.clash-player-card.enemy { border-color: rgba(255, 77, 77, 0.3); box-shadow: inset 0 0 20px rgba(255, 77, 77, 0.05), 0 10px 20px rgba(0,0,0,0.4); }
+
+.clash-avatar {
+    width: 65px; height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 10px auto;
+    border: 2px solid;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+.clash-player-card.mine .clash-avatar { border-color: #00f2a7; }
+.clash-player-card.enemy .clash-avatar { border-color: #ff4d4d; }
+
+.clash-score {
+    font-size: 1.8rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    margin: 5px 0;
+}
+.clash-player-card.mine .clash-score { color: #00f2a7; text-shadow: 0 0 15px rgba(0,242,167,0.4); }
+.clash-player-card.enemy .clash-score { color: #ff4d4d; text-shadow: 0 0 15px rgba(255,77,77,0.4); }
+
+.clash-tug-bar {
+    width: 100%; height: 20px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 10px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4), inset 0 0 10px rgba(0,0,0,0.8);
+    margin: 25px 0;
+    position: relative;
+    z-index: 1;
+}
+.clash-tug-mine { height: 100%; background: linear-gradient(90deg, #008f63, #00f2a7); transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 15px #00f2a7; }
+.clash-tug-enemy { height: 100%; background: linear-gradient(90deg, #ff4d4d, #8b0000); transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 15px #ff4d4d; }
+
+.clash-timer {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+    font-family: 'Courier New', monospace; /* يعطي طابع رقمي فخم */
+}
+
+/* Wager & Friends Selectors */
+.wager-selector {
+    display: flex; gap: 10px; margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.2); padding: 5px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);
+}
+.wager-btn {
+    flex: 1; padding: 12px; border-radius: 12px; font-weight: 900; font-family: var(--font-main);
+    background: transparent; border: 1px solid transparent; color: var(--slate);
+    cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.wager-btn.active.coins { background: rgba(255, 215, 0, 0.15); border-color: #FFD700; color: #FFD700; box-shadow: 0 5px 15px rgba(255,215,0,0.2); transform: translateY(-2px); }
+.wager-btn.active.xp { background: rgba(0, 242, 167, 0.15); border-color: #00f2a7; color: #00f2a7; box-shadow: 0 5px 15px rgba(0,242,167,0.2); transform: translateY(-2px); }
+
+.clash-friend-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: 16px;
+    margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+}
+.clash-friend-item:hover { background: rgba(255,255,255,0.08); transform: translateX(-5px); border-color: rgba(255,255,255,0.1); }
+[dir="ltr"] .clash-friend-item:hover { transform: translateX(5px); }
+
+.workout-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+.w-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: 0.3s; }
+.w-dot.active-mine { background: #00f2a7; box-shadow: 0 0 10px #00f2a7; transform: scale(1.2); }
+.w-dot.active-enemy { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; transform: scale(1.2); }
