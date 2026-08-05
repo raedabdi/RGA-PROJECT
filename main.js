@@ -219,7 +219,39 @@ async function approveWorkout(docId) {
                 }
             }
         }
+// --- ⚡ إضافة الوزن المُعتمد من الإدارة إلى صدام الأبطال (1 ضد 1) ⚡ ---
+        if (totalVol > 0) {
+            try {
+                const userClashSnap = await db.collection('users').doc(data.userId).collection('active_clashes').where('status', '==', 'active').get();
+                let clashContribs = userData.clashContributions || {};
+                let contribsUpdated = false;
+                const clashBatch = db.batch(); // استخدام Batch هنا أيضاً
 
+                userClashSnap.forEach(doc => {
+                    const clashData = doc.data();
+                    const clashId = clashData.id;
+                    
+                    let count = clashContribs[clashId] || 0;
+                    if (count < 2) {
+                        const isPlayer1 = clashData.player1.uid === data.userId;
+                        const fieldToUpdate = isPlayer1 ? 'player1.score' : 'player2.score';
+                        const enemyUid = isPlayer1 ? clashData.player2.uid : clashData.player1.uid;
+
+                        clashBatch.update(doc.ref, { [fieldToUpdate]: firebase.firestore.FieldValue.increment(totalVol) });
+                        clashBatch.update(db.collection('users').doc(enemyUid).collection('active_clashes').doc(clashId), { [fieldToUpdate]: firebase.firestore.FieldValue.increment(totalVol) });
+
+                        clashContribs[clashId] = count + 1;
+                        contribsUpdated = true;
+                    }
+                });
+
+                if (contribsUpdated) {
+                    updatePayload.clashContributions = clashContribs;
+                    await clashBatch.commit();
+                }
+            } catch(e) { console.error("Admin Clash update error", e); }
+        }
+        // --- نهاية إضافة الوزن للصدام ---
         // 3. المقبرة والإشعارات
         if (dethronedVictim) {
             showToast(`✅ تم العثور على ضحية: ${dethronedVictim.firstName}. جاري إضافته للمقبرة...`);
@@ -987,7 +1019,12 @@ let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',y
         showToast(currentLang === 'en' ? "Volume capped at 30,000kg (Anti-Cheat system)." : "تم تقييد الحجم بـ 30,000 كجم كحد أقصى (نظام الحماية من الغش).");
     }
 
-await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});addVolumeToClanWar(totalVol);if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
+await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});     
+addVolumeToClanWar(totalVol); 
+if(!needsProof && typeof addVolumeToActiveClashes === 'function') {
+    addVolumeToActiveClashes(totalVol);
+}
+if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
 const user=auth.currentUser;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));let timeMsg=currentLang==='en'?`${hours}h ${minutes}m`:`${hours} س و ${minutes} د`;db.collection('users').doc(user.uid).update({workouts:workoutHistory});showToast(currentLang==='en'?`Workout Saved! XP resets in ${timeMsg}`:`تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`)}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');showToast(currentLang==='en'?`Saved! +50 XP`:`تم الحفظ! +50 XP`)}}
 closeWorkoutModal();if(document.getElementById('log-container')){renderWorkoutLog();if(typeof initWorkoutChart==="function")setTimeout(initWorkoutChart,200);}}finally{setTimeout(()=>{isSavingNormalWorkout=!1},2000)}}
 
@@ -1719,14 +1756,21 @@ if (myUid && myUid !== targetUid) {
     const safeName = (data.firstName || 'Hero').replace(/</g, "&lt;");
 
     if (isFriend) {
-        const clashBtnText = lang === 'en' ? '<i class="fa-solid fa-bolt"></i> Challenge' : 'صدام الأبطال <i class="fa-solid fa-bolt"></i>';
+        let clashBtnHtml = "";
+        if (data.isInActiveClash) {
+            // الخصم مشغول بتحدي حالياً
+            const busyText = lang === 'en' ? '<i class="fa-solid fa-ban"></i> In a Clash' : 'يقاتل حالياً <i class="fa-solid fa-ban"></i>';
+            clashBtnHtml = `<button class="btn-primary" style="flex: 1; height: 50px; background: rgba(255, 255, 255, 0.05); border-color: gray; color: gray; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0;" disabled>${busyText}</button>`;
+        } else {
+            const clashBtnText = lang === 'en' ? '<i class="fa-solid fa-bolt"></i> Challenge' : 'صدام الأبطال <i class="fa-solid fa-bolt"></i>';
+            clashBtnHtml = `<button class="btn-primary" style="flex: 1; height: 50px; background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; color: #ff4d4d; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0; box-shadow: 0 0 15px rgba(255,77,77,0.2);" onclick="openClashSetup('${targetUid}', '${safeName.replace(/'/g, "\\'")}')">${clashBtnText}</button>`;
+        }
+
         const unfriendBtnText = lang === 'en' ? '<i class="fa-solid fa-user-minus"></i> Unfriend' : 'إزالة الصديق <i class="fa-solid fa-user-minus"></i>';
         
         friendActionHTML = `
             <div style="display: flex; gap: 10px; margin-top: 15px; width: 100%; align-items: center;">
-                <button class="btn-primary" style="flex: 1; height: 50px; background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; color: #ff4d4d; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0; box-shadow: 0 0 15px rgba(255,77,77,0.2);" onclick="openClashSetup('${targetUid}', '${safeName.replace(/'/g, "\\'")}')">
-                    ${clashBtnText}
-                </button>
+                ${clashBtnHtml}
                 <div style="position: relative; height: 50px; display: flex; align-items: center;">
                     <button class="member-menu-trigger member-menu-trigger-btn" style="height: 50px; width: 45px; display: flex; align-items: center; justify-content: center; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white;" onclick="toggleMemberMenu('profile-friend-menu', this)">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -2313,9 +2357,17 @@ let threshold = getMuscleThreshold(muscleVal, exLower);if(weight>=threshold){if(
 document.getElementById('live-ex-reps').value='';if(!isSuperset){const restOverlay=document.getElementById('rest-timer-overlay');restOverlay.style.display='flex';setTimeout(()=>restOverlay.classList.add('active'),10);startRestTimer(restTime)}else{showToast(currentLang==='en'?"Superset Logged! No rest.":"تم تسجيل السوبرسيت! استمر بالجلد.")}};function closeLiveWorkout(){liveWorkoutActive=!1;clearInterval(liveDurationTimer);clearInterval(restInterval);releaseWakeLock();const overlay=document.getElementById('live-workout-overlay');overlay.classList.remove('active');setTimeout(()=>{overlay.style.display='none';const canvas=document.getElementById('stardust-canvas');if(canvas)canvas.style.zIndex='-1'},500);document.getElementById('rest-timer-overlay').classList.remove('active')}
 function skipRest(){clearInterval(restInterval);const restOverlay=document.getElementById('rest-timer-overlay');restOverlay.classList.remove('active');setTimeout(()=>restOverlay.style.display='none',500)}
 function animateValue(obj,start,end,duration){let startTimestamp=null;const step=(timestamp)=>{if(!startTimestamp)startTimestamp=timestamp;const progress=Math.min((timestamp-startTimestamp)/duration,1);obj.innerHTML=Math.floor(progress*(end-start)+start);if(progress<1)window.requestAnimationFrame(step);};window.requestAnimationFrame(step)}
-let isSavingLiveWorkout=!1;async function finishLiveWorkout(){if(liveExercises.length===0){closeLiveWorkout();return}
+let isSavingLiveWorkout=!1;
+
+
+async function finishLiveWorkout(){if(liveExercises.length===0){closeLiveWorkout();return}
 if(isSavingLiveWorkout)return;isSavingLiveWorkout=!0;releaseWakeLock();try{const user=auth.currentUser;const totalSets=liveExercises.length;const totalVolume=liveExercises.reduce((sum,ex)=>sum+(ex.weight*ex.reps),0);let liveReps=0;liveExercises.forEach(ex=>liveReps+=parseInt(ex.reps)||0);const m=String(Math.floor(liveSeconds/60)).padStart(2,'0');const s=String(liveSeconds%60).padStart(2,'0');const finalTime=`${m}:${s}`;let xpMessage="";let xpGained=!1;if(pendingProofData){if(user){await db.collection('users').doc(user.uid).collection('notifications').add({type:'pending_proof',text:translations[currentLang].proof_required_notif,exerciseData:pendingProofData,fullWorkoutData:liveExercises,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()})}
-xpMessage=currentLang==='en'?"Pending Approval ⏳":"بانتظار الإثبات ⏳";xpGained=!1}else{await updateQuestProgressBatch({volume:totalVolume,reps:liveReps,workout_days:1});addVolumeToClanWar(totalVolume);if(typeof updateStat==="function"){updateStat('workouts',1);liveExercises.forEach(ex=>{let w=parseFloat(ex.weight)||0;if(w>0)updateStat('maxWeight',w,!0);})}
+xpMessage=currentLang==='en'?"Pending Approval ⏳":"بانتظار الإثبات ⏳";xpGained=!1}else{await updateQuestProgressBatch({volume:totalVolume,reps:liveReps,workout_days:1});    
+addVolumeToClanWar(totalVolume); 
+if(!pendingProofData && typeof addVolumeToActiveClashes === 'function') {
+    addVolumeToActiveClashes(totalVolume);
+}
+if(typeof updateStat==="function"){updateStat('workouts',1);liveExercises.forEach(ex=>{let w=parseFloat(ex.weight)||0;if(w>0)updateStat('maxWeight',w,!0);})}
 let workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[];let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});let typeStr=liveExercises[0]?.type||"تمرين لايف";workoutHistory.unshift({date:dateStr,type:typeStr,details:liveExercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));xpMessage=currentLang==='en'?`XP resets in ${hours}h ${minutes}m`:`تتجدد المكافأة بعد ${hours}س و${minutes}د`;await db.collection('users').doc(user.uid).update({workouts:workoutHistory})}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));await db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');xpGained=!0;xpMessage="+50 XP"}}}
 clearInterval(liveDurationTimer);clearInterval(restInterval);const overlay=document.getElementById('live-workout-overlay');overlay.classList.remove('active');setTimeout(()=>overlay.style.display='none',500);document.getElementById('rest-timer-overlay').classList.remove('active');const summaryOverlay=document.getElementById('live-summary-overlay');if(summaryOverlay){document.getElementById('sum-time').innerText=finalTime;document.getElementById('sum-sets').innerText=totalSets;document.getElementById('sum-volume').innerText="0";const xpRewardBox=document.querySelector('.xp-reward-box');if(xpRewardBox){xpRewardBox.innerText=xpMessage;xpRewardBox.style.fontSize=xpGained?'2.5rem':(pendingProofData?'1.5rem':'1.1rem');xpRewardBox.style.color=xpGained?'var(--primary-color)':(pendingProofData?'#FFD700':'var(--slate)');xpRewardBox.style.textShadow=xpGained?'0 0 20px rgba(0, 242, 167, 0.6)':(pendingProofData?'0 0 15px rgba(255, 215, 0, 0.5)':'none');xpRewardBox.style.animation=xpGained?'pulseXP 1.5s infinite alternate':'none'}
 summaryOverlay.style.display='flex';setTimeout(()=>{summaryOverlay.classList.add('active');animateValue(document.getElementById('sum-volume'),0,totalVolume,1500)},50)}else{showToast(currentLang==='en'?`Workout Saved! ${xpMessage}`:`تم الحفظ! ${xpMessage}`);closeLiveSummary()}}finally{setTimeout(()=>{isSavingLiveWorkout=!1},2000)}}
@@ -5160,15 +5212,136 @@ window.openClashSetup = function(targetUid, targetName) {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 };
-
 window.sendClashRequest = async function(targetUid, feeType, feeAmount) {
     const user = auth.currentUser;
     if(!user) return;
     
     let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const isEn = currentLang === 'en';
+    feeAmount = parseInt(feeAmount); 
     
-    // 1. فحص الرصيد
+    const clashId = user.uid < targetUid ? `${user.uid}_${targetUid}` : `${targetUid}_${user.uid}`;
+    const btn = event.target.closest('.clash-card-btn');
+    if (btn) btn.style.pointerEvents = 'none'; 
+
+    try {
+        // فحص هل الخصم مشغول بتحدي حالياً؟
+        const targetDoc = await db.collection('users').doc(targetUid).get();
+        if (targetDoc.exists && targetDoc.data().isInActiveClash === true) {
+            showToast(isEn ? "This hero is currently fighting in another clash!" : "هذا البطل يقاتل في معركة أخرى حالياً!");
+            if (btn) btn.style.pointerEvents = 'auto';
+            return;
+        }
+
+        // فحص هل إنت مشغول بتحدي؟
+        if (savedData.isInActiveClash) {
+            showToast(isEn ? "You are already in a clash!" : "أنت تخوض معركة بالفعل! ركز فيها أولاً.");
+            if (btn) btn.style.pointerEvents = 'auto';
+            return;
+        }
+
+        // فحص هل يوجد تحدي معلق بينكم؟
+        const clashCheck = await db.collection('users').doc(targetUid).collection('notifications').doc(`clash_${clashId}`).get();
+        if (clashCheck.exists) {
+            showToast(isEn ? "Challenge already sent to this hero!" : "يوجد تحدي معلق بينك وبين هذا البطل!");
+            if (btn) btn.style.pointerEvents = 'auto';
+            return;
+        }
+
+
+        let hasBalance = false;
+        if(feeType === 'xp') {
+            const availableXp = (savedData.xp || 0) - (savedData.spentXp || 0);
+            hasBalance = availableXp >= feeAmount;
+        } else {
+            hasBalance = (savedData.ironCoins || 0) >= feeAmount;
+        }
+
+        if(!hasBalance) {
+            showToast(isEn ? "Insufficient balance!" : "رصيدك لا يكفي لدفع رسوم التحدي!");
+            if (btn) btn.style.pointerEvents = 'auto';
+            return;
+        }
+
+        if(!confirm(isEn ? `Pay ${feeAmount} ${feeType.toUpperCase()} and send challenge?` : `خصم ${feeAmount} ${feeType === 'xp' ? 'XP' : 'عملة'} وإرسال التحدي؟`)) {
+            if (btn) btn.style.pointerEvents = 'auto';
+            return;
+        }
+
+        // خصم الرسوم
+        if(feeType === 'xp') {
+            await db.collection('users').doc(user.uid).set({ spentXp: firebase.firestore.FieldValue.increment(feeAmount) }, { merge: true });
+            savedData.spentXp = (savedData.spentXp || 0) + feeAmount;
+        } else {
+            await db.collection('users').doc(user.uid).set({ ironCoins: firebase.firestore.FieldValue.increment(-feeAmount) }, { merge: true });
+            savedData.ironCoins = (savedData.ironCoins || 0) - feeAmount;
+        }
+        localStorage.setItem('currentUser', JSON.stringify(savedData));
+
+        const myName = (savedData.firstName || "Hero") + " " + (savedData.lastName || "");
+        const myPhoto = savedData.photoURL || "/Photos/adm.jpeg";
+
+        // إرسال الإشعار للخصم فقط (وبس يقبل بتتحول البيانات لغرفة معركة)
+        await db.collection('users').doc(targetUid).collection('notifications').doc(`clash_${clashId}`).set({
+            type: 'clash_invite',
+            clashId: clashId,
+            senderId: user.uid,
+            senderName: myName,
+            senderPhoto: myPhoto,
+            feeType: feeType,
+            feeAmount: feeAmount,
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        showToast(isEn ? "Challenge sent! Awaiting response." : "تم إرسال التحدي! بانتظار قبول الخصم ⚔️");
+        const setupModal = document.getElementById('clash-setup-modal');
+        if(setupModal) setupModal.remove();
+        
+        if(typeof renderUI === 'function') renderUI(savedData);
+
+    } catch (e) {
+        console.error("Clash Error: ", e);
+        showToast(isEn ? "Error sending challenge!" : "حدث خطأ في الإرسال! تأكد من الاتصال.");
+        if (btn) btn.style.pointerEvents = 'auto';
+    }
+};// =========================================
+// ⚡ وظائف قبول/رفض صدام الأبطال ⚡
+// =========================================
+
+window.rejectClash = async function(notifId, senderId, feeType, feeAmount) {
+    const user = auth.currentUser;
+    if(!user) return;
+    const isEn = currentLang === 'en';
+
+    try {
+        // حذف الإشعار فوراً
+        await db.collection('users').doc(user.uid).collection('notifications').doc(notifId).delete();
+        
+        // إرجاع الأموال للمرسل بأمان
+        if (feeType === 'xp') {
+            await db.collection('users').doc(senderId).set({ spentXp: firebase.firestore.FieldValue.increment(-feeAmount) }, { merge: true });
+        } else {
+            await db.collection('users').doc(senderId).set({ ironCoins: firebase.firestore.FieldValue.increment(feeAmount) }, { merge: true });
+        }
+
+        showToast(isEn ? "Challenge rejected." : "تم رفض التحدي وإرجاع الرسوم للمرسل.");
+    } catch (e) {
+        console.error(e);
+        showToast(isEn ? "Error rejecting." : "حدث خطأ أثناء الرفض.");
+    }
+};
+window.acceptClash = async function(notifId, senderId, feeType, feeAmount) {
+    const user = auth.currentUser;
+    if(!user) return;
+    const isEn = currentLang === 'en';
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if (savedData.isInActiveClash) {
+        showToast(isEn ? "You are already in a clash!" : "أنت تخوض معركة بالفعل!");
+        return;
+    }
+
     let hasBalance = false;
     if(feeType === 'xp') {
         const availableXp = (savedData.xp || 0) - (savedData.spentXp || 0);
@@ -5178,48 +5351,291 @@ window.sendClashRequest = async function(targetUid, feeType, feeAmount) {
     }
 
     if(!hasBalance) {
-        showToast(isEn ? "Insufficient balance to enter this clash!" : "رصيدك لا يكفي لدفع رسوم التحدي!");
+        showToast(isEn ? "Not enough balance!" : "رصيدك لا يكفي للقبول!");
         return;
     }
 
-    // 2. تأكيد الإرسال
-    if(!confirm(isEn ? `Pay ${feeAmount} ${feeType.toUpperCase()} and send challenge?` : `خصم ${feeAmount} ${feeType === 'xp' ? 'XP' : 'عملة'} وإرسال التحدي؟`)) return;
-
-    // 3. خصم الرسوم مبدئياً كـ "حجز" (Escrow)
+    // خصم الرسوم وتفعيل حالة (مشغول)
     if(feeType === 'xp') {
+        await db.collection('users').doc(user.uid).set({ spentXp: firebase.firestore.FieldValue.increment(feeAmount), isInActiveClash: true }, { merge: true });
         savedData.spentXp = (savedData.spentXp || 0) + feeAmount;
-        await db.collection('users').doc(user.uid).update({ spentXp: savedData.spentXp });
     } else {
+        await db.collection('users').doc(user.uid).set({ ironCoins: firebase.firestore.FieldValue.increment(-feeAmount), isInActiveClash: true }, { merge: true });
         savedData.ironCoins = (savedData.ironCoins || 0) - feeAmount;
-        await db.collection('users').doc(user.uid).update({ ironCoins: savedData.ironCoins });
     }
+    
+    savedData.isInActiveClash = true;
     localStorage.setItem('currentUser', JSON.stringify(savedData));
+    if(typeof renderUI === 'function') renderUI(savedData);
 
-    // 4. إرسال الإشعار للخصم
+    const clashId = user.uid < senderId ? `${user.uid}_${senderId}` : `${senderId}_${user.uid}`;
+    const myName = (savedData.firstName || "Hero") + " " + (savedData.lastName || "");
+    const myPhoto = savedData.photoURL || "/Photos/adm.jpeg";
+
     try {
-        const myName = savedData.firstName + " " + (savedData.lastName || "");
-        const myPhoto = savedData.photoURL || "/Photos/adm.jpeg";
-        
-        await db.collection('users').doc(targetUid).collection('notifications').add({
-            type: 'clash_invite',
-            senderId: user.uid,
-            senderName: myName,
-            senderPhoto: myPhoto,
+        const notifDoc = await db.collection('users').doc(user.uid).collection('notifications').doc(notifId).get();
+        if(!notifDoc.exists) return;
+        const enemyName = notifDoc.data().senderName;
+        const enemyPhoto = notifDoc.data().senderPhoto;
+
+        await db.collection('users').doc(user.uid).collection('notifications').doc(notifId).delete();
+
+        // تحديث حالة الخصم لـ (مشغول)
+        await db.collection('users').doc(senderId).set({ isInActiveClash: true }, { merge: true });
+
+        const endTime = new Date();
+        endTime.setMinutes(endTime.getMinutes() + 1); // <-- دقيقة واحدة للتجربة (ارجع غيرها لـ getHours() + 24 بعدين)
+
+        const clashData = {
+            id: clashId,
+            player1: { uid: senderId, name: enemyName, photo: enemyPhoto, score: 0 },
+            player2: { uid: user.uid, name: myName, photo: myPhoto, score: 0 },
             feeType: feeType,
             feeAmount: feeAmount,
-            status: 'pending',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+            status: 'active',
+            endTime: endTime
+        };
 
-        showToast(isEn ? "Challenge sent! Awaiting response." : "تم إرسال التحدي! بانتظار قبول الخصم ⚔️");
-        document.getElementById('clash-setup-modal').remove();
-        
-        // تحديث أرقام الشاشة إذا كان بمتجر أو داشبورد
-        if(typeof renderUI === 'function') renderUI(savedData);
+        await db.collection('users').doc(user.uid).collection('active_clashes').doc(clashId).set(clashData);
+        await db.collection('users').doc(senderId).collection('active_clashes').doc(clashId).set(clashData);
 
+        showToast(isEn ? "Clash Accepted! The war begins!" : "تم قبول التحدي! بدأت المعركة ⚔️!");
+        listenToMyClashes(); 
     } catch (e) {
         console.error(e);
-        showToast("Error sending challenge.");
+    }
+};
+window.addVolumeToActiveClashes = async function(volume) {
+    const user = auth.currentUser;
+    if(!user || volume <= 0) return;
+    const isEn = currentLang === 'en';
+
+    try {
+        let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        let clashContribs = savedData.clashContributions || {};
+
+        const snapshot = await db.collection('users').doc(user.uid).collection('active_clashes').get();
+        let shouldUpdateUserDoc = false;
+        const batch = db.batch(); // استخدام Batch لضمان تحديث الطرفين معاً بنجاح
+
+        snapshot.forEach(doc => {
+            const clashData = doc.data();
+            if (clashData.status !== 'active') return; 
+
+            const clashId = clashData.id;
+            
+            // فحص الحد الأقصى (تمرينين فقط)
+            let count = clashContribs[clashId] || 0;
+            if (count >= 2) {
+                setTimeout(() => showToast(isEn ? "Clash Limit: Only 2 workouts count per duel!" : "تنبيه: يتم احتساب أول تمرينين فقط في هذا الصدام!"), 2000);
+                return; 
+            }
+
+            const isPlayer1 = clashData.player1.uid === user.uid;
+            const fieldToUpdate = isPlayer1 ? 'player1.score' : 'player2.score';
+            const enemyUid = isPlayer1 ? clashData.player2.uid : clashData.player1.uid;
+
+            // تحديث بطريقتين (عندي وعند الخصم) بشكل متزامن
+            batch.update(doc.ref, { [fieldToUpdate]: firebase.firestore.FieldValue.increment(volume) });
+            batch.update(db.collection('users').doc(enemyUid).collection('active_clashes').doc(clashId), { [fieldToUpdate]: firebase.firestore.FieldValue.increment(volume) });
+
+            // زيادة العداد
+            clashContribs[clashId] = count + 1;
+            shouldUpdateUserDoc = true;
+            
+            if (clashContribs[clashId] === 2) {
+                setTimeout(() => showToast(isEn ? "2/2 Clash workouts used!" : "استنفذت تمارين الصدام (2/2)! التمارين القادمة لن تحسب فيه."), 2000);
+            } else {
+                setTimeout(() => showToast(isEn ? "1/2 Clash workouts logged!" : "تم إضافة وزنك للصدام (1/2)!"), 2000);
+            }
+        });
+
+        if (shouldUpdateUserDoc) {
+            savedData.clashContributions = clashContribs;
+            localStorage.setItem('currentUser', JSON.stringify(savedData));
+            batch.update(db.collection('users').doc(user.uid), { clashContributions: clashContribs });
+            await batch.commit(); // تنفيذ التحديثات دفعة واحدة
+        }
+    } catch (e) { console.error("Error adding volume to clash:", e); }
+};
+
+window.isFinishingClash = null;
+
+window.finishHeroClash = async function(clashId, me, enemy, feeType, feeAmount) {
+    const user = auth.currentUser;
+    if(!user) return;
+    
+    // منع التكرار على مستوى الجهاز
+    if (window.isFinishingClash === clashId) return;
+    window.isFinishingClash = clashId;
+
+    try {
+        const myClashRef = db.collection('users').doc(me.uid).collection('active_clashes').doc(clashId);
+        const enemyClashRef = db.collection('users').doc(enemy.uid).collection('active_clashes').doc(clashId);
+        
+        // 🚨 حماية من السيرفر لمنع تكرار الجوائز 🚨
+        const docSnap = await myClashRef.get();
+        if(!docSnap.exists || docSnap.data().status === 'completed') {
+            return; // التحدي منتهي مسبقاً
+        }
+
+        const totalPrize = feeAmount * 2;
+        const isEn = currentLang === 'en';
+        const batch = db.batch();
+        
+        // 1. إنهاء التحدي للطرفين في الكولكشن
+        batch.update(myClashRef, { status: 'completed' });
+        batch.update(enemyClashRef, { status: 'completed' });
+
+        const updateField = feeType === 'xp' ? 'xp' : 'ironCoins';
+        
+        // قراءة النتيجة الحقيقية
+        const finalMeScore = docSnap.data().player1.uid === me.uid ? docSnap.data().player1.score : docSnap.data().player2.score;
+        const finalEnemyScore = docSnap.data().player1.uid === enemy.uid ? docSnap.data().player1.score : docSnap.data().player2.score;
+        
+        // 2. تجميع التحديثات لكل لاعب في (Object) واحد لمنع خطأ الفايربيس
+        let meUpdates = { isInActiveClash: false };
+        let enemyUpdates = { isInActiveClash: false };
+
+        if (finalMeScore > finalEnemyScore) {
+            // أنا الفائز
+            meUpdates[updateField] = firebase.firestore.FieldValue.increment(totalPrize);
+            
+            batch.set(db.collection('users').doc(me.uid).collection('notifications').doc(`result_${clashId}`), {
+                type: 'system_reward', title: isEn ? "🏆 Clash Won!" : "🏆 انتصار في التحدي!", text: isEn ? `You crushed ${enemy.name.split(' ')[0]} and won ${totalPrize} ${feeType.toUpperCase()}!` : `سحقت ${enemy.name.split(' ')[0]} وربحت ${totalPrize} ${feeType === 'xp' ? 'XP' : 'عملة'}!`, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            batch.set(db.collection('users').doc(enemy.uid).collection('notifications').doc(`result_${clashId}`), {
+                type: 'system_reward', title: isEn ? "💀 Clash Defeat!" : "💀 هزيمة في التحدي!", text: isEn ? `You lost to ${me.name.split(' ')[0]}. Train harder!` : `خسرت أمام ${me.name.split(' ')[0]}. تدرب بقوة أكبر!`, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else if (finalEnemyScore > finalMeScore) {
+            // الخصم الفائز
+            enemyUpdates[updateField] = firebase.firestore.FieldValue.increment(totalPrize);
+            
+            batch.set(db.collection('users').doc(enemy.uid).collection('notifications').doc(`result_${clashId}`), {
+                type: 'system_reward', title: isEn ? "🏆 Clash Won!" : "🏆 انتصار في التحدي!", text: isEn ? `You crushed ${me.name.split(' ')[0]} and won ${totalPrize} ${feeType.toUpperCase()}!` : `سحقت ${me.name.split(' ')[0]} وربحت ${totalPrize} ${feeType === 'xp' ? 'XP' : 'عملة'}!`, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            batch.set(db.collection('users').doc(me.uid).collection('notifications').doc(`result_${clashId}`), {
+                type: 'system_reward', title: isEn ? "💀 Clash Defeat!" : "💀 هزيمة في التحدي!", text: isEn ? `You lost to ${enemy.name.split(' ')[0]}. Train harder!` : `خسرت أمام ${enemy.name.split(' ')[0]}. تدرب بقوة أكبر!`, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            // تعادل
+            meUpdates[updateField] = firebase.firestore.FieldValue.increment(feeAmount);
+            enemyUpdates[updateField] = firebase.firestore.FieldValue.increment(feeAmount);
+            
+            const drawTitle = isEn ? "🤝 Clash Draw!" : "🤝 تعادل!";
+            const drawText = isEn ? "It's a tie! Your fee was refunded." : "انتهت المعركة بالتعادل! تم استرجاع الرسوم.";
+            batch.set(db.collection('users').doc(me.uid).collection('notifications').doc(`result_${clashId}`), { type: 'system_reward', title: drawTitle, text: drawText, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            batch.set(db.collection('users').doc(enemy.uid).collection('notifications').doc(`result_${clashId}`), { type: 'system_reward', title: drawTitle, text: drawText, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+
+        // 3. تحديث بيانات المستخدمين بـ Batch واحد سليم
+        batch.update(db.collection('users').doc(me.uid), meUpdates);
+        batch.update(db.collection('users').doc(enemy.uid), enemyUpdates);
+
+        // تنفيذ كل شيء
+        await batch.commit();
+        
+        // 4. تنظيف التخزين المحلي
+        let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        savedData.isInActiveClash = false;
+        if(savedData.clashContributions) delete savedData.clashContributions[clashId];
+        
+        // إظهار الرصيد فوراً لو كنت الرابح أو تعادل
+        if (finalMeScore >= finalEnemyScore) {
+            savedData[updateField] = (savedData[updateField] || 0) + (finalMeScore > finalEnemyScore ? totalPrize : feeAmount);
+        }
+        
+        localStorage.setItem('currentUser', JSON.stringify(savedData));
+        if(typeof renderUI === 'function') renderUI(savedData);
+
+    } catch(e) { 
+        console.error("End Clash Error:", e); 
+        window.isFinishingClash = null; 
     }
 };
 
+window.clashListenerUnsubscribe = null;
+window.clashCountdownInterval = null;
+
+window.listenToMyClashes = function() {
+    const user = auth.currentUser;
+    if(!user) return;
+    const container = document.getElementById('active-clashes-container');
+    if(!container) return;
+
+    const renderClashCard = (clashes) => {
+        if(clashes.length === 0) {
+            container.style.display = 'none';
+            container.innerHTML = '';
+            if(window.clashCountdownInterval) { clearInterval(window.clashCountdownInterval); }
+            return;
+        }
+        container.style.display = 'block';
+        const isEn = currentLang === 'en';
+        
+        let html = '';
+        clashes.forEach(clash => {
+            const me = clash.player1.uid === user.uid ? clash.player1 : clash.player2;
+            const enemy = clash.player1.uid === user.uid ? clash.player2 : clash.player1;
+            
+            let myColor = me.score >= enemy.score ? '#00f2a7' : 'white';
+            let enemyColor = enemy.score >= me.score ? '#ff4d4d' : 'white';
+            
+            const endTime = clash.endTime ? clash.endTime.toMillis() : 0;
+            const now = Date.now();
+            let timeMsg = "";
+            
+            if (now >= endTime) {
+                timeMsg = isEn ? "Finishing..." : "جاري احتساب النتائج...";
+                // الحماية: لا تنادي الدالة إذا كانت شغالة أصلاً
+                if (window.isFinishingClash !== clash.id) {
+                    finishHeroClash(clash.id, me, enemy, clash.feeType, clash.feeAmount);
+                }
+            } else {
+                const hrs = Math.floor((endTime - now) / (1000 * 60 * 60));
+                const mins = Math.floor(((endTime - now) % (1000 * 60 * 60)) / 60000);
+                const secs = Math.floor(((endTime - now) % 60000) / 1000); 
+                timeMsg = isEn ? `${hrs}h ${mins}m ${secs}s left` : `باقي ${hrs}س ${mins}د ${secs}ث`;
+            }
+
+            html += `
+            <div class="glass-card" style="border: 1px solid #ff4d4d; box-shadow: 0 0 20px rgba(255,77,77,0.2); position: relative; overflow: hidden; padding: 20px; margin-bottom: 15px;">
+                <div style="text-align:center; margin-bottom: 15px;">
+                    <h3 style="color:#ff4d4d; font-weight:900; margin:0; text-shadow:0 0 10px #ff4d4d;"><i class="fa-solid fa-khanda"></i> ${isEn ? 'HERO CLASH' : 'صدام الأبطال'}</h3>
+                    <span style="color:var(--slate); font-size:0.8rem; font-weight:bold; letter-spacing: 1px;">${timeMsg}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); border-radius: 15px; padding: 15px;">
+                    <div style="text-align: center; flex: 1;">
+                        <img src="${me.photo}" style="width:50px; height:50px; border-radius:50%; border:2px solid ${myColor}; object-fit:cover;">
+                        <div style="color:white; font-weight:bold; font-size:0.9rem; margin-top:5px;">${me.name.split(' ')[0]}</div>
+                        <div style="color:${myColor}; font-weight:900; font-size:1.2rem;">${me.score.toLocaleString()} <span style="font-size:0.7rem;">KG</span></div>
+                    </div>
+                    <div style="color: #FFD700; font-weight: 900; font-size: 1.5rem; font-style: italic; padding: 0 15px;">VS</div>
+                    <div style="text-align: center; flex: 1;">
+                        <img src="${enemy.photo}" style="width:50px; height:50px; border-radius:50%; border:2px solid ${enemyColor}; object-fit:cover;">
+                        <div style="color:white; font-weight:bold; font-size:0.9rem; margin-top:5px;">${enemy.name.split(' ')[0]}</div>
+                        <div style="color:${enemyColor}; font-weight:900; font-size:1.2rem;">${enemy.score.toLocaleString()} <span style="font-size:0.7rem;">KG</span></div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    };
+
+    if(window.clashListenerUnsubscribe) window.clashListenerUnsubscribe();
+
+    window.clashListenerUnsubscribe = db.collection('users').doc(user.uid).collection('active_clashes').where('status', '==', 'active').onSnapshot(snapshot => {
+        let allActiveClashes = [];
+        snapshot.forEach(doc => { allActiveClashes.push(doc.data()); });
+        renderClashCard(allActiveClashes);
+        
+        // تشغيل مؤقت محلي عشان الثواني تتحرك قدام عين اللاعب
+        if (window.clashCountdownInterval) clearInterval(window.clashCountdownInterval);
+        if (allActiveClashes.length > 0) {
+            window.clashCountdownInterval = setInterval(() => {
+                renderClashCard(allActiveClashes);
+            }, 1000);
+        }
+    });
+};
