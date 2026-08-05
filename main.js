@@ -416,7 +416,10 @@ vip_rule_3: "سيتم إجراء السحب بشفافية تامة عبر حس�
 vip_rule_4: "سيتم التواصل مع الفائز عبر الإيميل المسجل لدينا لتسليمه الجائزة.",
 vip_rules_btn: "موافق، أنا جاهز!",
 
-live_sets:"الجولات",live_continue:"استمرار ❯",muscle_chest:"صدر",muscle_back:"ظهر",muscle_shoulders:"أكتاف",muscle_biceps:"بايسبس",muscle_triceps:"ترايسبس",muscle_legs:"أرجل",muscle_core:"بطن",sys_push:"دفع (Push)",sys_pull:"سحب (Pull)",sys_legs:"أرجل (Legs)",sys_full:"شامل (Full Body)",deadlift_btn:" تحدي الديدليفت",squat_btn:" تحدي السكوات",choose_challenge:"اختر التحدي 🏆",challenge_subtitle:"ارتقِ بأدائك وحطم أرقامك القياسية!",deadlift_title:"ديدليفت",deadlift_desc:"ارفع بسرعة واجمع النقاط",squat_title:"سكوات",squat_desc:"توازن بدقة بالمنطقة الخضراء",cancel_return:"إلغاء والعودة",time:"الوقت",earned_xp:"النقاط",best_combo:"أعلى كومبو",mistakes:"الأخطاء",exit_session:"إنهاء الجولة",exit_challenge:"إنهاء التحدي",exit_confirm:"هل أنت متأكد من الخروج وإلغاء الجولة؟",grave_time_death:"وقت الوفاة:",grave_old_record:"الرقم القديم:",grave_assassin:"القاتل:",grave_condition:"حالة القبر",grave_condition_label:"الحالة:",grave_respected:"مُحترم",grave_defaced:"مُدنس",grave_leave_comment:"سجل زوار المقبرة",grave_place_flowers:"إلقاء التحية",grave_deface:"إهانة الملك",grave_btn_comment:"إرسال التعليق",grave_comments_title:"التعليقات",grave_here_lies:"هنا يرقد الملك الحاكم",grave_fell_on:"تاريخ السقوط:",grave_crushed_by:"سُحق على يد:",grave_admin_name:"الإدارة ",grave_admin_msg:"ارقد بسلام، كنت بطلاً حقيقياً.",grave_time_yesterday:"البارحة",grave_time_now:"الآن",great_job:"عاش يا بطل!",game_over:"الجولة انتهت!",good_luck:"حظ أوفر!",search_id:"🔍 البحث بالـ ID",my_friends:" أصدقائي",search_placeholder:"أدخل الـ ID (مثال: A1B2C)",search_btn:"بحث",searching:"جاري البحث...",player_not_found:"لم يتم العثور على أي بطل بهذا الـ ID!",own_id_msg:"هذا المعرف الخاص بك يا بطل!",send_request:"إرسال طلب صداقة",hero_profile:" بروفايل البطل",earned_badges_title:"الأوسمة المحققة 🏅",no_badges_yet:"لم يحقق أوسمة بعد.",no_friends_yet:"لا يوجد أصدقاء بعد",chat_btn:"دردشة",type_message:"اكتب رسالة...",loading_messages:"جاري تحميل الرسائل المشفرة... ⏳",messages_disappear:"تبدأ الرسائل بالاختفاء بعد 24 ساعة ⏳<br>ابدأ التحدي الآن!",notifications:"الإشعارات ",no_notifications:"لا توجد إشعارات جديدة",friend_request_from:"أرسل لك طلب صداقة!",accept:"قبول",reject:"رفض",message_from:"رسالة من",challenges_title:"التحديات",challenges_desc:"العب، اجمع نقاط، ونافس الوحوش",valhalla_title:"مقبرة الأساطير 🪦",valhalla_subtitle:"ملوك سقطت عروشهم، لكن أسماءهم خُلدت في التاريخ...",dethroned_by:"سقط على يد:",old_record:"الرقم السابق:",new_record:"الرقم القاتل:",empty_graveyard:"لم يسقط أي ملك في هذه المدينة بعد! الدماء لم تُسفك.",valhalla_btn:"زيارة المقبرة",click_to_reply:"انقر للرد"},en:{dashboard:"Dashboard",welcome:"Great to see you, Captain",valhalla_title:"Valhalla 🪦",valhalla_subtitle:"Kings who lost their thrones, but not their legacy...",dethroned_by:"Dethroned by:",old_record:"Old Record:",new_record:"Killer Record:",empty_graveyard:"No kings have fallen in this city yet! No blood spilled.",valhalla_btn:"Visit Valhalla",processing_wait:"Processing... ⏳",approve_success:"✅ Approved successfully!",approve_fail:"❌ Approval failed!",deleting_wait:"Deleting... ⏳",challenges_title:"Challenges",challenges_desc:"Play, earn XP, and compete",reject_success:"🗑️ Rejected.",reject_fail:"❌ Rejection failed!",error_loading:"Error loading data.",cancel_upload:" Logging cancelled.. try again when you are ready to prove your strength!",video_size_error:" Video size is too large! Please trim or compress it under 30MB.",upload_fail_storage:" Upload failed! Please check your internet connection.",upload_success_wait:" Video uploaded successfully! Admin is reviewing your proof.",save_db_error:" Video uploaded but failed to save! Please try again.",admin_name:"Admin 👑",leaderboard:" Leaderboard",logout:" Logout",level:"Level",xp:"Experience Points",streak:"Current Streak",days:"Days",id_text:"Player ID:",back:"Back",lang_en:"English",lang_ar:"العربية",home_btn:"Home",language_btn:" Language",profile_btn:" Profile",performance_center:"Performance Center",analytics:"Analytics",workout_history:"Workout Log",games_btn:" Games & Challenges",superset_btn:"Superset",live_select_muscle:"Select Muscle",muscle_arms:"Arms",corp_about_title:"About Royal Gravitas Arena",corp_about_desc:"We are more than just a fitness app; we are a leading institution in sports performance technology. Our mission is to merge science with gamification to create a unique training experience that pushes humans to their physical and mental limits.",comparison_title:"Stop Training, Start Dominating",comparison_desc:"There are two ways to train. The conventional way, and the hero's way.",old_way_title:"The Old Way",old_way_1_title:"Random Training",old_way_1_desc:"Workouts with no clear plan, forgotten weights, and slow progress.",
+live_sets:"الجولات",live_continue:"استمرار ❯",muscle_chest:"صدر",muscle_back:"ظهر",muscle_shoulders:"أكتاف",muscle_biceps:"بايسبس",muscle_triceps:"ترايسبس",muscle_legs:"أرجل",muscle_core:"بطن",sys_push:"دفع (Push)",sys_pull:"سحب (Pull)",sys_legs:"أرجل (Legs)",sys_full:"شامل (Full Body)",deadlift_btn:" تحدي الديدليفت",squat_btn:" تحدي السكوات",choose_challenge:"اختر التحدي 🏆",challenge_subtitle:"ارتقِ بأدائك وحطم أرقامك القياسية!",deadlift_title:"ديدليفت",deadlift_desc:"ارفع بسرعة واجمع النقاط",squat_title:"سكوات",squat_desc:"توازن بدقة بالمنطقة الخضراء",cancel_return:"إلغاء والعودة",time:"الوقت",earned_xp:"النقاط",best_combo:"أعلى كومبو",mistakes:"الأخطاء",exit_session:"إنهاء الجولة",exit_challenge:"إنهاء التحدي",exit_confirm:"هل أنت متأكد من الخروج وإلغاء الجولة؟",grave_time_death:"وقت الوفاة:",grave_old_record:"الرقم القديم:",grave_assassin:"القاتل:",grave_condition:"حالة القبر",grave_condition_label:"الحالة:",grave_respected:"مُحترم",grave_defaced:"مُدنس",grave_leave_comment:"سجل زوار المقبرة",grave_place_flowers:"إلقاء التحية",grave_deface:"إهانة الملك",grave_btn_comment:"إرسال التعليق",grave_comments_title:"التعليقات",grave_here_lies:"هنا يرقد الملك الحاكم",grave_fell_on:"تاريخ السقوط:",grave_crushed_by:"سُحق على يد:",grave_admin_name:"الإدارة ",grave_admin_msg:"ارقد بسلام، كنت بطلاً حقيقياً.",grave_time_yesterday:"البارحة",grave_time_now:"الآن",great_job:"عاش يا بطل!",game_over:"الجولة انتهت!",good_luck:"حظ أوفر!",search_id:"🔍 البحث بالـ ID",my_friends:" أصدقائي",search_placeholder:"أدخل الـ ID (مثال: A1B2C)",search_btn:"بحث",searching:"جاري البحث...",player_not_found:"لم يتم العثور على أي بطل بهذا الـ ID!",own_id_msg:"هذا المعرف الخاص بك يا بطل!",send_request:"إرسال طلب صداقة",hero_profile:" بروفايل البطل",earned_badges_title:"الأوسمة المحققة 🏅",no_badges_yet:"لم يحقق أوسمة بعد.",no_friends_yet:"لا يوجد أصدقاء بعد",chat_btn:"دردشة",type_message:"اكتب رسالة...",loading_messages:"جاري تحميل الرسائل المشفرة... ⏳",messages_disappear:"تبدأ الرسائل بالاختفاء بعد 24 ساعة ⏳<br>ابدأ التحدي الآن!",notifications:"الإشعارات ",no_notifications:"لا توجد إشعارات جديدة",friend_request_from:"أرسل لك طلب صداقة!",accept:"قبول",reject:"رفض",message_from:"رسالة من",challenges_title:"التحديات",challenges_desc:"العب، اجمع نقاط، ونافس الوحوش",valhalla_title:"مقبرة الأساطير 🪦",valhalla_subtitle:"ملوك سقطت عروشهم، لكن أسماءهم خُلدت في التاريخ...",dethroned_by:"سقط على يد:",old_record:"الرقم السابق:",new_record:"الرقم القاتل:",empty_graveyard:"لم يسقط أي ملك في هذه المدينة بعد! الدماء لم تُسفك.",valhalla_btn:"زيارة المقبرة",click_to_reply:"انقر للرد",
+spin_btn_title: "عجلة الحظ اليومية", spin_btn_desc: "اضغط هنا لجرب حظك واربح غنائم خرافية!", spin_modal_title: "دولاب الغنائم 🎰", spin_start: "سحب (مجاني)", spin_cooldown: "متاحة غداً"},en:{dashboard:"Dashboard",welcome:"Great to see you, Captain",valhalla_title:"Valhalla 🪦",valhalla_subtitle:"Kings who lost their thrones, but not their legacy...",dethroned_by:"Dethroned by:",old_record:"Old Record:",new_record:"Killer Record:",empty_graveyard:"No kings have fallen in this city yet! No blood spilled.",valhalla_btn:"Visit Valhalla",
+spin_btn_title: "Daily Lucky Spin", spin_btn_desc: "Tap to test your luck and win epic loot!", spin_modal_title: "Wheel of Loot 🎰", spin_start: "Spin (Free)", spin_cooldown: "Available Tomorrow",
+processing_wait:"Processing... ⏳",approve_success:"✅ Approved successfully!",approve_fail:"❌ Approval failed!",deleting_wait:"Deleting... ⏳",challenges_title:"Challenges",challenges_desc:"Play, earn XP, and compete",reject_success:"🗑️ Rejected.",reject_fail:"❌ Rejection failed!",error_loading:"Error loading data.",cancel_upload:" Logging cancelled.. try again when you are ready to prove your strength!",video_size_error:" Video size is too large! Please trim or compress it under 30MB.",upload_fail_storage:" Upload failed! Please check your internet connection.",upload_success_wait:" Video uploaded successfully! Admin is reviewing your proof.",save_db_error:" Video uploaded but failed to save! Please try again.",admin_name:"Admin 👑",leaderboard:" Leaderboard",logout:" Logout",level:"Level",xp:"Experience Points",streak:"Current Streak",days:"Days",id_text:"Player ID:",back:"Back",lang_en:"English",lang_ar:"العربية",home_btn:"Home",language_btn:" Language",profile_btn:" Profile",performance_center:"Performance Center",analytics:"Analytics",workout_history:"Workout Log",games_btn:" Games & Challenges",superset_btn:"Superset",live_select_muscle:"Select Muscle",muscle_arms:"Arms",corp_about_title:"About Royal Gravitas Arena",corp_about_desc:"We are more than just a fitness app; we are a leading institution in sports performance technology. Our mission is to merge science with gamification to create a unique training experience that pushes humans to their physical and mental limits.",comparison_title:"Stop Training, Start Dominating",comparison_desc:"There are two ways to train. The conventional way, and the hero's way.",old_way_title:"The Old Way",old_way_1_title:"Random Training",old_way_1_desc:"Workouts with no clear plan, forgotten weights, and slow progress.",
 ft_refund: "Refund Policy",
         legal_refund_title: "Refund & Return Policy",
         legal_refund_body: `
@@ -2969,27 +2972,128 @@ if(savedData.quests.lastWeeklyReset!==weekStr){let weeklyPool=[...questBank.week
 savedData.quests.lastWeeklyReset=weekStr;needsUpdate=!0}
 if(needsUpdate){localStorage.setItem('currentUser',JSON.stringify(savedData));if(auth.currentUser)db.collection('users').doc(auth.currentUser.uid).update({quests:savedData.quests})}
 renderQuests()}
-let questTimerInterval;window.renderQuests=function(){const container=document.getElementById('active-quests-container');if(!container)return;let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');let activeQuests=savedData.quests?.active||[];let progressData=savedData.quests?.progress||{};const isEn=currentLang==='en';if(activeQuests.length===0){container.innerHTML=`<p style="text-align:center; color:var(--slate);">${isEn ? 'No quests right now.' : 'لا توجد مهام حالياً.'}</p>`;return}
-activeQuests.sort((a,b)=>(b.id.startsWith('w_')?1:0)-(a.id.startsWith('w_')?1:0));container.innerHTML=activeQuests.map(quest=>{let currentProg=progressData[quest.id]||0;let isCompleted=currentProg>=quest.target;if(currentProg>quest.target)currentProg=quest.target;let percent=(currentProg/quest.target)*100;let title=isEn?quest.en:quest.ar;let desc=isEn?quest.desc_en:quest.desc_ar;let isWeekly=quest.id.startsWith('w_');let iconHtml=isWeekly?'<i class="fa-solid fa-star" style="color: #FFD700;"></i>':'<i class="fa-solid fa-bolt" style="color: var(--primary-color);"></i>';let overlayHTML=isCompleted?`<div class="quest-completed-overlay"><i class="fa-solid fa-check-circle"></i> ${isEn ? 'Completed!' : 'مكتملة!'}</div>`:'';let weeklyBadge=isWeekly?`<span style="display:inline-block; font-size:0.65rem; background: rgba(255,215,0,0.15); color: #FFD700; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); margin: 0 4px; font-weight: bold; white-space: nowrap;"><i class="fa-regular fa-clock"></i> <span class="weekly-timer-text">...</span></span>`:'';return `
-            <div class="quest-item ${isWeekly ? 'weekly' : ''}">
-                ${overlayHTML}
-                <div class="quest-header">
-                    <div style="flex: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
-                        <h4 class="quest-title" style="margin:0;">${iconHtml} ${title}</h4>
-                        ${weeklyBadge}
-                        <p class="quest-desc" style="width: 100%; margin-top: 2px;">${desc}</p>
-                    </div>
-                    <div class="quest-xp-badge">+${quest.xp} XP</div>
+let questTimerInterval;
+window.renderQuests = function() {
+    const container = document.getElementById('active-quests-container');
+    if (!container) return;
+
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    let activeQuests = savedData.quests?.active || [];
+    let progressData = savedData.quests?.progress || {};
+    const isEn = currentLang === 'en';
+    const t = translations[currentLang || 'ar'];
+
+    const lastSpin = savedData.lastDailySpin || "";
+    const todayStr = new Date().toDateString();
+    const isSpinAvailable = (lastSpin !== todayStr);
+    
+    // تصميم حالة الزر مدمج وأنيق جداً
+    let spinStatusHTML = '';
+    if (isSpinAvailable) {
+        spinStatusHTML = `
+            <div style="background: var(--primary-color); color: #000; padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 900; box-shadow: 0 0 10px rgba(0,242,167,0.4); animation: pulseXP 2s infinite alternate; white-space: nowrap;">
+                ${isEn ? 'Spin' : 'سحب'}
+            </div>`;
+    } else {
+        spinStatusHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <span style="background: rgba(255,255,255,0.05); color: var(--slate); padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.05); white-space: nowrap;">${isEn ? 'Locked' : 'مغلق'}</span>
+                <span id="spin-countdown" style="color: var(--slate); font-size: 0.65rem; font-weight: bold; white-space: nowrap;">...</span>
+            </div>`;
+    }
+
+    // الزر الزجاجي بكلمات مختصرة وفخمة
+    let finalHTML = `
+        <div class="apple-glass-btn" onclick="window.openEpicSpin()" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 15px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                <div style="width: 40px; height: 40px; background: rgba(0, 242, 167, 0.1); border: 1px solid rgba(0, 242, 167, 0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--primary-color);">
+                    <i class="fa-solid fa-dharmachakra fa-spin-hover"></i>
                 </div>
-                <div class="quest-progress-wrap">
-                    <div class="quest-progress-bg">
-                        <div class="quest-progress-fill" style="width: ${percent}%;"></div>
-                    </div>
-                    <div class="quest-status">${currentProg} / ${quest.target}</div>
+                <div style="text-align: ${isEn ? 'left' : 'right'};">
+                    <h3 style="color: white; margin: 0; font-size: 0.95rem; font-weight: 900; letter-spacing: 0.5px;">${isEn ? 'Lucky Spin' : 'عجلة الحظ'}</h3>
+                    <p style="color: var(--slate); margin: 2px 0 0 0; font-size: 0.75rem;">${isEn ? 'Daily Loot!' : 'غنائم يومية!'}</p>
                 </div>
             </div>
-        `}).join('');const titleEl=document.querySelector('[data-translate="quests_title"]');if(titleEl)titleEl.innerText=isEn?'Bounty Board':'لوحة المهام';const timerEl=document.getElementById('quest-timer');const updateTimers=()=>{const now=new Date();if(timerEl){const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const dailyTimeLeftMs=tomorrow-now;const hours=Math.floor(dailyTimeLeftMs/(1000*60*60));const minutes=Math.floor((dailyTimeLeftMs%(1000*60*60))/(1000*60));timerEl.innerText=isEn?`Resets in ${hours}h ${minutes}m`:`تتجدد خلال ${hours}س و${minutes}د`}
-let nextMonday=new Date(now);nextMonday.setHours(0,0,0,0);let daysUntilMonday=(8-nextMonday.getDay())%7;if(daysUntilMonday===0)daysUntilMonday=7;nextMonday.setDate(nextMonday.getDate()+daysUntilMonday);const weeklyTimeLeftMs=nextMonday-now;const weeklyDays=Math.floor(weeklyTimeLeftMs/(1000*60*60*24));const weeklyHoursLeft=Math.floor((weeklyTimeLeftMs%(1000*60*60*24))/(1000*60*60));let weeklyText=isEn?`${weeklyDays}d ${weeklyHoursLeft}h`:`${weeklyDays}يوم و${weeklyHoursLeft}س`;document.querySelectorAll('.weekly-timer-text').forEach(el=>{el.innerText=weeklyText})};updateTimers();if(window.questTimerInterval)clearInterval(window.questTimerInterval);window.questTimerInterval=setInterval(updateTimers,60000)};window.updateQuestProgressBatch=async function(updatesObj){const user=auth.currentUser;if(!user)return;try{const userDoc=await db.collection('users').doc(user.uid).get();if(!userDoc.exists)return;let serverData=userDoc.data();let serverQuests=serverData.quests||{active:[],progress:{}};if(!serverQuests.active||serverQuests.active.length===0)return;let progressChanged=!1;let totalXpGained=0;const isEn=currentLang==='en';if(!serverQuests.progress)serverQuests.progress={};serverQuests.active.forEach(quest=>{if(updatesObj[quest.type]!==undefined){let currentProg=serverQuests.progress[quest.id]||0;let amount=updatesObj[quest.type];if(currentProg<quest.target){if(quest.type==='dl_combo'){if(amount>currentProg){serverQuests.progress[quest.id]=amount;progressChanged=!0}}else{serverQuests.progress[quest.id]=currentProg+amount;progressChanged=!0}
+            <div style="flex-shrink: 0;">
+                ${spinStatusHTML}
+            </div>
+        </div>
+    `;
+
+    if (activeQuests.length === 0) {
+        finalHTML += `<p style="text-align:center; color:var(--slate); margin-top:20px;">${isEn ? 'No quests right now.' : 'لا توجد مهام حالياً.'}</p>`;
+    } else {
+        activeQuests.sort((a, b) => (b.id.startsWith('w_') ? 1 : 0) - (a.id.startsWith('w_') ? 1 : 0));
+        const questsListHTML = activeQuests.map(quest => {
+            let currentProg = progressData[quest.id] || 0;
+            let isCompleted = currentProg >= quest.target;
+            if (currentProg > quest.target) currentProg = quest.target;
+            let percent = (currentProg / quest.target) * 100;
+            let title = isEn ? quest.en : quest.ar;
+            let desc = isEn ? quest.desc_en : quest.desc_ar;
+            let isWeekly = quest.id.startsWith('w_');
+            let iconHtml = isWeekly ? '<i class="fa-solid fa-star" style="color: #FFD700;"></i>' : '<i class="fa-solid fa-bolt" style="color: var(--primary-color);"></i>';
+            let overlayHTML = isCompleted ? `<div class="quest-completed-overlay"><i class="fa-solid fa-check-circle"></i> ${isEn ? 'Completed!' : 'مكتملة!'}</div>` : '';
+            let weeklyBadge = isWeekly ? `<span style="display:inline-block; font-size:0.65rem; background: rgba(255,215,0,0.15); color: #FFD700; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); margin: 0 4px; font-weight: bold; white-space: nowrap;"><i class="fa-regular fa-clock"></i> <span class="weekly-timer-text">...</span></span>` : '';
+            
+            return `
+                <div class="quest-item ${isWeekly ? 'weekly' : ''}">
+                    ${overlayHTML}
+                    <div class="quest-header">
+                        <div style="flex: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                            <h4 class="quest-title" style="margin:0;">${iconHtml} ${title}</h4>
+                            ${weeklyBadge}
+                            <p class="quest-desc" style="width: 100%; margin-top: 2px;">${desc}</p>
+                        </div>
+                        <div class="quest-xp-badge">+${quest.xp} XP</div>
+                    </div>
+                    <div class="quest-progress-wrap">
+                        <div class="quest-progress-bg">
+                            <div class="quest-progress-fill" style="width: ${percent}%;"></div>
+                        </div>
+                        <div class="quest-status">${currentProg} / ${quest.target}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        finalHTML += questsListHTML;
+    }
+
+    container.innerHTML = finalHTML;
+
+    const timerEl = document.getElementById('quest-timer');
+    const spinTimerEl = document.getElementById('spin-countdown');
+    
+    const updateTimers = () => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setHours(24, 0, 0, 0);
+        const dailyTimeLeftMs = tomorrow - now;
+        const hours = Math.floor(dailyTimeLeftMs / (1000 * 60 * 60));
+        const minutes = Math.floor((dailyTimeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (timerEl) timerEl.innerText = isEn ? `Resets in ${hours}h ${minutes}m` : `تتجدد خلال ${hours}س و${minutes}د`;
+        // العداد صار يكتب (بعد 16س) بدل الكلمة الطويلة
+        if (spinTimerEl) spinTimerEl.innerText = isEn ? `in ${hours}h ${minutes}m` : `بعد ${hours}س و${minutes}د`;
+
+        let nextMonday = new Date(now);
+        nextMonday.setHours(0, 0, 0, 0);
+        let daysUntilMonday = (8 - nextMonday.getDay()) % 7;
+        if (daysUntilMonday === 0) daysUntilMonday = 7;
+        nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
+        const weeklyTimeLeftMs = nextMonday - now;
+        const weeklyDays = Math.floor(weeklyTimeLeftMs / (1000 * 60 * 60 * 24));
+        const weeklyHoursLeft = Math.floor((weeklyTimeLeftMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let weeklyText = isEn ? `${weeklyDays}d ${weeklyHoursLeft}h` : `${weeklyDays}يوم و${weeklyHoursLeft}س`;
+        document.querySelectorAll('.weekly-timer-text').forEach(el => { el.innerText = weeklyText });
+    };
+    
+    updateTimers();
+    if (window.questTimerInterval) clearInterval(window.questTimerInterval);
+    window.questTimerInterval = setInterval(updateTimers, 60000);
+};
+
+window.updateQuestProgressBatch=async function(updatesObj){const user=auth.currentUser;if(!user)return;try{const userDoc=await db.collection('users').doc(user.uid).get();if(!userDoc.exists)return;let serverData=userDoc.data();let serverQuests=serverData.quests||{active:[],progress:{}};if(!serverQuests.active||serverQuests.active.length===0)return;let progressChanged=!1;let totalXpGained=0;const isEn=currentLang==='en';if(!serverQuests.progress)serverQuests.progress={};serverQuests.active.forEach(quest=>{if(updatesObj[quest.type]!==undefined){let currentProg=serverQuests.progress[quest.id]||0;let amount=updatesObj[quest.type];if(currentProg<quest.target){if(quest.type==='dl_combo'){if(amount>currentProg){serverQuests.progress[quest.id]=amount;progressChanged=!0}}else{serverQuests.progress[quest.id]=currentProg+amount;progressChanged=!0}
 if(progressChanged&&serverQuests.progress[quest.id]>=quest.target&&currentProg<quest.target){totalXpGained+=quest.xp;let qName=isEn?quest.en:quest.ar;setTimeout(()=>showToast(`🎯 ${isEn ? 'Quest Completed' : 'تم إنجاز المهمة'}: ${qName}! (+${quest.xp} XP)`),800)}}}});if(progressChanged){await db.collection('users').doc(user.uid).update({quests:serverQuests});let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');savedData.quests=serverQuests;localStorage.setItem('currentUser',JSON.stringify(savedData));if(document.getElementById('active-quests-container'))renderQuests();if(totalXpGained>0)await addXP(totalXpGained,'quest');}}catch(error){console.error("Error updating quests securely:",error)}};window.updateQuestProgress=async function(actionType,amount=1){let obj={};obj[actionType]=amount;await updateQuestProgressBatch(obj)};document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('main-content-area')){setTimeout(initQuests,500)}});let wakeLock=null;let liveStartTimeStamp=0;let restTargetTimeStamp=0;async function requestWakeLock(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen')}}catch(err){console.error('Wake Lock error:',err)}}
 function releaseWakeLock(){if(wakeLock!==null){wakeLock.release().then(()=>{wakeLock=null})}}
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&liveWorkoutActive){requestWakeLock();liveSeconds=Math.floor((Date.now()-liveStartTimeStamp)/1000);const m=String(Math.floor(liveSeconds/60)).padStart(2,'0');const s=String(liveSeconds%60).padStart(2,'0');const liveTimerEl=document.getElementById('live-timer');if(liveTimerEl)liveTimerEl.innerText=`${m}:${s}`;const restOverlay=document.getElementById('rest-timer-overlay');if(restOverlay&&restOverlay.style.display!=='none'){let timeLeft=Math.ceil((restTargetTimeStamp-Date.now())/1000);if(timeLeft<=0){skipRest()}else{const restText=document.getElementById('rest-countdown');if(restText)restText.innerText=timeLeft}}}});window.renderNoGuildScreen=async function(t){const area=document.getElementById('guild-content-area');if(!area)return;const userData=JSON.parse(localStorage.getItem('currentUser')||'{}');const lang=currentLang||'ar';const txtSearchTitle=lang==='en'?'Explore Clans':'استكشاف العصابات';const txtCreateBtn=lang==='en'?'Create Clan':'تأسيس عصابة';const txtSearchPlaceholder=lang==='en'?'Enter Clan Tag...':'أدخل رمز العصابة (Tag)...';const txtTopSuggested=lang==='en'?'Top Suggested Clans':'أبرز العصابات المقترحة';const txtSearching=lang==='en'?'Searching for warriors...':'جاري البحث عن مقاتلين...';const txtNoClans=lang==='en'?'No suggested clans found.':'لا توجد عصابات مقترحة حالياً.';let topActionBtnHtml='';if(userData.clanId){topActionBtnHtml=`
@@ -4750,3 +4854,182 @@ window.addEventListener('beforeunload', function (e) {
         return confirmationMessage;
     }
 });
+/* =========================================
+   🎰 EPIC SPIN LOGIC & MODAL (APPLE GLASS STYLE)
+   ========================================= */
+
+window.closeEpicSpin = function() {
+    const spinModal = document.getElementById('epic-spin-modal');
+    if(spinModal) {
+        spinModal.classList.remove('active'); 
+        setTimeout(() => { spinModal.style.display = 'none'; }, 400);
+    }
+};
+window.openEpicSpin = function() {
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const todayStr = new Date().toDateString();
+    const isEn = currentLang === 'en';
+    const t = translations[currentLang || 'ar'];
+
+    // 🚨 تم تفعيل القفل الرسمي للعوام: يمنع فتح العجلة إذا سحب اليوم 🚨
+    if (savedData.lastDailySpin === todayStr) { 
+        showToast(isEn ? "You already spun today! Come back tomorrow." : "لقد استخدمت سحبتك اليوم! عد غداً."); 
+        return; 
+    }
+
+    let spinModal = document.getElementById('epic-spin-modal');
+    if (!spinModal) {
+        const modalHTML = `
+            <div id="epic-spin-modal" class="modal-overlay" style="z-index: 999999; background: rgba(5, 10, 20, 0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);">
+                <div class="modal-content" style="max-width: 400px; text-align: center; background: linear-gradient(180deg, rgba(15, 25, 45, 0.85), rgba(10, 15, 30, 0.95)); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); border-radius: 28px; padding: 35px 25px;">
+                    
+                    <button onclick="window.closeEpicSpin()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.05); border-radius: 50%; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.1); color: var(--slate); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;">&times;</button>
+                    
+                    <div style="width: 60px; height: 60px; margin: 0 auto 15px auto; background: rgba(0, 242, 167, 0.1); border-radius: 18px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 242, 167, 0.3); box-shadow: 0 10px 20px rgba(0,242,167,0.15);">
+                        <i class="fa-solid fa-gem" style="font-size: 1.8rem; color: var(--primary-color);"></i>
+                    </div>
+
+                    <h2 style="color: white; font-weight: 900; margin-bottom: 5px; letter-spacing: 0.5px; font-size: 1.5rem;">
+                        ${isEn ? 'Daily Reward' : 'المكافأة اليومية'}
+                    </h2>
+                    <p style="color: var(--slate); font-size: 0.85rem; margin-bottom: 30px;">${isEn ? 'Test your luck and win exclusive items.' : 'جرب حظك واربح غنائم حصرية.'}</p>
+
+                    <!-- مسار السحب الأفقي الراقي -->
+                    <div class="spin-roulette-container" style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; box-shadow: inset 0 10px 30px rgba(0,0,0,0.8); height: 110px; margin-bottom: 30px;">
+                        <!-- خط المنتصف النيون -->
+                        <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, #00f2a7, transparent); box-shadow: 0 0 15px #00f2a7; z-index: 10;"></div>
+                        
+                        <div id="spin-track" class="spin-track" style="height: 100%; align-items: center;">
+                            <!-- سيتم توليد العناصر هنا بالـ JS -->
+                        </div>
+                    </div>
+
+                    <button id="start-spin-btn" style="width: 100%; font-size: 1.1rem; font-weight: 900; font-family: var(--font-main); background: var(--primary-color); color: #000; border: none; border-radius: 16px; padding: 16px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(0,242,167,0.3);" onclick="window.startEpicSpin()">
+                        ${isEn ? 'SPIN' : 'سحب'}
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        spinModal = document.getElementById('epic-spin-modal');
+    }
+
+    const track = document.getElementById('spin-track');
+    track.style.transition = 'none'; 
+    track.style.transform = 'translateX(0px)'; 
+    
+    const rewards = [
+        { type: 'xp', val: 50, color: '#fff', icon: 'fa-gem', label: '50 XP' },
+        { type: 'xp', val: 100, color: '#00f2a7', icon: 'fa-gem', label: '100 XP' },
+        { type: 'xp', val: 250, color: '#FFD700', icon: 'fa-gem', label: '250 XP' },
+        { type: 'coins', val: 5, color: '#fff', icon: 'fa-coins', label: '5 Coins' },
+        { type: 'coins', val: 10, color: '#FFD700', icon: 'fa-coins', label: '10 Coins' },
+        { type: 'coins', val: 50, color: '#ff4d4d', icon: 'fa-coins', label: '50 Coins' },
+        { type: 'crate', val: 'iron', color: '#a8a8a8', icon: 'fa-box', label: 'Iron Crate' },
+        { type: 'crate', val: 'steel', color: '#00d4ff', icon: 'fa-box-open', label: 'Steel Crate' }
+    ];
+
+    let itemsHTML = '';
+    window.spinWinningItem = rewards[Math.floor(Math.random() * rewards.length)]; 
+    
+    for (let i = 0; i < 65; i++) {
+        let item = rewards[Math.floor(Math.random() * rewards.length)];
+        if (i === 50) item = window.spinWinningItem; 
+        
+        itemsHTML += `
+            <div style="min-width: 90px; height: 85px; margin: 0 6px; background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.4)); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: ${item.color};">
+                <i class="fa-solid ${item.icon}" style="font-size: 1.6rem; margin-bottom: 6px; filter: drop-shadow(0 0 5px ${item.color}88);"></i>
+                <span style="font-size: 0.85rem; font-weight: bold; color: white;">${item.label}</span>
+            </div>
+        `;
+    }
+    track.innerHTML = itemsHTML;
+    
+    spinModal.style.display = 'flex';
+    setTimeout(() => { spinModal.classList.add('active'); }, 10);
+    
+    const startBtn = document.getElementById('start-spin-btn');
+    startBtn.disabled = false;
+    startBtn.style.background = 'var(--primary-color)';
+    startBtn.style.color = '#000';
+    startBtn.innerHTML = isEn ? 'SPIN' : 'سحب';
+};
+window.startEpicSpin = function() {
+    const btn = document.getElementById('start-spin-btn');
+    btn.disabled = true;
+    const isEn = currentLang === 'en';
+    
+    btn.style.background = 'rgba(255,255,255,0.1)';
+    btn.style.color = 'var(--slate)';
+    btn.style.boxShadow = 'none';
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${isEn ? 'Spinning...' : 'جاري السحب...'}`;
+    
+    if (navigator.vibrate) navigator.vibrate(50);
+
+    const track = document.getElementById('spin-track');
+    const containerWidth = document.querySelector('.spin-roulette-container').offsetWidth;
+    const itemWidth = 102; // 90px width + 12px margin
+    const targetIndex = 50;
+    
+    const offsetCenter = (containerWidth / 2) - (itemWidth / 2);
+    const randomOffset = Math.floor(Math.random() * 50) - 25; 
+    
+    let travelDistance = (targetIndex * itemWidth) - offsetCenter + randomOffset;
+    
+    track.style.transition = 'transform 5.5s cubic-bezier(0.1, 0.9, 0.15, 1)'; 
+    
+    if (isEn) {
+        track.style.transform = `translateX(-${travelDistance}px)`;
+    } else {
+        track.style.transform = `translateX(${travelDistance}px)`; 
+    }
+
+    setTimeout(() => {
+        window.giveSpinReward(window.spinWinningItem);
+    }, 5500);
+};
+window.giveSpinReward = function(reward) {
+    const user = auth.currentUser;
+    if(!user) return;
+
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const isEn = currentLang === 'en';
+
+    // 1. تحديد تاريخ اليوم
+    const todayStr = new Date().toDateString();
+    savedData.lastDailySpin = todayStr;
+    
+    // 2. تجهيز البيانات اللي رح نبعثها للسيرفر (Firebase) عشان ما ينمسح القفل بالريفرش
+    let dbUpdates = { lastDailySpin: todayStr };
+    
+    let msg = "";
+    if (reward.type === 'xp') {
+        savedData.xp = (savedData.xp || 0) + reward.val;
+        msg = `+${reward.val} XP!`;
+        if (typeof addXP === "function") addXP(reward.val, 'quest'); 
+    } else if (reward.type === 'coins') {
+        savedData.ironCoins = (savedData.ironCoins || 0) + reward.val;
+        msg = `+${reward.val} Iron Coins!`;
+        dbUpdates.ironCoins = savedData.ironCoins; // إضافة العملات للتحديث
+    } else if (reward.type === 'crate') {
+        if(!savedData.crates) savedData.crates = {};
+        savedData.crates[reward.val] = (savedData.crates[reward.val] || 0) + 1;
+        msg = isEn ? `+1 ${reward.label}!` : `+1 صندوق!`;
+        dbUpdates[`crates.${reward.val}`] = firebase.firestore.FieldValue.increment(1); // إضافة الصندوق للتحديث
+    }
+
+    // 3. الحفظ في المتصفح
+    localStorage.setItem('currentUser', JSON.stringify(savedData));
+    
+    // 4. 🔥 السحر هنا: إرسال القفل والجائزة للسيرفر معاً عشان الريفرش ما يكسره 🔥
+    db.collection('users').doc(user.uid).update(dbUpdates).catch(e => console.error("Error saving spin:", e));
+    
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    showToast((isEn ? "🎉 You Won: " : "🎉 مبروك، ربحت: ") + msg);
+
+    if (typeof renderQuests === "function") renderQuests();
+
+    setTimeout(() => {
+        window.closeEpicSpin();
+    }, 2000);
+};

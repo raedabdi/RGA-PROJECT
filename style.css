@@ -1017,3 +1017,68 @@ html, body, .main-content, .perf-tab-content, .chat-messages-area {
     20% { transform: rotate(30deg) translateY(100%); }
     100% { transform: rotate(30deg) translateY(100%); }
 }
+
+/* =========================================
+   🎰 EPIC HORIZONTAL SPIN (Apple Glass Style)
+   ========================================= */
+.apple-glass-btn {
+    width: 100%;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    z-index: 10; /* عشان يكبس معك بدون مشاكل */
+}
+.apple-glass-btn::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 60%);
+    animation: rotateGlow 8s linear infinite; z-index: 0; pointer-events: none;
+}
+.apple-glass-btn:active {
+    transform: scale(0.95);
+    border-color: #FFD700;
+}
+.spin-status-badge {
+    white-space: nowrap !important; /* يمنع النص ينزل سطرين */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.spin-roulette-container {
+    position: relative; width: 100%; height: 120px; background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px; border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.9), 0 10px 20px rgba(0,0,0,0.5);
+    overflow: hidden; margin: 25px 0;
+}
+.spin-roulette-container::after {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 100%; background: #00f2a7;
+    box-shadow: 0 0 20px #00f2a7, 0 0 40px #00f2a7; z-index: 10; border-radius: 2px;
+}
+.spin-track {
+    display: flex; height: 100%; align-items: center;
+    transition: transform 6s cubic-bezier(0.1, 0.9, 0.2, 1);
+    will-change: transform;
+}
+.spin-item {
+    min-width: 110px; height: 95px; margin: 0 5px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.8));
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: white; font-weight: 900; font-size: 1.1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.spin-item.gold { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.spin-item.neon { border-color: #00f2a7; color: #00f2a7; background: rgba(0,242,167,0.1); text-shadow: 0 0 10px rgba(0,242,167,0.5); }
+.spin-item.mythic { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255,77,77,0.1); text-shadow: 0 0 10px rgba(255,77,77,0.5); }
