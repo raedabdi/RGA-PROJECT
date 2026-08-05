@@ -1708,80 +1708,136 @@ let earnedBadgesHTML=`<p style="text-align: center; color: var(--slate); font-si
                         <p>${currentLang === 'en' ? b.title_en : b.title_ar}</p>
                     </div>
                 `).join('')}
-let friendActionHTML='';if(myUid&&myUid!==targetUid){const myFriends=myUserData.myFriendsList||[];const isFriend=myFriends.some(f=>f.id===targetUid);if(isFriend){const friendBtnText=lang==='en'?'<i class="fa-solid fa-user-check"></i> Friend ':'<i class="fa-solid fa-user-check"></i> صديق';const unfriendBtnText=lang==='en'?'<i class="fa-solid fa-user-minus"></i> Unfriend':'إزالة الصديق <i class="fa-solid fa-user-minus"></i>';friendActionHTML=`
-                    <div style="display: flex; gap: 10px; margin-top: 15px; width: 100%; align-items: center;">
-                        <button class="btn-primary" style="flex: 1; height: 50px; background: rgba(0, 242, 167, 0.1); border-color: #00f2a7; color: #00f2a7; cursor: default; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0; -webkit-tap-highlight-color: transparent;">
-                            ${friendBtnText}
-                        </button>
-                        <div style="position: relative; height: 50px; display: flex; align-items: center;">
-                            <button class="member-menu-trigger member-menu-trigger-btn" style="height: 50px; width: 45px; display: flex; align-items: center; justify-content: center; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; -webkit-tap-highlight-color: transparent;" onclick="toggleMemberMenu('profile-friend-menu', this)">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <div id="profile-friend-menu" class="member-action-menu-content" style="position: absolute; top: 55px; left: 0; background: rgba(10, 20, 41, 0.98); border: 1px solid rgba(255, 77, 77, 0.3); border-radius: 12px; padding: 5px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); min-width: 150px; z-index: 1000;">
-                                <div class="dropdown-item-pro danger" onclick="deleteFriendFromProfile('${targetUid}')" style="padding: 12px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 10px; color: #ff4d4d; cursor: pointer; border-radius: 8px; white-space: nowrap; -webkit-tap-highlight-color: transparent;">
-                                    ${unfriendBtnText}
-                                </div>
-                            </div>
+
+const clashBtnText = lang==='en' ? '<i class="fa-solid fa-bolt"></i> Challenge' : 'صدام الأبطال <i class="fa-solid fa-bolt"></i>';
+let friendActionHTML = '';
+if (myUid && myUid !== targetUid) {
+    const myFriends = myUserData.myFriendsList || [];
+    const isFriend = myFriends.some(f => f.id === targetUid);
+    
+    // تأمين الاسم عشان ما يعمل خطأ برمجية
+    const safeName = (data.firstName || 'Hero').replace(/</g, "&lt;");
+
+    if (isFriend) {
+        const clashBtnText = lang === 'en' ? '<i class="fa-solid fa-bolt"></i> Challenge' : 'صدام الأبطال <i class="fa-solid fa-bolt"></i>';
+        const unfriendBtnText = lang === 'en' ? '<i class="fa-solid fa-user-minus"></i> Unfriend' : 'إزالة الصديق <i class="fa-solid fa-user-minus"></i>';
+        
+        friendActionHTML = `
+            <div style="display: flex; gap: 10px; margin-top: 15px; width: 100%; align-items: center;">
+                <button class="btn-primary" style="flex: 1; height: 50px; background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; color: #ff4d4d; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0; box-shadow: 0 0 15px rgba(255,77,77,0.2);" onclick="openClashSetup('${targetUid}', '${safeName.replace(/'/g, "\\'")}')">
+                    ${clashBtnText}
+                </button>
+                <div style="position: relative; height: 50px; display: flex; align-items: center;">
+                    <button class="member-menu-trigger member-menu-trigger-btn" style="height: 50px; width: 45px; display: flex; align-items: center; justify-content: center; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white;" onclick="toggleMemberMenu('profile-friend-menu', this)">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <div id="profile-friend-menu" class="member-action-menu-content" style="position: absolute; top: 55px; left: 0; background: rgba(10, 20, 41, 0.98); border: 1px solid rgba(255, 77, 77, 0.3); border-radius: 12px; padding: 5px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); min-width: 150px; z-index: 1000;">
+                        <div class="dropdown-item-pro danger" onclick="deleteFriendFromProfile('${targetUid}')" style="padding: 12px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 10px; color: #ff4d4d; cursor: pointer; border-radius: 8px;">
+                            ${unfriendBtnText}
                         </div>
                     </div>
-                `}else{const reqDoc=await db.collection('users').doc(targetUid).collection('notifications').doc('freq_'+myUid).get();if(reqDoc.exists){const reqSentText=lang==='en'?'<i class="fa-solid fa-clock-rotate-left"></i> Request Sent ⏳':'تم الإرسال ⏳ <i class="fa-solid fa-clock-rotate-left"></i>';friendActionHTML=`
-                        <button class="btn-primary" style="width: 100%; height: 50px; margin-top: 15px; background: rgba(255,255,255,0.05); border-color: var(--slate); color: var(--slate); cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent;" disabled>
-                            ${reqSentText}
-                        </button>
-                    `}else{const addFriendText=lang==='en'?`<i class="fa-solid fa-user-plus"></i> Send Friend Request`:`إرسال طلب صداقة <i class="fa-solid fa-user-plus"></i>`;friendActionHTML=`
-                        <button class="btn-primary" id="profile-add-friend-btn" style="width: 100%; height: 50px; margin-top: 15px; box-shadow: 0 0 15px rgba(0,242,167,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent;" onclick="sendFriendRequest('${targetUid}')">
-                            ${addFriendText}
-                        </button>
-                    `}}}
-let clanInfoHTML='';if(data.clanId){const txtClanMember=lang==='en'?'CLAN MEMBER':'عضو في عصابة';clanInfoHTML=`
-                <div class="premium-clan-badge" onclick="closeProfileAndOpenClan('${data.clanId}')" style="margin-top:15px; background: rgba(20, 20, 20, 0.3); backdrop-filter: blur(5px); -webkit-tap-highlight-color: transparent;">
-                    <div class="clan-badge-content">
-                        <div class="clan-badge-icon"><i class="fa-solid fa-crown" style="color: #FFD700;"></i></div>
-                        <div class="clan-badge-info">
-                            <span class="clan-badge-title">${txtClanMember}</span>
-                            <strong id="dynamic-clan-name" class="clan-badge-name"><i class="fa-solid fa-spinner fa-spin" style="font-size: 0.9rem;"></i></strong>
-                        </div>
-                    </div>
-                    <div class="clan-badge-arrow"><i class="fa-solid fa-chevron-left"></i></div>
                 </div>
-            `;db.collection('clans').doc(data.clanId).get().then(doc=>{const nameEl=document.getElementById('dynamic-clan-name');if(doc.exists&&nameEl)nameEl.innerText=doc.data().name})}else if(myUserData.clanId){const txtInvite=lang==='en'?'Invite to Clan':'دعوة للعصابة';const inviteId=`invite_${myUid}_${targetUid}`;clanInfoHTML=`<button id="clan-invite-btn" class="btn-primary" style="width:100%; height: 50px; margin-top:15px; background: rgba(0, 242, 167, 0.1); border: 1px solid var(--primary-color); color:var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent;" onclick="sendClanInvite('${targetUid}')">
-                <i class="fa-solid fa-envelope-open-text"></i> ${txtInvite}
-            </button>`;db.collection('users').doc(targetUid).collection('notifications').doc(inviteId).get().then(invDoc=>{const btn=document.getElementById('clan-invite-btn');if(invDoc.exists&&btn){btn.disabled=!0;btn.style.opacity="0.5";btn.innerText=lang==='en'?"Invite Sent":"تم إرسال دعوة"}})}
-modal.innerHTML=`
-            <header class="top-bar" style="position: sticky; top: 0; background: transparent; z-index: 10; border-bottom: 1px solid rgba(0, 242, 167, 0.2);">
-                <div class="header-row">
-                    <button onclick="document.getElementById('player-profile-modal').style.display='none'" class="btn-primary" style="padding: 5px 15px; -webkit-tap-highlight-color: transparent;">${t.back}</button>
-                    <h1 style="margin: 0 15px; color: white;">${t.hero_profile}</h1>
-                </div>
-            </header>
-            <div style="padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; padding-bottom: 50px;">
-                <section class="profile-header has-cover" style="position: relative; overflow: hidden; padding-top: ${activeCover ? '0' : '30px'}; margin-bottom: 25px; border-radius: 30px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); animation: fadeIn 0.4s;">
-                    ${coverHtml}
-                    <div class="profile-header-content" style="position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: ${activeCover ? '80px' : '0'};">
-                        <div class="avatar-pro-wrapper ${activeBorder}" style="margin-bottom: 15px;">
-                            <div id="friend-page-avatar" class="profile-avatar-img" style="background-color: transparent; background-image: url('${userPhoto}'); ${activeBorder ? '' : 'border: 4px solid var(--primary-color);'}"></div>
-                        </div>
-                        <h2 style="color: white; font-weight: 900; margin-top: 5px; margin-bottom: 2px;">${data.firstName || ''} ${data.lastName || ''}</h2>
-                        ${titleHTML}
-                        <div class="bio-container" style="margin-top: 10px;">
-                            <p class="bio-text">"${bio}"</p>
-                            <p style="color: var(--primary-color); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">📍 ${data.country || t.undefined_country} - ${data.city || t.undefined_city}</p>
-                            <p style="color: var(--slate); font-size: 0.8rem; margin-bottom: 5px;"><i class="fa-solid fa-dumbbell"></i> ${data.gym || t.no_gym}</p>
-                            ${friendActionHTML}
-                            ${clanInfoHTML}
-                        </div>
-                    </div>
-                </section>
-                <h3 style="color: var(--slate); margin-bottom: 15px; font-size: 0.9rem;">${t.stats_summary}</h3>
-                <div class="profile-stats-row">
-                    <div class="mini-stat-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);"><h4>LEVEL</h4><p>${data.rank || 1}</p></div>
-                    <div class="mini-stat-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);"><h4>BADGES</h4><p>${earnedCount}</p></div>
-                    <div class="mini-stat-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);"><h4>STREAK</h4><p>${data.streak || 1}d</p></div>
-                </div>
-                <h3 style="color: var(--slate); margin-bottom: 15px; font-size: 0.9rem; margin-top: 25px;">${t.earned_badges_title}</h3>
-                <div class="earned-badges-showcase" style="background: rgba(0,0,0,0.3); border: 1px inset rgba(255,255,255,0.05); backdrop-filter: blur(5px);">${earnedBadgesHTML}</div>
             </div>
-        `}catch(error){modal.style.display='none';console.error(error)}}
+        `;
+    } else {
+        // هاد الجزء اللي كان ممسوح (إذا مش صديقك)
+        const reqDoc = await db.collection('users').doc(targetUid).collection('notifications').doc('freq_' + myUid).get();
+        if (reqDoc.exists) {
+            const reqSentText = lang === 'en' ? '<i class="fa-solid fa-clock-rotate-left"></i> Request Sent ⏳' : 'تم الإرسال ⏳ <i class="fa-solid fa-clock-rotate-left"></i>';
+            friendActionHTML = `
+                <button class="btn-primary" style="width: 100%; height: 50px; margin-top: 15px; background: rgba(255,255,255,0.05); border-color: var(--slate); color: var(--slate); cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent;" disabled>
+                    ${reqSentText}
+                </button>
+            `;
+        } else {
+            const addFriendText = lang === 'en' ? `<i class="fa-solid fa-user-plus"></i> Send Friend Request` : `إرسال طلب صداقة <i class="fa-solid fa-user-plus"></i>`;
+            friendActionHTML = `
+                <button class="btn-primary" id="profile-add-friend-btn" style="width: 100%; height: 50px; margin-top: 15px; box-shadow: 0 0 15px rgba(0,242,167,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent;" onclick="sendFriendRequest('${targetUid}')">
+                    ${addFriendText}
+                </button>
+            `;
+        }
+    }
+}
+
+let clanInfoHTML = '';
+if (data.clanId) {
+    const txtClanMember = lang === 'en' ? 'CLAN MEMBER' : 'عضو في عصابة';
+    clanInfoHTML = `
+        <div class="premium-clan-badge" onclick="closeProfileAndOpenClan('${data.clanId}')" style="margin-top:15px; background: rgba(20, 20, 20, 0.3); backdrop-filter: blur(5px); -webkit-tap-highlight-color: transparent;">
+            <div class="clan-badge-content">
+                <div class="clan-badge-icon"><i class="fa-solid fa-crown" style="color: #FFD700;"></i></div>
+                <div class="clan-badge-info">
+                    <span class="clan-badge-title">${txtClanMember}</span>
+                    <strong id="dynamic-clan-name" class="clan-badge-name"><i class="fa-solid fa-spinner fa-spin" style="font-size: 0.9rem;"></i></strong>
+                </div>
+            </div>
+            <div class="clan-badge-arrow"><i class="fa-solid fa-chevron-left"></i></div>
+        </div>
+    `;
+    db.collection('clans').doc(data.clanId).get().then(doc => {
+        const nameEl = document.getElementById('dynamic-clan-name');
+        if (doc.exists && nameEl) nameEl.innerText = doc.data().name;
+    });
+} else if (myUserData.clanId) {
+    const txtInvite = lang === 'en' ? 'Invite to Clan' : 'دعوة للعصابة';
+    const inviteId = `invite_${myUid}_${targetUid}`;
+    clanInfoHTML = `
+        <button id="clan-invite-btn" class="btn-primary" style="width:100%; height: 50px; margin-top:15px; background: rgba(0, 242, 167, 0.1); border: 1px solid var(--primary-color); color:var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent;" onclick="sendClanInvite('${targetUid}')">
+            <i class="fa-solid fa-envelope-open-text"></i> ${txtInvite}
+        </button>`;
+    db.collection('users').doc(targetUid).collection('notifications').doc(inviteId).get().then(invDoc => {
+        const btn = document.getElementById('clan-invite-btn');
+        if (invDoc.exists && btn) {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.innerText = lang === 'en' ? "Invite Sent" : "تم إرسال دعوة";
+        }
+    });
+}
+
+modal.innerHTML = `
+    <header class="top-bar" style="position: sticky; top: 0; background: transparent; z-index: 10; border-bottom: 1px solid rgba(0, 242, 167, 0.2);">
+        <div class="header-row">
+            <button onclick="document.getElementById('player-profile-modal').style.display='none'" class="btn-primary" style="padding: 5px 15px; -webkit-tap-highlight-color: transparent;">${t.back}</button>
+            <h1 style="margin: 0 15px; color: white;">${t.hero_profile}</h1>
+        </div>
+    </header>
+    <div style="padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; padding-bottom: 50px;">
+        <section class="profile-header has-cover" style="position: relative; overflow: hidden; padding-top: ${activeCover ? '0' : '30px'}; margin-bottom: 25px; border-radius: 30px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); animation: fadeIn 0.4s;">
+            ${coverHtml}
+            <div class="profile-header-content" style="position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: ${activeCover ? '80px' : '0'};">
+                <div class="avatar-pro-wrapper ${activeBorder}" style="margin-bottom: 15px;">
+                    <div id="friend-page-avatar" class="profile-avatar-img" style="background-color: transparent; background-image: url('${userPhoto}'); ${activeBorder ? '' : 'border: 4px solid var(--primary-color);'}"></div>
+                </div>
+                <h2 style="color: white; font-weight: 900; margin-top: 5px; margin-bottom: 2px;">${data.firstName || ''} ${data.lastName || ''}</h2>
+                ${titleHTML}
+                <div class="bio-container" style="margin-top: 10px;">
+                    <p class="bio-text">"${bio}"</p>
+                    <p style="color: var(--primary-color); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">📍 ${data.country || t.undefined_country} - ${data.city || t.undefined_city}</p>
+                    <p style="color: var(--slate); font-size: 0.8rem; margin-bottom: 5px;"><i class="fa-solid fa-dumbbell"></i> ${data.gym || t.no_gym}</p>
+                    ${friendActionHTML}
+                    ${clanInfoHTML}
+                </div>
+            </div>
+        </section>
+        <h3 style="color: var(--slate); margin-bottom: 15px; font-size: 0.9rem;">${t.stats_summary}</h3>
+        <div class="profile-stats-row">
+            <div class="mini-stat-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);"><h4>LEVEL</h4><p>${data.rank || 1}</p></div>
+            <div class="mini-stat-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);"><h4>BADGES</h4><p>${earnedCount}</p></div>
+            <div class="mini-stat-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);"><h4>STREAK</h4><p>${data.streak || 1}d</p></div>
+        </div>
+        <h3 style="color: var(--slate); margin-bottom: 15px; font-size: 0.9rem; margin-top: 25px;">${t.earned_badges_title}</h3>
+        <div class="earned-badges-showcase" style="background: rgba(0,0,0,0.3); border: 1px inset rgba(255,255,255,0.05); backdrop-filter: blur(5px);">${earnedBadgesHTML}</div>
+    </div>
+`;
+} catch(error) {
+    modal.style.display='none';
+    console.error(error);
+}
+} // <--- هذه التسكيرة ضرورية جداً لنهاية الدالة viewPlayerProfile
+
+
 async function rejectFriendRequest(notifId){const currentUser=auth.currentUser;if(!currentUser)return;try{await db.collection('users').doc(currentUser.uid).collection('notifications').doc(notifId).delete()}catch(error){console.error(error)}}
 async function deleteFriend(friendId){const currentUser=auth.currentUser;if(!currentUser)return;const t=translations[currentLang||'ar'];if(confirm(currentLang==='en'?"Remove this hero from your friends?":"متأكد إنك بدك تحذف هالبطل من أصدقائك؟")){try{const doc=await db.collection('users').doc(currentUser.uid).get();let myFriends=doc.data()?.myFriendsList||[];myFriends=myFriends.filter(f=>f.id!==friendId);await db.collection('users').doc(currentUser.uid).update({myFriendsList:myFriends});renderMyFriends();showToast(currentLang==='en'?"Friend removed":"تم حذف الصديق")}catch(error){console.error(error)}}}
 window.joinGuildByTag=async function(){const tagInput=document.getElementById('search-guild-tag').value.trim().toUpperCase();const t=translations[currentLang||'ar'];if(tagInput.length<2){showToast(currentLang==='en'?"Enter a valid tag!":"أدخل رمزاً صحيحاً!");return}
@@ -3335,6 +3391,29 @@ isInitialLoad=!1;body.innerHTML='';snapshot.forEach(doc=>{const notif=doc.data()
                       </div>`)
 
 
+} else if (notif.type === 'clash_invite') {
+    const isEn = currentLang === 'en';
+    const feeText = notif.feeType === 'xp' ? `${notif.feeAmount} XP` : `${notif.feeAmount} ${isEn ? 'Coins' : 'عملة'}`;
+    const prizeText = notif.feeType === 'xp' ? `${notif.feeAmount * 2} XP` : `${notif.feeAmount * 2} ${isEn ? 'Coins' : 'عملة'}`;
+    
+    body.insertAdjacentHTML('beforeend', `
+    <div class="notif-item" id="${notifId}" style="background: rgba(255, 77, 77, 0.05); border-left: 3px solid #ff4d4d;">
+        <div class="notif-icon"><img src="${notif.senderPhoto}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
+        <div class="notif-content">
+            <p style="color: #ff4d4d; font-weight: 900; margin-bottom: 2px;"><i class="fa-solid fa-khanda"></i> ${isEn ? 'Hero Clash!' : 'صدام الأبطال!'}</p>
+            <p style="font-size: 0.85rem; color: white; line-height: 1.5; margin-top: 5px;">
+                ${isEn ? 'Captain' : 'الكابتن'} <strong>${notif.senderName}</strong> ${isEn ? 'challenged you!' : 'يتحداك في مواجهة 24 ساعة!'}
+            </p>
+            <div style="background: rgba(0,0,0,0.5); padding: 8px; border-radius: 8px; margin-top: 8px; border: 1px dashed #ff4d4d;">
+                <div style="color: var(--slate); font-size: 0.75rem;">${isEn ? 'Entry Fee:' : 'رسوم الدخول:'} <b style="color:white;">${feeText}</b></div>
+                <div style="color: #FFD700; font-size: 0.8rem; font-weight: bold; margin-top: 2px;">${isEn ? 'Prize:' : 'الجائزة الكبرى:'} ${prizeText}</div>
+            </div>
+            <div class="notif-actions" style="margin-top: 10px;">
+                <button class="accept-btn" style="width: 100%; background: #ff4d4d; color: white;" onclick="acceptClash('${notifId}', '${notif.senderId}', '${notif.feeType}', ${notif.feeAmount})">${isEn ? 'Accept & Fight' : 'قبول التحدي'}</button>
+                <button class="reject-btn" style="width: 100%; margin-top: 5px;" onclick="rejectClash('${notifId}', '${notif.senderId}', '${notif.feeType}', ${notif.feeAmount})">${t.reject}</button>
+            </div>
+        </div>
+    </div>`);
 
 }else if(notif.type==='throne_win'){let btnText=currentLang==='en'?"Claim Throne & XP!":"استلم العرش والـ XP!";body.insertAdjacentHTML('beforeend',`
         <div class="notif-item" id="${notifId}" style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700;">
@@ -5033,3 +5112,114 @@ window.giveSpinReward = function(reward) {
         window.closeEpicSpin();
     }, 2000);
 };
+/* =========================================
+   ⚔️ HERO CLASH (1V1) LOGIC
+   ========================================= */
+
+window.openClashSetup = function(targetUid, targetName) {
+    const isEn = currentLang === 'en';
+    
+    // إخفاء نافذة البروفايل مؤقتاً
+    const profileModal = document.getElementById('player-profile-modal');
+    if(profileModal) profileModal.style.display = 'none';
+
+    const modalHTML = `
+        <div id="clash-setup-modal" class="modal-overlay active" style="z-index: 999999; background: rgba(5, 10, 20, 0.85); backdrop-filter: blur(25px);">
+            <div class="modal-content glass-card" style="max-width: 400px; text-align: center; border: 1px solid #ff4d4d; box-shadow: 0 20px 60px rgba(255,77,77,0.15); padding: 30px 20px;">
+                
+                <button onclick="document.getElementById('clash-setup-modal').remove(); if(document.getElementById('player-profile-modal')) document.getElementById('player-profile-modal').style.display='flex';" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.05); border-radius: 50%; width: 32px; height: 32px; border: none; color: var(--slate); font-size: 1.2rem; cursor: pointer;">&times;</button>
+                
+                <h2 style="color: #ff4d4d; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; font-size: 1.6rem; text-shadow: 0 0 15px rgba(255,77,77,0.6);">
+                    <i class="fa-solid fa-khanda"></i> ${isEn ? 'Hero Clash' : 'صدام الأبطال'}
+                </h2>
+                <p style="color: white; font-size: 0.95rem; margin-bottom: 5px;">${isEn ? 'Challenge' : 'تحدي المواجهة ضد'} <b style="color:#00f2a7;">${targetName}</b></p>
+                <p style="color: var(--slate); font-size: 0.8rem; margin-bottom: 25px;">${isEn ? 'Whoever lifts the most total volume in 24 hours takes the Grand Prize!' : 'من يرفع إجمالي أوزان أعلى خلال 24 ساعة، يفوز بالجائزة الكبرى!'}</p>
+
+                <div style="text-align: ${isEn ? 'left' : 'right'}; color: var(--slate); font-size: 0.8rem; margin-bottom: 10px; font-weight: bold;">${isEn ? 'Select Entry Fee:' : 'اختر رسوم الدخول للتحدي:'}</div>
+
+                <!-- خيار الـ XP -->
+                <div class="clash-card-btn xp-fee" onclick="sendClashRequest('${targetUid}', 'xp', 1000)">
+                    <div class="clash-info">
+                        <div class="clash-title" style="color: #00f2a7;">1,000 XP</div>
+                        <div class="clash-prize">${isEn ? 'Grand Prize: 2,000 XP' : 'الجائزة الكبرى: 2,000 XP'}</div>
+                    </div>
+                    <i class="fa-solid fa-gem clash-icon" style="color: #00f2a7;"></i>
+                </div>
+
+                <!-- خيار العملات الحديدية -->
+                <div class="clash-card-btn coin-fee" onclick="sendClashRequest('${targetUid}', 'coins', 50)">
+                    <div class="clash-info">
+                        <div class="clash-title" style="color: #FFD700;">50 ${isEn ? 'Iron Coins' : 'عملة حديدية'}</div>
+                        <div class="clash-prize">${isEn ? 'Grand Prize: 100 Coins' : 'الجائزة الكبرى: 100 عملة'}</div>
+                    </div>
+                    <i class="fa-solid fa-coins clash-icon" style="color: #FFD700;"></i>
+                </div>
+
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+};
+
+window.sendClashRequest = async function(targetUid, feeType, feeAmount) {
+    const user = auth.currentUser;
+    if(!user) return;
+    
+    let savedData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const isEn = currentLang === 'en';
+    
+    // 1. فحص الرصيد
+    let hasBalance = false;
+    if(feeType === 'xp') {
+        const availableXp = (savedData.xp || 0) - (savedData.spentXp || 0);
+        hasBalance = availableXp >= feeAmount;
+    } else {
+        hasBalance = (savedData.ironCoins || 0) >= feeAmount;
+    }
+
+    if(!hasBalance) {
+        showToast(isEn ? "Insufficient balance to enter this clash!" : "رصيدك لا يكفي لدفع رسوم التحدي!");
+        return;
+    }
+
+    // 2. تأكيد الإرسال
+    if(!confirm(isEn ? `Pay ${feeAmount} ${feeType.toUpperCase()} and send challenge?` : `خصم ${feeAmount} ${feeType === 'xp' ? 'XP' : 'عملة'} وإرسال التحدي؟`)) return;
+
+    // 3. خصم الرسوم مبدئياً كـ "حجز" (Escrow)
+    if(feeType === 'xp') {
+        savedData.spentXp = (savedData.spentXp || 0) + feeAmount;
+        await db.collection('users').doc(user.uid).update({ spentXp: savedData.spentXp });
+    } else {
+        savedData.ironCoins = (savedData.ironCoins || 0) - feeAmount;
+        await db.collection('users').doc(user.uid).update({ ironCoins: savedData.ironCoins });
+    }
+    localStorage.setItem('currentUser', JSON.stringify(savedData));
+
+    // 4. إرسال الإشعار للخصم
+    try {
+        const myName = savedData.firstName + " " + (savedData.lastName || "");
+        const myPhoto = savedData.photoURL || "/Photos/adm.jpeg";
+        
+        await db.collection('users').doc(targetUid).collection('notifications').add({
+            type: 'clash_invite',
+            senderId: user.uid,
+            senderName: myName,
+            senderPhoto: myPhoto,
+            feeType: feeType,
+            feeAmount: feeAmount,
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showToast(isEn ? "Challenge sent! Awaiting response." : "تم إرسال التحدي! بانتظار قبول الخصم ⚔️");
+        document.getElementById('clash-setup-modal').remove();
+        
+        // تحديث أرقام الشاشة إذا كان بمتجر أو داشبورد
+        if(typeof renderUI === 'function') renderUI(savedData);
+
+    } catch (e) {
+        console.error(e);
+        showToast("Error sending challenge.");
+    }
+};
+
