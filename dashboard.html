@@ -147,16 +147,16 @@
 </div>
 
 <!-- 📈 نافذة بورصة الأبطال (RGA Stock Exchange) 📈 -->
-<div id="stock-market-modal" class="modal-overlay" style="z-index: 80000; background: rgba(5, 10, 20, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+<div id="stock-market-modal" class="modal-overlay" style="z-index: 80000; background: rgba(5, 10, 20, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 15px; padding-top: calc(20px + env(safe-area-inset-top));">
     <div class="modal-content" style="max-width: 600px; padding: 0; background: transparent; border: none; box-shadow: none;">
-        <div class="apple-glass-panel" style="padding: 25px; border-radius: 30px; background: rgba(15, 20, 35, 0.65); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); position: relative; overflow: hidden;">
+        <div class="apple-glass-panel" style="padding: 25px; border-radius: 30px; background: rgba(15, 20, 35, 0.65); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); position: relative; overflow-y: auto; overflow-x: hidden; max-height: 85vh;">
             
             <!-- ================= الواجهة الرئيسية للسوق ================= -->
             <div id="stock-main-view">
-                <button onclick="closeStockMarket()" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 1.2rem; cursor: pointer; transition: 0.3s; z-index: 10;">&times;</button>
-                <button onclick="showStockMarketInfo()" style="position: absolute; top: 20px; right: 20px; background: rgba(155, 89, 182, 0.15); border: 1px solid rgba(155, 89, 182, 0.3); width: 32px; height: 32px; border-radius: 50%; color: #d8b4fe; font-size: 1rem; cursor: pointer; transition: 0.3s; z-index: 10;"><i class="fa-solid fa-info"></i></button>
+                <button onclick="closeStockMarket()" style="position: absolute; top: 25px; left: 20px; background: rgba(255,255,255,0.1); border: none; width: 35px; height: 35px; border-radius: 50%; color: #fff; font-size: 1.4rem; cursor: pointer; transition: 0.3s; z-index: 99999; transform: translateZ(0); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">&times;</button>
+                <button onclick="showStockMarketInfo()" style="position: absolute; top: 25px; right: 20px; background: rgba(155, 89, 182, 0.15); border: 1px solid rgba(155, 89, 182, 0.3); width: 35px; height: 35px; border-radius: 50%; color: #d8b4fe; font-size: 1.1rem; cursor: pointer; transition: 0.3s; z-index: 99999; transform: translateZ(0); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-info"></i></button>
 
-                <div style="text-align: center; margin-bottom: 25px; margin-top: 15px;">
+                <div style="text-align: center; margin-bottom: 25px; margin-top: 40px;">
                     <h2 style="color: white; font-weight: 900; letter-spacing: 1px; font-size: 1.6rem; text-shadow: 0 0 15px rgba(255,255,255,0.2);">RGA EXCHANGE</h2>
                     <p id="stock-subtitle" style="color: var(--slate); font-size: 0.85rem; font-weight: 600;">استثمر في الأبطال وضاعف ثروتك</p>
                 </div>
