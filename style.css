@@ -1193,3 +1193,124 @@ html, body, .main-content, .perf-tab-content, .chat-messages-area {
 .w-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: 0.3s; }
 .w-dot.active-mine { background: #00f2a7; box-shadow: 0 0 10px #00f2a7; transform: scale(1.2); }
 .w-dot.active-enemy { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; transform: scale(1.2); }
+
+/* =========================================
+   📈 STOCK MARKET (APPLE GLASS UI) 📈
+   ========================================= */
+.stock-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.3));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.stock-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(-5px);
+    border-color: rgba(155, 89, 182, 0.5);
+}
+[dir="ltr"] .stock-card:hover { transform: translateX(5px); }
+
+.stock-avatar {
+    width: 45px; height: 45px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stock-info h4 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.stock-symbol {
+    color: var(--slate);
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stock-price-box {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.stock-price {
+    color: #FFD700;
+    font-size: 1.1rem;
+    font-weight: 900;
+    font-family: monospace;
+}
+
+.stock-change.up { color: #00f2a7; text-shadow: 0 0 10px rgba(0,242,167,0.3); }
+.stock-change.down { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,0.3); }
+
+.btn-buy-stock {
+    background: rgba(0, 242, 167, 0.15);
+    border: 1px solid #00f2a7;
+    color: #00f2a7;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-buy-stock:hover { background: #00f2a7; color: #000; box-shadow: 0 0 15px rgba(0,242,167,0.5); }
+
+.btn-sell-stock {
+    background: rgba(255, 77, 77, 0.15);
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-sell-stock:hover { background: #ff4d4d; color: #000; box-shadow: 0 0 15px rgba(255,77,77,0.5); }
+
+/* =========================================
+   🍏 APPLE GLASS MODAL ANIMATIONS 🍏
+   ========================================= */
+@keyframes rgaAppleFadeIn {
+    0% { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
+    100% { opacity: 1; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+}
+@keyframes rgaApplePopIn {
+    0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes rgaAppleFadeOut {
+    0% { opacity: 1; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+    100% { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
+}
+@keyframes rgaApplePopOut {
+    0% { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.8) translateY(20px); }
+}
+
+.rga-apple-open {
+    display: flex !important;
+    animation: rgaAppleFadeIn 0.3s ease-out forwards !important;
+}
+.rga-apple-open > .apple-glass-panel,
+.rga-apple-open > .modal-content {
+    animation: rgaApplePopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+.rga-apple-close {
+    animation: rgaAppleFadeOut 0.3s ease-in forwards !important;
+}
+.rga-apple-close > .apple-glass-panel,
+.rga-apple-close > .modal-content {
+    animation: rgaApplePopOut 0.3s ease-in forwards !important;
+}

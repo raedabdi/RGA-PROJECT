@@ -50,6 +50,11 @@
         <i class="fa-solid fa-khanda"></i>
     </button>
 
+    <!-- 📈 زر البورصة (RGA Exchange) 📈 -->
+    <button class="top-nav-icon-btn" onclick="openStockMarket()" title="بورصة الأبطال" style="width:45px;height:45px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(155, 89, 182, 0.15);border:1px solid #9b59b6;color:#d8b4fe;box-shadow:0 0 15px rgba(155, 89, 182, 0.4);">
+        <i class="fa-solid fa-chart-line"></i>
+    </button>
+
     <div class="hide-on-mobile">
         <h1>لوحة التحكم</h1>
         <p id="welcome-user">سعيد برؤيتك، كابتن</p>
@@ -141,4 +146,105 @@
     </div>
 </div>
 
+<!-- 📈 نافذة بورصة الأبطال (RGA Stock Exchange) 📈 -->
+<div id="stock-market-modal" class="modal-overlay" style="z-index: 80000; background: rgba(5, 10, 20, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+    <div class="modal-content" style="max-width: 600px; padding: 0; background: transparent; border: none; box-shadow: none;">
+        <div class="apple-glass-panel" style="padding: 25px; border-radius: 30px; background: rgba(15, 20, 35, 0.65); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); position: relative; overflow: hidden;">
+            
+            <!-- ================= الواجهة الرئيسية للسوق ================= -->
+            <div id="stock-main-view">
+                <button onclick="closeStockMarket()" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 1.2rem; cursor: pointer; transition: 0.3s; z-index: 10;">&times;</button>
+                <button onclick="showStockMarketInfo()" style="position: absolute; top: 20px; right: 20px; background: rgba(155, 89, 182, 0.15); border: 1px solid rgba(155, 89, 182, 0.3); width: 32px; height: 32px; border-radius: 50%; color: #d8b4fe; font-size: 1rem; cursor: pointer; transition: 0.3s; z-index: 10;"><i class="fa-solid fa-info"></i></button>
+
+                <div style="text-align: center; margin-bottom: 25px; margin-top: 15px;">
+                    <h2 style="color: white; font-weight: 900; letter-spacing: 1px; font-size: 1.6rem; text-shadow: 0 0 15px rgba(255,255,255,0.2);">RGA EXCHANGE</h2>
+                    <p id="stock-subtitle" style="color: var(--slate); font-size: 0.85rem; font-weight: 600;">استثمر في الأبطال وضاعف ثروتك</p>
+                </div>
+
+                <!-- 🌟 بطاقة سهمي (My Stock) الحقيقية 🌟 -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 18px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p id="txt-my-stock-value" style="color: var(--slate); font-size: 0.75rem; margin: 0; font-weight: bold; text-transform: uppercase;">سعر سهمك الحالي</p>
+                        <h3 id="my-own-stock-price" style="color: #00f2a7; margin: 0; font-family: monospace; font-size: 1.6rem;">0</h3>
+                    </div>
+                    <div style="text-align: right; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px;" dir="ltr">
+                        <p id="txt-my-investors" style="color: var(--slate); font-size: 0.75rem; margin: 0; font-weight: bold;">المستثمرين بك</p>
+                        <h4 id="my-investors-count" style="color: white; margin: 0; font-size: 1.3rem;">0 <i class="fa-solid fa-users" style="color:var(--slate); font-size:0.9rem;"></i></h4>
+                    </div>
+                </div>
+
+                <!-- المحفظة الشخصية (Portfolio) الفخمة -->
+                <div class="portfolio-card" style="background: linear-gradient(145deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.5);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        
+                        <!-- الرصيد المتاح (الأصول) -->
+                        <div>
+                            <p id="stock-port-title" style="color: var(--slate); font-size: 0.8rem; margin: 0 0 5px 0; font-weight: bold; letter-spacing: 0.5px;">الرصيد المتاح للتداول</p>
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <h3 id="my-portfolio-coins" style="color: #FFD700; font-size: 1.3rem; font-weight: 900; margin: 0; font-family: monospace; text-shadow: 0 0 10px rgba(255,215,0,0.3);">0 <i class="fa-solid fa-coins" style="font-size: 0.9rem;"></i></h3>
+                                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
+                                <h3 id="my-portfolio-xp" style="color: #00f2a7; font-size: 1.3rem; font-weight: 900; margin: 0; font-family: monospace; text-shadow: 0 0 10px rgba(0,242,167,0.3);">0 <span style="font-size: 0.9rem; font-family: var(--font-main);">XP</span></h3>
+                            </div>
+                        </div>
+
+                        <!-- العائد الاستثماري (ROI) والتفاصيل -->
+                        <div style="text-align: right;" dir="ltr">
+                            <p id="stock-profit-title" style="color: var(--slate); font-size: 0.8rem; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 0.5px;">العائد (ROI)</p>
+                            <h4 id="my-portfolio-profit-pct" style="color: #00f2a7; font-size: 1.5rem; margin: 0; font-family: monospace; font-weight: 900; text-shadow: 0 0 15px rgba(0,242,167,0.4);">+0.00%</h4>
+                            <div id="my-portfolio-profit-details" style="font-size: 0.75rem; font-weight: bold; margin-top: 4px; display: flex; flex-direction: column; gap: 3px; align-items: flex-end;">
+                                <!-- سيتم التعبئة بواسطة JS -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="performance-tabs" style="display: flex; gap: 5px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 15px;">
+                    <button id="tab-market-btn" class="perf-tab-btn active-tab" onclick="switchStockTab('market', this)" style="border-radius: 10px;">السوق</button>
+                    <button id="tab-mystocks-btn" class="perf-tab-btn" onclick="switchStockTab('my_stocks', this)" style="border-radius: 10px;">محفظتي</button>
+                </div>
+
+                <div id="stock-market-list" style="max-height: 350px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+
+            <!-- ================= واجهة الرسم البياني (Chart View) ================= -->
+            <div id="stock-chart-view" style="display: none; animation: fadeIn 0.3s ease; padding-top: 10px;">
+                <button onclick="closeStockChartView()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05); color: white; padding: 10px 18px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; font-weight: bold; font-family: var(--font-main); transition: 0.2s; backdrop-filter: blur(10px);">
+                    <i class="fa-solid fa-arrow-right"></i> <span id="txt-back-market">السوق</span>
+                </button>
+                
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    <img id="chart-hero-img" src="" style="width: 55px; height: 55px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); object-fit: cover;">
+                    <div>
+                        <h3 id="chart-hero-name" style="color: white; margin: 0; font-weight: 900; font-size: 1.2rem;">Hero</h3>
+                        <p id="chart-hero-sym" style="color: var(--slate); margin: 0; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">SYM</p>
+                    </div>
+                    <div style="margin-right: auto; text-align: left;" dir="ltr">
+                        <h3 id="chart-hero-price" style="color: white; margin: 0; font-weight: 900; font-size: 1.6rem; font-family: monospace;">0</h3>
+                        <p id="chart-hero-change" style="margin: 0; font-size: 0.9rem; font-weight: bold;">0.00%</p>
+                    </div>
+                </div>
+
+                <div style="width: 100%; height: 200px; margin-bottom: 20px; position: relative; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); background: rgba(0,0,0,0.1);">
+                    <canvas id="heroStockChart"></canvas>
+                </div>
+
+                <div id="stock-action-buttons" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" style="flex: 1; padding: 14px; background: rgba(255, 215, 0, 0.1); color: #FFD700; border-color: #FFD700; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="executeStockTrade('buy_coins')">
+                            <i class="fa-solid fa-coins"></i> <span id="txt-buy-coins">شراء بـ Coins</span>
+                        </button>
+                        <button class="btn-primary" style="flex: 1; padding: 14px; background: rgba(0, 242, 167, 0.1); color: #00f2a7; border-color: #00f2a7; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="executeStockTrade('buy_xp')">
+                            <span style="font-weight: 900;">XP</span> <span id="txt-buy-xp">شراء بـ XP</span>
+                        </button>
+                    </div>
+                    <button id="btn-sell-chart" class="btn-primary" style="width: 100%; padding: 14px; background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border-color: #ff4d4d; border-radius: 14px; display: none; align-items: center; justify-content: center; gap: 8px;" onclick="executeStockTrade('sell')">
+                        <i class="fa-solid fa-arrow-trend-down"></i> <span id="txt-sell-all">بيع الكمية المتاحة</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 <script src="main.js"></script></body></html>

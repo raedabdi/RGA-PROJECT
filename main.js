@@ -379,8 +379,11 @@ tour_6_text:"هون بتشوف ترتيبك بين الوحوش بالليدرب
 
 gym_placeholder:"اسم النادي الذي تتمرن فيه (اختياري)",
 enter_id_msg:"أدخل ID اللاعب للبحث عنه",search_heroes_msg:"ابحث عن أصدقائك وضيفهم لتبدأ التحديات!",meal_cooldown:"وجبتك لسه بتنهضم! انتظر",admin_panel:"👑 لوحة الإدارة",admin_requests:"👑 طلبات الوحشنة",admin_loading:"جاري سحب الفيديوهات من السيرفر...",admin_empty:"لا يوجد طلبات معلقة!",approve_btn:"✅ اعتماد الوحش",reject_btn:"❌ رفض وغش",captain:"الكابتن",workout_date:"التاريخ",muscle_label:"العضلة",confirm_approve:"متأكد إنك بدك تعتمد هذا الوزن الأسطوري؟",confirm_reject:"هل أنت متأكد من رفض الطلب؟ سيتم حذف الفيديو.",admin_notif_approve:"تم مراجعة الفيديو واعتماد وحشنتك بنجاح! عاش يا بطل 🔥",admin_notif_reject:"للأسف تم رفض الإثبات الخاص بك! إما أن الوزن غير صحيح أو الفيديو غير واضح.",pending_review_msg:"⏳ وحش! عندك تمرين أسطوري قيد المراجعة.. استرخي شوي لبين ما نعتمدلك ياه!",heavy_lift_alert:" إنت وحش!!\nلأنك قطعت الدنيا، لازم ترفع فيديو يثبت قوتك عشان نعتمدلك الرقم ونحطه بالليدربورد.\nجاهز ترفع الفيديو؟",uploading_proof:"جاري رفع إثبات الوحشنة... لا تطلع من التطبيق! 🚀",upload_success:"✅ تم رفع الفيديو بنجاح! الإدارة بتراجع وحشنتك، استنى شوي يا بطل.",upload_fail:"❌ فشل رفع الفيديو.. تأكد من الإنترنت وجرب كمان مرة.",country_select:"اختر الدولة...",city_select:"اختر المدينة...",save_location:"حفظ الموقع",no_monster_yet:"لا يوجد وحش في هذه المدينة بعد! كن أنت الأول.",challenge_him:"تحدى الوحش ⚔️",help_btn:"جولة تعريفية",max_weight_record:"أعلى وزن: ",battleground:"ساحة المعركة ⚔️",weights_filter:"الأوزان",commitment_filter:"الالتزام",map_level_filter:"المستوى",wanted_dead:"مطلوب للعدالة ",silver_guard:" حارس فضي",bronze_guard:" حارس برونزي",tribute_btn:" تحصيل ضريبة الملك",nav_features:"الميزات",nav_stats:"الإحصائيات",nav_help:"المساعدة",hero_subtitle:"حوّل لياقتك إلى لعبة",hero_title:"ارتقِ بقوتك",hero_desc:"انضم إلى ثورة اللياقة البدنية. اكتسب نقاط خبرة، تنافس مع الأصدقاء، وحقق أهدافك بطريقة لم تتخيلها من قبل.",btn_start:"ابدأ التحدي الآن",stat_active:"عضو نشط",stat_weight:"كجم تم رفعه",stat_challenges:"تحدي مكتمل",feat_main_1:"أطلق",feat_main_2:"العنان لقدراتك",feat_subtitle:"كل ما تحتاجه للوصول إلى القمة في منصة واحدة متكاملة.",help_title:"مركز المساعدة ",faq_tab:"الأسئلة الشائعة",contact_tab:"تواصل معنا",contact_desc:"عندك مشكلة أو اقتراح؟ ابعث للإدارة مباشرة!",send_msg:"إرسال الرسالة",email_ph:"بريدك الإلكتروني",msg_ph:"اكتب رسالتك هنا...",tribute_success:"💰 تم تحصيل +50 XP ضريبة الملك!",tribute_claimed:"الضريبة محصلة اليوم ",map_weights:" الأوزان",map_streak:" الالتزام",map_level:" المستوى",my_city:" (مدينتي)",locating_city:"جاري تحديد موقع المدينة...",moving_to:"جاري الانتقال إلى",corp_about_title:"عن Royal Gravitas Arena",corp_about_desc:"نحن لسنا مجرد تطبيق للياقة البدنية؛ نحن مؤسسة رائدة في تكنولوجيا الأداء الرياضي. هدفنا هو دمج العلم مع الألعاب لخلق تجربة تدريبية فريدة تدفع بالبشر إلى أقصى قدراتهم البدنية والذهنية.",corp_values_title:"قيمنا الأساسية",val1_t:"النزاهة",val1_d:"نظام التحقق بالفيديو يضمن منافسة شريفة للجميع.",
-
-
+stock_info_title: "دليل بورصة الأبطال",
+stock_info_1: "جهدك = قيمتك: سعر سهمك يرتفع كلما سجلت تمارين وفزت في حلبة 1 ضد 1. إذا تكاسلت، ينهار سهمك.",
+stock_info_2: "الاستثمار المزدوج: يمكنك شراء أسهم اللاعبين الآخرين باستخدام (العملات الحديدية) أو (نقاط الخبرة).",
+stock_info_3: "الأرباح: عندما تبيع أسهمك بعد ارتفاع سعر اللاعب، ستسترد أرباحك على شكل (عملات حديدية) دائماً. إنها الطريقة المثلى لتحويل الخبرة إلى ثروة فعلية.",
+stock_info_btn: "إغلاق التعليمات",
 
 delete_confirm_single: "هل أنت متأكد من حذف هذا التمرين؟ سيتم حذفه نهائياً.",
 delete_confirm_all: "هل أنت متأكد من حذف كل سجلات تمارينك؟ سيؤدي هذا إلى إعادة ضبط الإحصائيات!",
@@ -455,6 +458,14 @@ old_way_2_title:"Boredom & Burnout",old_way_2_desc:"Repeating the same routine i
 combo_record_toast: "🔥 New Combo Record: {combo}!",
 
 rga_way_3_title:"A Community of Beasts",rga_way_3_desc:"Dominate your city, join Guilds, and establish your name globally.",corp_values_title:"Our Core Values",auth_login_tab:"Login",auth_signup_tab:"Sign Up",auth_email_ph:"Email Address",auth_pass_ph:"Password",auth_login_btn:"Log In",auth_forgot_pass:"Forgot Password?",soon_btn:"We’ll be right back",maintenance_title:"Under Maintenance ",maintenance_desc:"We are upgrading our systems to provide a better experience. We apologize for the inconvenience, please try again later.",login_success:" Login successful! Redirecting...",auth_fname_ph:"First Name",auth_lname_ph:"Last Name",auth_signup_btn:"Create Account",prompt_email:"Please enter your registered email address:",reset_sent:" Password reset link sent to your email.",game_cooldown:"Game is resting! Available in",wait_setup:"Wait a moment, setting things up Champ ",val1_t:"Integrity",val1_d:"Our video verification system ensures fair competition for everyone.",val2_t:"Innovation",val2_d:"Utilizing advanced TSB algorithms and muscle radar technology.",val3_t:"Global Community",val3_d:"A worldwide ecosystem connecting heroes from all walks of life.",
+
+
+
+stock_info_title: "RGA Exchange Guide",
+stock_info_1: "Your Effort = Your Value: Your stock price rises with workouts and 1v1 wins. Slack off, and your stock crashes.",
+stock_info_2: "Dual Investment: You can purchase stocks using either (Iron Coins) or (XP Points).",
+stock_info_3: "Profits: Selling shares always yields returns in (Iron Coins). This is the premium way to convert surplus XP into real wealth.",
+stock_info_btn: "Close Guide",
 
 btn_join_empire: "Join Us ",
 job_modal_title: "Join Royal Gravitas Arena Team",
@@ -1006,7 +1017,7 @@ let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',y
     }
 
 await updateQuestProgressBatch({volume:totalVol,reps:totalReps,workout_days:1});addVolumeToClanWar(totalVolume); addVolumeToHeroClash(totalVolume);if(typeof updateStat==="function"){updateStat('workouts',1);let highestWeight=0;rows.forEach(row=>{let w=parseFloat(row.querySelector('.ex-weight').value)||0;if(w>highestWeight)highestWeight=w});if(highestWeight>0){updateStat('maxWeight',highestWeight,!0)}}
-const user=auth.currentUser;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));let timeMsg=currentLang==='en'?`${hours}h ${minutes}m`:`${hours} س و ${minutes} د`;db.collection('users').doc(user.uid).update({workouts:workoutHistory});showToast(currentLang==='en'?`Workout Saved! XP resets in ${timeMsg}`:`تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`)}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');showToast(currentLang==='en'?`Saved! +50 XP`:`تم الحفظ! +50 XP`)}}
+const user=auth.currentUser;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));let timeMsg=currentLang==='en'?`${hours}h ${minutes}m`:`${hours} س و ${minutes} د`;db.collection('users').doc(user.uid).update({workouts:workoutHistory});showToast(currentLang==='en'?`Workout Saved! XP resets in ${timeMsg}`:`تم حفظ التمرين! المكافأة تتجدد بعد ${timeMsg}`)}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr, stockVolatility: firebase.firestore.FieldValue.increment(2)});if(typeof addXP==="function")await addXP(50,'workout');showToast(currentLang==='en'?`Saved! +50 XP`:`تم الحفظ! +50 XP`)}}
 closeWorkoutModal();if(document.getElementById('log-container')){renderWorkoutLog();if(typeof initWorkoutChart==="function")setTimeout(initWorkoutChart,200);}}finally{setTimeout(()=>{isSavingNormalWorkout=!1},2000)}}
 
 
@@ -2278,11 +2289,11 @@ function animateValue(obj,start,end,duration){let startTimestamp=null;const step
 let isSavingLiveWorkout=!1;async function finishLiveWorkout(){if(liveExercises.length===0){closeLiveWorkout();return}
 if(isSavingLiveWorkout)return;isSavingLiveWorkout=!0;releaseWakeLock();try{const user=auth.currentUser;const totalSets=liveExercises.length;const totalVolume=liveExercises.reduce((sum,ex)=>sum+(ex.weight*ex.reps),0);let liveReps=0;liveExercises.forEach(ex=>liveReps+=parseInt(ex.reps)||0);const m=String(Math.floor(liveSeconds/60)).padStart(2,'0');const s=String(liveSeconds%60).padStart(2,'0');const finalTime=`${m}:${s}`;let xpMessage="";let xpGained=!1;if(pendingProofData){if(user){await db.collection('users').doc(user.uid).collection('notifications').add({type:'pending_proof',text:translations[currentLang].proof_required_notif,exerciseData:pendingProofData,fullWorkoutData:liveExercises,status:'pending',timestamp:firebase.firestore.FieldValue.serverTimestamp()})}
 xpMessage=currentLang==='en'?"Pending Approval ⏳":"بانتظار الإثبات ⏳";xpGained=!1}else{await updateQuestProgressBatch({volume:totalVolume,reps:liveReps,workout_days:1});addVolumeToClanWar(totalVolume); addVolumeToHeroClash(totalVolume);if(typeof updateStat==="function"){updateStat('workouts',1);liveExercises.forEach(ex=>{let w=parseFloat(ex.weight)||0;if(w>0)updateStat('maxWeight',w,!0);})}
-let workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[];let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});let typeStr=liveExercises[0]?.type||"تمرين لايف";workoutHistory.unshift({date:dateStr,type:typeStr,details:liveExercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));xpMessage=currentLang==='en'?`XP resets in ${hours}h ${minutes}m`:`تتجدد المكافأة بعد ${hours}س و${minutes}د`;await db.collection('users').doc(user.uid).update({workouts:workoutHistory})}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));await db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');xpGained=!0;xpMessage="+50 XP"}}}
+let workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[];let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});let typeStr=liveExercises[0]?.type||"تمرين لايف";workoutHistory.unshift({date:dateStr,type:typeStr,details:liveExercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));xpMessage=currentLang==='en'?`XP resets in ${hours}h ${minutes}m`:`تتجدد المكافأة بعد ${hours}س و${minutes}د`;await db.collection('users').doc(user.uid).update({workouts:workoutHistory})}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));await db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr, stockVolatility: firebase.firestore.FieldValue.increment(2)});if(typeof addXP==="function")await addXP(50,'workout');xpGained=!0;xpMessage="+50 XP"}}}
 clearInterval(liveDurationTimer);clearInterval(restInterval);const overlay=document.getElementById('live-workout-overlay');overlay.classList.remove('active');setTimeout(()=>overlay.style.display='none',500);document.getElementById('rest-timer-overlay').classList.remove('active');const summaryOverlay=document.getElementById('live-summary-overlay');if(summaryOverlay){document.getElementById('sum-time').innerText=finalTime;document.getElementById('sum-sets').innerText=totalSets;document.getElementById('sum-volume').innerText="0";const xpRewardBox=document.querySelector('.xp-reward-box');if(xpRewardBox){xpRewardBox.innerText=xpMessage;xpRewardBox.style.fontSize=xpGained?'2.5rem':(pendingProofData?'1.5rem':'1.1rem');xpRewardBox.style.color=xpGained?'var(--primary-color)':(pendingProofData?'#FFD700':'var(--slate)');xpRewardBox.style.textShadow=xpGained?'0 0 20px rgba(0, 242, 167, 0.6)':(pendingProofData?'0 0 15px rgba(255, 215, 0, 0.5)':'none');xpRewardBox.style.animation=xpGained?'pulseXP 1.5s infinite alternate':'none'}
 summaryOverlay.style.display='flex';setTimeout(()=>{summaryOverlay.classList.add('active');animateValue(document.getElementById('sum-volume'),0,totalVolume,1500)},50)}else{showToast(currentLang==='en'?`Workout Saved! ${xpMessage}`:`تم الحفظ! ${xpMessage}`);closeLiveSummary()}}finally{setTimeout(()=>{isSavingLiveWorkout=!1},2000)}}
 async function processLiveQuestsAndHistory(updateMaxWeightLocally){const totalSets=liveExercises.length;const totalVolume=liveExercises.reduce((sum,ex)=>sum+(ex.weight*ex.reps),0);let liveReps=0;liveExercises.forEach(ex=>liveReps+=parseInt(ex.reps)||0);await updateQuestProgressBatch({volume:totalVolume,reps:liveReps,workout_days:1});if(typeof updateStat==="function"){updateStat('workouts',1);if(updateMaxWeightLocally){liveExercises.forEach(ex=>{let w=parseFloat(ex.weight)||0;if(w>0)updateStat('maxWeight',w,!0);})}}
-let workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[];let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});let typeStr=pendingProofData?pendingProofData.type:(liveExercises[0]?.type||"تمرين لايف");workoutHistory.unshift({date:dateStr,type:typeStr,details:liveExercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));const user=auth.currentUser;let xpMessage="";let xpGained=!1;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));xpMessage=currentLang==='en'?`XP resets in ${hours}h ${minutes}m`:`تتجدد المكافأة بعد ${hours}س و${minutes}د`;await db.collection('users').doc(user.uid).update({workouts:workoutHistory})}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));await db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr});if(typeof addXP==="function")await addXP(50,'workout');xpGained=!0;xpMessage="+50 XP"}}
+let workoutHistory=JSON.parse(localStorage.getItem('userWorkouts'))||[];let dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});let typeStr=pendingProofData?pendingProofData.type:(liveExercises[0]?.type||"تمرين لايف");workoutHistory.unshift({date:dateStr,type:typeStr,details:liveExercises});localStorage.setItem('userWorkouts',JSON.stringify(workoutHistory));const user=auth.currentUser;let xpMessage="";let xpGained=!1;if(user){let savedData=JSON.parse(localStorage.getItem('currentUser')||'{}');const todayStr=new Date().toDateString();const lastXpDate=savedData.lastWorkoutXpDate||"";if(lastXpDate===todayStr){const now=new Date();const tomorrow=new Date(now);tomorrow.setHours(24,0,0,0);const timeLeftMs=tomorrow-now;const hours=Math.floor(timeLeftMs/(1000*60*60));const minutes=Math.floor((timeLeftMs%(1000*60*60))/(1000*60));xpMessage=currentLang==='en'?`XP resets in ${hours}h ${minutes}m`:`تتجدد المكافأة بعد ${hours}س و${minutes}د`;await db.collection('users').doc(user.uid).update({workouts:workoutHistory})}else{savedData.lastWorkoutXpDate=todayStr;localStorage.setItem('currentUser',JSON.stringify(savedData));await db.collection('users').doc(user.uid).update({workouts:workoutHistory,lastWorkoutXpDate:todayStr, stockVolatility: firebase.firestore.FieldValue.increment(2)});if(typeof addXP==="function")await addXP(50,'workout');xpGained=!0;xpMessage="+50 XP"}}
 const m=String(Math.floor(liveSeconds/60)).padStart(2,'0');const s=String(liveSeconds%60).padStart(2,'0');window.liveFinalTime=`${m}:${s}`;window.liveFinalVolume=totalVolume;window.liveFinalSets=totalSets;window.liveXpMessage=xpMessage;window.liveXpGained=xpGained}
 function closeLiveSummaryOrShow(){clearInterval(liveDurationTimer);clearInterval(restInterval);const overlay=document.getElementById('live-workout-overlay');overlay.classList.remove('active');setTimeout(()=>overlay.style.display='none',500);document.getElementById('rest-timer-overlay').classList.remove('active');releaseWakeLock();const summaryOverlay=document.getElementById('live-summary-overlay');if(summaryOverlay){document.getElementById('sum-time').innerText=window.liveFinalTime;document.getElementById('sum-sets').innerText=window.liveFinalSets;document.getElementById('sum-volume').innerText="0";const xpRewardBox=document.querySelector('.xp-reward-box');if(xpRewardBox){xpRewardBox.innerText=window.liveXpMessage;xpRewardBox.style.fontSize=window.liveXpGained?'2.5rem':'1.1rem';xpRewardBox.style.color=window.liveXpGained?'var(--primary-color)':'var(--slate)';xpRewardBox.style.textShadow=window.liveXpGained?'0 0 20px rgba(0, 242, 167, 0.6)':'none';xpRewardBox.style.animation=window.liveXpGained?'pulseXP 1.5s infinite alternate':'none'}
 summaryOverlay.style.display='flex';setTimeout(()=>{summaryOverlay.classList.add('active');animateValue(document.getElementById('sum-volume'),0,window.liveFinalVolume,1500)},50)}else{showToast(currentLang==='en'?`Workout Saved! ${window.liveXpMessage}`:`تم حفظ التمرين! ${window.liveXpMessage}`);closeLiveSummary()}}
@@ -5642,8 +5653,12 @@ window.finishHeroClash = async function(clashId, clashData, myData, enemyData) {
 
         if (winState === 'win') {
             notifTitle = isEn ? "🏆 Clash Victory!" : "🏆 انتصار ساحق!";
+
             notifBody = isEn ? `You crushed ${enemyData.name} and won ${prize} ${wIcon}!` : `سحقت ${enemyData.name} وغنمت ${prize} ${wIcon}!`;
-            
+// الكود الجديد: رفع سهم الفائز بقوة في البورصة 📈🔥
+await db.collection('users').doc(user.uid).update({ stockVolatility: firebase.firestore.FieldValue.increment(5) });
+
+
             if(wagerType === 'coins') {
                 userData.ironCoins = (userData.ironCoins || 0) + prize;
                 await db.collection('users').doc(user.uid).update({ ironCoins: firebase.firestore.FieldValue.increment(prize) });
@@ -5660,10 +5675,12 @@ window.finishHeroClash = async function(clashId, clashData, myData, enemyData) {
             } else {
                 if(typeof addXP === 'function') addXP(wagerAmount, 'quest');
             }
-        } else {
-            notifTitle = isEn ? "💀 Clash Defeat" : "💀 هزيمة!";
-            notifBody = isEn ? `You lost to ${enemyData.name}. Train harder!` : `خسرت التحدي لصالح ${enemyData.name}. عُد أقوى!`;
-        }
+       } else {
+    notifTitle = isEn ? "💀 Clash Defeat" : "💀 هزيمة!";
+    notifBody = isEn ? `You lost to ${enemyData.name}. Train harder!` : `خسرت التحدي لصالح ${enemyData.name}. عُد أقوى!`;
+    // الكود الجديد: هبوط سهم الخاسر في البورصة 📉
+    await db.collection('users').doc(user.uid).update({ stockVolatility: firebase.firestore.FieldValue.increment(-5) });
+}
 
         await db.collection('users').doc(user.uid).collection('notifications').add({
             type: 'system_reward',
@@ -5685,5 +5702,504 @@ window.finishHeroClash = async function(clashId, clashData, myData, enemyData) {
         console.error("Finish Clash Error:", e);
     } finally {
         setTimeout(() => { window.isFinishingClash = false; }, 2000);
+    }
+};
+
+
+/* =========================================
+   📈 RGA STOCK EXCHANGE SYSTEM (REAL ECONOMY) 📈
+   ========================================= */
+
+window.currentViewedStock = null;
+window.heroChartInstance = null;
+
+
+window.switchStockTab = function(tab, btn) {
+    const buttons = btn.parentElement.querySelectorAll('button');
+    buttons.forEach(b => b.classList.remove('active-tab'));
+    btn.classList.add('active-tab');
+    loadStockMarketData(tab);
+};
+
+function applyStockTranslations() {
+    const isEn = currentLang === 'en';
+    document.getElementById('stock-subtitle').innerText = isEn ? 'Invest in Heroes. Grow your wealth.' : 'استثمر في الأبطال وضاعف ثروتك';
+    document.getElementById('stock-port-title').innerText = isEn ? 'Total Assets' : 'إجمالي الأصول';
+    document.getElementById('stock-profit-title').innerText = isEn ? 'ROI' : 'العائد الاستثماري';
+    document.getElementById('tab-market-btn').innerText = isEn ? 'Market' : 'السوق';
+    document.getElementById('tab-mystocks-btn').innerText = isEn ? 'Portfolio' : 'محفظتي';
+    document.getElementById('txt-back-market').innerText = isEn ? 'Back' : 'رجوع';
+    document.getElementById('txt-buy-coins').innerText = isEn ? 'Buy (Coins)' : 'شراء بـ Coins';
+    document.getElementById('txt-buy-xp').innerText = isEn ? 'Buy (XP)' : 'شراء بـ XP';
+    document.getElementById('txt-sell-all').innerText = isEn ? 'Sell Shares' : 'بيع الأسهم';
+    document.getElementById('txt-my-stock-value').innerText = isEn ? 'My Stock Value' : 'قيمة سهمك بالسوق';
+    document.getElementById('txt-my-investors').innerText = isEn ? 'Investors' : 'المستثمرين بك';
+}
+
+// 🧠 الخوارزمية الحقيقية لحساب السعر
+function calculateStockPrice(userDocData) {
+    let level = userDocData.rank || 1;
+    let xp = userDocData.xp || 0;
+    let streak = userDocData.streak || 1;
+    let maxWeight = (userDocData.stats && userDocData.stats.maxWeight) ? userDocData.stats.maxWeight : 0;
+    let volatility = userDocData.stockVolatility || 0; 
+    
+    // السعر = (المستوى * 5) + (الخبرة / 200) + (الستريك * 2) + (أعلى وزن / 5) + التذبذبات
+    let price = (level * 5) + (xp / 200) + (streak * 2) + (maxWeight / 5) + volatility;
+    
+    return Math.max(10, Math.floor(price)); // السعر لا ينزل عن 10
+}
+window.loadStockMarketData = async function(tab) {
+    const list = document.getElementById('stock-market-list');
+    const user = auth.currentUser;
+    if(!user) return;
+
+    list.innerHTML = `<div style="text-align:center; padding: 30px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:#9b59b6;"></i></div>`;
+
+    try {
+        let myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const isEn = currentLang === 'en';
+        
+        // 1. حساب وعرض الرصيد المتاح (Coins + XP)
+        let availableXp = (myData.xp || 0) - (myData.spentXp || 0);
+        document.getElementById('my-portfolio-coins').innerHTML = `${(myData.ironCoins || 0).toLocaleString()} <i class="fa-solid fa-coins" style="font-size: 0.9rem;"></i>`;
+        document.getElementById('my-portfolio-xp').innerHTML = `${availableXp.toLocaleString()} <span style="font-size: 0.9rem; font-family: var(--font-main);">XP</span>`;
+
+        // 2. حساب تفاصيل سهمي (سعري الشخصي)
+        let myPrice = calculateStockPrice(myData);
+        let myRealInvestors = myData.investorsCount || 0;
+        
+        document.getElementById('my-own-stock-price').innerHTML = `${myPrice}`;
+        document.getElementById('my-investors-count').innerHTML = `${myRealInvestors} <i class="fa-solid fa-users" style="color:var(--slate); font-size:0.9rem;"></i>`;
+
+        const snapshot = await db.collection('users').orderBy('xp', 'desc').limit(20).get();
+        let html = '';
+
+        let myInvestments = myData.investments || {}; 
+        let totalPortfolioValue = 0;
+        let totalInvestedCost = 0;
+        let totalCoinProfit = 0;
+        let totalXpProfit = 0;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const targetUid = doc.id;
+            
+            let currentPrice = calculateStockPrice(data);
+            let oldPrice = data.lastStockPrice || (currentPrice - (Math.random() * 8).toFixed(1)); 
+            if(oldPrice <= 0) oldPrice = currentPrice * 0.9;
+            let changePct = (((currentPrice - oldPrice) / oldPrice) * 100).toFixed(1);
+            
+            let changeClass = changePct >= 0 ? 'up' : 'down';
+            let changeIcon = changePct >= 0 ? '<i class="fa-solid fa-caret-up"></i>' : '<i class="fa-solid fa-caret-down"></i>';
+            let shortSym = data.firstName.substring(0, 3).toUpperCase();
+
+            let sharesOwned = 0;
+            // 3. تحليل المحفظة وتوزيع الأرباح بدقة
+            if (myInvestments[targetUid]) {
+                let inv = myInvestments[targetUid];
+                sharesOwned = inv.shares;
+                let currencyUsed = inv.currency || 'buy_xp';
+                
+                let cost = sharesOwned * inv.avgPrice;
+                let val = sharesOwned * currentPrice;
+                let profit = val - cost;
+
+                totalInvestedCost += cost;
+                totalPortfolioValue += val;
+
+                if (currencyUsed === 'buy_coins') {
+                    totalCoinProfit += profit;
+                } else {
+                    totalXpProfit += profit;
+                }
+            }
+
+            const safeName = data.firstName.replace(/'/g, "");
+            const safePhoto = data.photoURL || '/Photos/adm.jpeg';
+
+            if (tab === 'market') {
+                if (targetUid === user.uid) return; 
+                
+                html += `
+                <div class="stock-card" onclick="openStockDetails('${targetUid}', '${safeName}', '${safePhoto}', ${currentPrice}, ${changePct}, ${sharesOwned})">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="${safePhoto}" class="stock-avatar">
+                        <div class="stock-info">
+                            <h4>${safeName}</h4>
+                            <span class="stock-symbol">${shortSym}</span>
+                        </div>
+                    </div>
+                    <div class="stock-price-box">
+                        <span class="stock-price">${currentPrice}</span>
+                        <span class="stock-change ${changeClass}">${changeIcon} ${Math.abs(changePct)}%</span>
+                    </div>
+                </div>`;
+            } else if (tab === 'my_stocks' && sharesOwned > 0) {
+                let inv = myInvestments[targetUid];
+                let profitLoss = ((currentPrice - inv.avgPrice) / inv.avgPrice) * 100;
+                let plClass = profitLoss >= 0 ? 'up' : 'down';
+                
+                html += `
+                <div class="stock-card" onclick="openStockDetails('${targetUid}', '${safeName}', '${safePhoto}', ${currentPrice}, ${changePct}, ${sharesOwned})">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img src="${safePhoto}" class="stock-avatar">
+                        <div class="stock-info">
+                            <h4>${safeName}</h4>
+                            <span class="stock-symbol">${inv.shares} ${isEn ? 'Shares' : 'سهم'}</span>
+                        </div>
+                    </div>
+                    <div class="stock-price-box">
+                        <span class="stock-price">${(inv.shares * currentPrice).toFixed(0)}</span>
+                        <span class="stock-change ${plClass}">${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(1)}%</span>
+                    </div>
+                </div>`;
+            }
+        });
+
+        // 4. رسم بيانات الأرباح الصافية (النسبة والأرقام الدقيقة)
+        let pctEl = document.getElementById('my-portfolio-profit-pct');
+        let detailsEl = document.getElementById('my-portfolio-profit-details');
+
+        if (totalInvestedCost > 0) {
+            let totalPL = (((totalPortfolioValue - totalInvestedCost) / totalInvestedCost) * 100).toFixed(1);
+            pctEl.innerText = `${totalPL >= 0 ? '+' : ''}${totalPL}%`;
+            pctEl.style.color = totalPL >= 0 ? '#00f2a7' : '#ff4d4d';
+            pctEl.style.textShadow = totalPL >= 0 ? '0 0 15px rgba(0,242,167,0.4)' : '0 0 15px rgba(255,77,77,0.4)';
+
+            let detailsHtml = '';
+            if (totalCoinProfit !== 0) {
+                let cColor = totalCoinProfit > 0 ? '#00f2a7' : '#ff4d4d';
+                let cSign = totalCoinProfit > 0 ? '+' : '';
+                detailsHtml += `<span style="color:${cColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">${cSign}${totalCoinProfit.toFixed(0)} <i class="fa-solid fa-coins"></i></span>`;
+            }
+            if (totalXpProfit !== 0) {
+                let xColor = totalXpProfit > 0 ? '#00f2a7' : '#ff4d4d';
+                let xSign = totalXpProfit > 0 ? '+' : '';
+                detailsHtml += `<span style="color:${xColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">${xSign}${totalXpProfit.toFixed(0)} XP</span>`;
+            }
+            detailsEl.innerHTML = detailsHtml;
+
+        } else {
+            pctEl.innerText = "0.00%";
+            pctEl.style.color = "var(--slate)";
+            pctEl.style.textShadow = "none";
+            detailsEl.innerHTML = `<span style="color:var(--slate);">${isEn ? 'No Active Investments' : 'لا يوجد استثمارات نشطة'}</span>`;
+        }
+
+        if(html === '') html = `<p style="text-align:center; color:var(--slate); margin-top:20px;">${isEn ? 'No data available.' : 'لا توجد بيانات حالياً.'}</p>`;
+        list.innerHTML = html;
+
+    } catch (e) {
+        console.error(e);
+        list.innerHTML = `<p style="text-align:center; color:#ff4d4d;">Error loading market!</p>`;
+    }
+};
+
+/* --- نظام الرسم البياني --- */
+window.openStockDetails = function(uid, name, photo, currentPrice, changePct, sharesOwned) {
+    document.getElementById('stock-main-view').style.display = 'none';
+    document.getElementById('stock-chart-view').style.display = 'block';
+
+    window.currentViewedStock = { uid, name, currentPrice, sharesOwned };
+
+    document.getElementById('chart-hero-name').innerText = name;
+    document.getElementById('chart-hero-sym').innerText = name.substring(0, 3).toUpperCase();
+    document.getElementById('chart-hero-img').src = photo;
+    document.getElementById('chart-hero-price').innerHTML = `${currentPrice}`;
+    
+    const changeEl = document.getElementById('chart-hero-change');
+    changeEl.innerText = `${changePct >= 0 ? '+' : ''}${changePct}%`;
+    changeEl.style.color = changePct >= 0 ? '#00f2a7' : '#ff4d4d';
+
+    const btnSell = document.getElementById('btn-sell-chart');
+    if (sharesOwned > 0) {
+        btnSell.style.display = 'flex';
+        btnSell.querySelector('span').innerText = currentLang === 'en' ? `Sell (${sharesOwned} Shares)` : `بيع (${sharesOwned} سهم)`;
+    } else {
+        btnSell.style.display = 'none';
+    }
+
+    drawHeroChart(currentPrice, changePct);
+};
+
+window.closeStockChartView = function() {
+    document.getElementById('stock-chart-view').style.display = 'none';
+    document.getElementById('stock-main-view').style.display = 'block';
+    if(window.heroChartInstance) window.heroChartInstance.destroy();
+};
+
+function drawHeroChart(currentPrice, changePct) {
+    const ctx = document.getElementById('heroStockChart');
+    if(window.heroChartInstance) window.heroChartInstance.destroy();
+
+    let history = [];
+    let tempPrice = currentPrice;
+    for (let i = 0; i < 7; i++) {
+        history.unshift(tempPrice);
+        let modifier = changePct >= 0 ? (Math.random() * 3 + 1) : -(Math.random() * 3 + 1);
+        tempPrice = Math.max(5, tempPrice - modifier);
+    }
+
+    const isUptrend = changePct >= 0;
+    const lineColor = isUptrend ? '#00f2a7' : '#ff4d4d';
+    const bgColor = isUptrend ? 'rgba(0, 242, 167, 0.15)' : 'rgba(255, 77, 77, 0.15)';
+
+    window.heroChartInstance = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Today'],
+            datasets: [{
+                data: history,
+                borderColor: lineColor,
+                backgroundColor: bgColor,
+                borderWidth: 3,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+            scales: {
+                x: { display: false },
+                y: { display: false, min: Math.min(...history) - 5 }
+            }
+        }
+    });
+}
+
+/* --- التداول الفعلي وتحديث المستثمرين (مع حماية الاقتصاد) --- */
+window.executeStockTrade = async function(actionType) {
+    const stock = window.currentViewedStock;
+    if(!stock) return;
+
+    let myData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const isEn = currentLang === 'en';
+
+    // ==========================================
+    // 1. منطق البيع (Sell Logic)
+    // ==========================================
+    if (actionType === 'sell') {
+        let inv = myData.investments[stock.uid];
+        let revenue = stock.sharesOwned * stock.currentPrice;
+        let returnCurrency = 'xp'; // افتراضي
+
+        // فحص العملة التي تم الشراء بها
+        if (!inv.currency || inv.currency === 'buy_xp') {
+            // اشتراها بـ XP -> ترجع XP إجبارياً
+            if (!confirm(isEn ? `Confirm selling ${stock.sharesOwned} shares? You will get ${revenue} XP.` : `تأكيد بيع ${stock.sharesOwned} أسهم؟ ستسترد ${revenue} XP.`)) return;
+            returnCurrency = 'xp';
+        } else {
+            // اشتراها بـ Coins -> نخليه يختار
+            let msg = isEn ? 
+                `You invested with Coins. How do you want your ${revenue} profits?\nType "1" for Iron Coins.\nType "2" for XP.` : 
+                `أنت استثمرت بالعملات. كيف تريد استلام أرباحك (${revenue})؟\nاكتب "1" لاستلامها كـ (عملات حديدية).\nاكتب "2" لاستلامها كـ (نقاط XP).`;
+            
+            let choice = prompt(msg);
+            if (choice === '1') returnCurrency = 'coins';
+            else if (choice === '2') returnCurrency = 'xp';
+            else {
+                showToast(isEn ? "Trade cancelled." : "تم إلغاء عملية البيع.");
+                return;
+            }
+        }
+        
+        let dbUpdates = {
+            [`investments.${stock.uid}`]: firebase.firestore.FieldValue.delete()
+        };
+
+        // إضافة الأرباح بناءً على اختيار العملة
+        if (returnCurrency === 'coins') {
+            myData.ironCoins = (myData.ironCoins || 0) + revenue;
+            dbUpdates.ironCoins = myData.ironCoins;
+        } else {
+            myData.xp = (myData.xp || 0) + revenue;
+            myData.rank = Math.floor(myData.xp / 500) + 1; // تحديث المستوى إذا ربح XP كثير
+            dbUpdates.xp = myData.xp;
+            dbUpdates.rank = myData.rank;
+        }
+
+        delete myData.investments[stock.uid];
+        
+        try {
+            const batch = db.batch();
+            batch.update(db.collection('users').doc(auth.currentUser.uid), dbUpdates);
+            // إنقاص المستثمرين من اللاعب الهدف
+            batch.update(db.collection('users').doc(stock.uid), {
+                investorsCount: firebase.firestore.FieldValue.increment(-1)
+            });
+            await batch.commit();
+
+            let toastMsg = isEn ? `Sold! +${revenue} ${returnCurrency.toUpperCase()}` : `تم البيع بنجاح! +${revenue} ${returnCurrency === 'coins' ? 'كوين' : 'XP'}`;
+            showToast(toastMsg);
+        } catch (e) { showToast(isEn ? "Error!" : "خطأ!"); return; }
+
+    } 
+    // ==========================================
+    // 2. منطق الشراء (Buy Logic)
+    // ==========================================
+    else {
+        // حماية: منع خلط العملات لنفس السهم
+        if (myData.investments && myData.investments[stock.uid]) {
+            let existingCurrency = myData.investments[stock.uid].currency || 'buy_xp';
+            if (existingCurrency !== actionType) {
+                let currName = existingCurrency === 'buy_coins' ? (isEn?'Coins':'كوينز') : 'XP';
+                showToast(isEn ? `You already invested here using ${currName}. Use the same currency!` : `أنت تمتلك أسهماً هنا اشتريتها بـ (${currName}). يجب استخدام نفس العملة!`);
+                return;
+            }
+        }
+
+        let currencyLabel = actionType === 'buy_coins' ? (isEn?'Coins':'كوين') : 'XP';
+        let sharesStr = prompt(isEn ? `How many shares do you want to buy?\nPrice per share: ${stock.currentPrice} ${currencyLabel}` : `كم سهماً تريد الشراء؟\nسعر السهم: ${stock.currentPrice} ${currencyLabel}`);
+        if (!sharesStr) return;
+        
+        let shares = parseInt(sharesStr);
+        if (isNaN(shares) || shares <= 0) return;
+
+        let pricePerShare = stock.currentPrice;
+        let totalCost = shares * pricePerShare;
+
+        let hasBalance = false;
+        if (actionType === 'buy_coins') {
+            hasBalance = (myData.ironCoins || 0) >= totalCost;
+        } else {
+            hasBalance = ((myData.xp || 0) - (myData.spentXp || 0)) >= totalCost;
+        }
+
+        if (!hasBalance) {
+            showToast(isEn ? "Not enough balance!" : "رصيدك غير كافٍ لإتمام العملية!");
+            return;
+        }
+
+        if (!confirm(isEn ? `Confirm buying ${shares} shares for ${totalCost} ${currencyLabel}?` : `تأكيد شراء ${shares} أسهم بتكلفة إجمالية ${totalCost} ${currencyLabel}؟`)) return;
+
+        try {
+            const batch = db.batch();
+            let myDocRef = db.collection('users').doc(auth.currentUser.uid);
+            let targetDocRef = db.collection('users').doc(stock.uid);
+            
+            let dbUpdates = {};
+            if (actionType === 'buy_coins') {
+                myData.ironCoins -= totalCost;
+                dbUpdates.ironCoins = myData.ironCoins;
+            } else {
+                myData.spentXp = (myData.spentXp || 0) + totalCost;
+                dbUpdates.spentXp = myData.spentXp;
+            }
+
+            let isFirstTimeInvestor = false;
+            if (!myData.investments) myData.investments = {};
+            
+            if (myData.investments[stock.uid]) {
+                let oldShares = myData.investments[stock.uid].shares;
+                let oldAvg = myData.investments[stock.uid].avgPrice;
+                let newAvg = ((oldShares * oldAvg) + (shares * stock.currentPrice)) / (oldShares + shares);
+                myData.investments[stock.uid].shares += shares;
+                myData.investments[stock.uid].avgPrice = parseFloat(newAvg.toFixed(2));
+            } else {
+                isFirstTimeInvestor = true;
+                // تم إضافة تسجيل نوع العملة هنا 🔑
+                myData.investments[stock.uid] = { shares: shares, avgPrice: stock.currentPrice, currency: actionType };
+            }
+
+            dbUpdates.investments = myData.investments;
+            batch.update(myDocRef, dbUpdates);
+
+            if (isFirstTimeInvestor) {
+                batch.update(targetDocRef, {
+                    investorsCount: firebase.firestore.FieldValue.increment(1)
+                });
+            }
+
+            await batch.commit();
+            showToast(isEn ? "Trade Successful!" : "تمت العملية بنجاح!");
+        } catch (e) {
+            showToast(isEn ? "Error executing trade." : "حدث خطأ في العملية."); return;
+        }
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(myData));
+    closeStockChartView();
+    loadStockMarketData(document.querySelector('.perf-tab-btn.active-tab').getAttribute('onclick').includes('my_stocks') ? 'my_stocks' : 'market');
+};
+
+
+
+/* --- دوال فتح وإغلاق السوق مع أنيميشن أبل الناعم --- */
+
+window.openStockMarket = function() {
+    const modal = document.getElementById('stock-market-modal');
+    if(modal) {
+        document.body.classList.add('no-scroll-modal'); // قفل السكرول الخلفي
+        modal.style.display = 'flex';
+        modal.classList.remove('rga-apple-close');
+        modal.classList.add('rga-apple-open'); // تشغيل أنيميشن الدخول
+        applyStockTranslations();
+        loadStockMarketData('market');
+    }
+};
+
+window.closeStockMarket = function() {
+    const modal = document.getElementById('stock-market-modal');
+    if(modal) {
+        modal.classList.remove('rga-apple-open');
+        modal.classList.add('rga-apple-close'); // تشغيل أنيميشن الخروج
+        
+        // ننتظر 300 ملي ثانية (مدة الأنيميشن) ثم نخفي العنصر نهائياً
+        setTimeout(() => {
+            modal.style.display = 'none';
+            modal.classList.remove('rga-apple-close');
+            
+            // فتح السكرول الخلفي إذا لم تكن هناك نوافذ أخرى مفتوحة
+            const anyModalOpen = document.querySelectorAll('.rga-apple-open, .modal-overlay.active').length > 0;
+            if (!anyModalOpen) {
+                document.body.classList.remove('no-scroll-modal');
+            }
+        }, 300);
+    }
+    closeStockChartView();
+};
+
+/* --- زر المساعدة (Info) للبورصة مع أنيميشن أبل --- */
+
+window.showStockMarketInfo = function() {
+    const t = translations[currentLang || 'ar'];
+    const rulesHtml = `
+        <li style="margin-bottom:12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">${t.stock_info_1}</li>
+        <li style="margin-bottom:12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">${t.stock_info_2}</li>
+        <li style="margin-bottom:12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">${t.stock_info_3}</li>
+    `;
+
+    const modal = document.createElement('div');
+    // إضافة كلاسات الدخول الخاصة بأبل
+    modal.className = 'modal-overlay rga-apple-open';
+    modal.style.zIndex = '90000';
+    
+    // تم تغيير أمر الإغلاق في الزر ليقوم بالأنيميشن العكسي بدلاً من الحذف المباشر
+    modal.innerHTML = `
+        <div class="modal-content glass-card" style="max-width:400px; padding:25px; border: 1px solid #9b59b6; background: rgba(15, 20, 35, 0.95); backdrop-filter: blur(20px);">
+            <h2 style="color:#d8b4fe; margin-bottom:20px; text-align:center;">${t.stock_info_title}</h2>
+            <ul style="color:white; list-style:none; padding:0; font-size:0.9rem; text-align: ${currentLang === 'en' ? 'left' : 'right'};" dir="${currentLang === 'en' ? 'ltr' : 'rtl'}">${rulesHtml}</ul>
+            <button class="btn-primary" onclick="closeStockInfoModal(this)" style="width: 100%; margin-top: 20px; background: rgba(155, 89, 182, 0.2); color: #d8b4fe; border-color: #9b59b6;">
+                ${t.stock_info_btn}
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+// دالة مخصصة لإغلاق نافذة المعلومات بأنيميشن
+window.closeStockInfoModal = function(btnElement) {
+    const modal = btnElement.closest('.modal-overlay');
+    if(modal) {
+        modal.classList.remove('rga-apple-open');
+        modal.classList.add('rga-apple-close'); // تشغيل الخروج
+        setTimeout(() => {
+            modal.remove(); // حذف من الشاشة بعد انتهاء الأنيميشن
+        }, 300);
     }
 };
