@@ -87,10 +87,10 @@ const t=translations[currentLang||'ar'];mainContent.innerHTML=`
         </header>
         <section class="performance-container">
             <div class="performance-tabs" style="display: flex; gap: 5px; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px;">
-    <button class="perf-tab-btn active-tab" onclick="switchAdminTab('requests', this)">${currentLang === 'en' ? 'Beast Requests (Videos)' : 'طلبات الوحوش (فيديو)'}</button>
-    <button class="perf-tab-btn" onclick="switchAdminTab('messages', this)">${currentLang === 'en' ? 'Inbox (Support)' : 'صندوق الوارد (دعم فني)'}</button>
-</div>
-
+                <button class="perf-tab-btn active-tab" onclick="switchAdminTab('requests', this)">${currentLang === 'en' ? 'Beast Requests (Videos)' : 'طلبات الوحوش (فيديو)'}</button>
+                <button class="perf-tab-btn" onclick="switchAdminTab('messages', this)">${currentLang === 'en' ? 'Inbox (Support)' : 'صندوق الوارد (دعم فني)'}</button>
+                <button class="perf-tab-btn" onclick="switchAdminTab('payments', this)" style="color: #3498db;">${currentLang === 'en' ? 'CliQ Payments' : 'حوالات ميثاق الأبطال'}</button>
+            </div>
 
             <div id="admin-tab-requests" style="display: block;">
                 <div id="admin-requests-container" style="text-align:center; padding:40px; color:var(--primary-color);">
@@ -103,9 +103,21 @@ const t=translations[currentLang||'ar'];mainContent.innerHTML=`
                     <i class="fa-solid fa-spinner fa-spin fa-3x"></i>
                 </div>
             </div>
+
+            <div id="admin-tab-payments" style="display: none;">
+                <div id="admin-payments-container" style="text-align:center; padding:40px; color:#3498db;">
+                    <i class="fa-solid fa-spinner fa-spin fa-3x"></i>
+                </div>
+            </div>
         </section>
-    `;loadPendingWorkouts();loadAdminMessages()}
-window.switchAdminTab=function(tab,btn){document.querySelectorAll('.perf-tab-btn').forEach(b=>b.classList.remove('active-tab'));btn.classList.add('active-tab');document.getElementById('admin-tab-requests').style.display=tab==='requests'?'block':'none';document.getElementById('admin-tab-messages').style.display=tab==='messages'?'block':'none'};async function loadAdminMessages(){const container=document.getElementById('admin-messages-container');try{const snapshot=await db.collection('contact_messages').orderBy('timestamp','desc').get();if(snapshot.empty){container.innerHTML=`<div class="empty-notif" style="margin-top:50px;"><i class="fa-solid fa-inbox" style="font-size:4rem; color:var(--slate);"></i><p style="margin-top:15px; color:white;">لا توجد رسائل جديدة.</p></div>`;return}
+    `;loadPendingWorkouts();loadAdminMessages();loadAdminPayments()}
+window.switchAdminTab=function(tab,btn){
+    document.querySelectorAll('.perf-tab-btn').forEach(b=>b.classList.remove('active-tab'));
+    btn.classList.add('active-tab');
+    document.getElementById('admin-tab-requests').style.display=tab==='requests'?'block':'none';
+    document.getElementById('admin-tab-messages').style.display=tab==='messages'?'block':'none';
+    document.getElementById('admin-tab-payments').style.display=tab==='payments'?'block':'none';
+};async function loadAdminMessages(){const container=document.getElementById('admin-messages-container');try{const snapshot=await db.collection('contact_messages').orderBy('timestamp','desc').get();if(snapshot.empty){container.innerHTML=`<div class="empty-notif" style="margin-top:50px;"><i class="fa-solid fa-inbox" style="font-size:4rem; color:var(--slate);"></i><p style="margin-top:15px; color:white;">لا توجد رسائل جديدة.</p></div>`;return}
 let html='<div style="display: flex; flex-direction: column; gap: 15px;">';snapshot.forEach(doc=>{const data=doc.data();const date=data.timestamp?data.timestamp.toDate().toLocaleString('en-GB'):'غير معروف';html+=`
                 <div class="glass-card" style="border-right: 4px solid #3498db; text-align: right;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
@@ -6202,4 +6214,399 @@ window.closeStockInfoModal = function(btnElement) {
             modal.remove(); // حذف من الشاشة بعد انتهاء الأنيميشن
         }, 300);
     }
+};
+
+window.currentPledgeChallenge = null;
+window.openIronPledgeHub = async function() {
+    if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('collapsed');
+    const mainContent = document.getElementById('main-content-area');
+    if(!mainContent) return;
+    if(!mainContent.dataset.originalContent) mainContent.dataset.originalContent = mainContent.innerHTML;
+    
+    const isEn = currentLang === 'en';
+    const user = auth.currentUser;
+
+    mainContent.innerHTML = `
+        <header class="top-bar" style="margin-bottom: 20px;">
+            <div class="header-row">
+                <button id="back-to-dash-btn" class="btn-primary" style="padding: 5px 15px;">${isEn ? 'Back' : 'رجوع'}</button>
+                <h1 style="margin: 0 15px; font-weight: 900; color: #4da6ff; text-shadow: 0 0 15px rgba(52, 152, 219, 0.4);">
+                    <i class="fa-solid fa-handshake-angle"></i> ${isEn ? 'Iron Pledge' : 'ميثاق الأبطال'}
+                </h1>
+            </div>
+        </header>
+        <section class="performance-container" id="pledge-main-view" style="animation: fadeIn 0.4s;">
+            <div style="text-align:center; padding: 50px;"><i class="fa-solid fa-spinner fa-spin fa-3x" style="color:#3498db;"></i></div>
+        </section>
+    `;
+    document.getElementById('back-to-dash-btn').onclick = backToDashboard;
+
+    try {
+        // جلب بيانات اللاعب من السيرفر للتأكد 100% من حالته
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
+        const view = document.getElementById('pledge-main-view');
+
+        // 🚨 السحر هنا: فحص إذا الإدارة قبلته 🚨
+        if (userData.activePledge === 'PLEDGE_MAY') {
+            // اللاعب مشترك وتم قبوله -> افتح لوحة التحكم الخاصة بالتحدي
+            renderActivePledgeDashboard(userData);
+        } else {
+            // اللاعب غير مشترك -> افتح شاشة المبيعات وشيك إذا مقدم طلب
+            const myRequest = await db.collection('payment_requests').where('uid', '==', user.uid).where('status', '==', 'pending').get();
+            renderPledgeSalesPage(!myRequest.empty);
+        }
+    } catch (e) {
+        console.error(e);
+        document.getElementById('pledge-main-view').innerHTML = `<p style="color:red; text-align:center;">Error loading Pledge Hub.</p>`;
+    }
+};
+
+// الشاشة القديمة (شاشة الإقناع والدفع)
+function renderPledgeSalesPage(hasPending) {
+    const isEn = currentLang === 'en';
+    const challengePrice = 10;
+    
+    let actionBtnHtml = hasPending ? `
+        <div style="background: rgba(255, 159, 67, 0.15); border: 1px dashed #ff9f43; padding: 15px; border-radius: 12px; color: #ff9f43; font-weight: bold; text-align: center;">
+            <i class="fa-solid fa-hourglass-half fa-spin"></i> ${isEn ? 'Your pledge is under review...' : 'إيداعك قيد مراجعة الإدارة...'}
+        </div>
+    ` : `
+        <button class="btn-primary" style="width: 100%; padding: 15px; background: rgba(52, 152, 219, 0.15); color: #4da6ff; border-color: #3498db; font-size: 1.1rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);" onclick="openCliqModal('PLEDGE_MAY', ${challengePrice})">
+            <i class="fa-solid fa-signature"></i> ${isEn ? 'Sign Contract & Deposit' : `توقيع الميثاق وإيداع (${challengePrice} JD)`}
+        </button>
+    `;
+
+    document.getElementById('pledge-main-view').innerHTML = `
+        <div style="background: linear-gradient(135deg, rgba(52,152,219,0.1), rgba(0,0,0,0.6)); border: 1px solid rgba(52,152,219,0.3); border-radius: 20px; padding: 25px; text-align: center; margin-bottom: 25px; box-shadow: inset 0 0 30px rgba(0,0,0,0.8);">
+            <i class="fa-solid fa-scale-unbalanced" style="font-size: 3rem; color: #3498db; margin-bottom: 15px; filter: drop-shadow(0 0 10px #3498db);"></i>
+            <h2 style="color: white; font-weight: 900; margin-bottom: 10px;">${isEn ? 'Commitment Contracts' : 'عقود الالتزام الصارمة'}</h2>
+            <p style="color: #a0aec0; font-size: 0.9rem; line-height: 1.6;">${isEn ? 'Put down a financial pledge. Train consistently for 30 days. Those who quit lose their pledge.' : 'ضع عربون التزامك. تدرّب بانتظام لمدة 30 يوماً. من يستسلم يترك ماله، ومن ينجز التحدي يسترد ماله ويأخذ حصة من المنسحبين!'}</p>
+        </div>
+
+        <h3 style="color: white; margin-bottom: 15px;">${isEn ? 'Active Pledges' : 'المواثيق المتاحة حالياً'}</h3>
+        
+        <div class="glass-card" style="border: 1px solid rgba(52,152,219,0.3); padding: 20px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <h3 style="color: white; margin: 0; font-weight: 900; line-height: 1.4; max-width: 70%;">
+                    ${isEn ? '30 Days Iron Discipline' : 'تحدي الانضباط الحديدي (30 يوم)'}
+                </h3>
+                <span style="background: rgba(0, 242, 167, 0.1); color: #00f2a7; border: 1px solid #00f2a7; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;">
+                    ${isEn ? 'Open' : 'متاح للتسجيل'}
+                </span>
+            </div>
+            
+            <p style="color: var(--slate); font-size: 0.85rem; margin-bottom: 15px;"><i class="fa-solid fa-users"></i> ${isEn ? '142 Heroes Pledged' : '142 بطل وضعوا ميثاقهم'}</p>
+            
+            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="text-align: right;">
+                    <span style="display: block; color: var(--slate); font-size: 0.75rem;">${isEn ? 'Entry Pledge' : 'وديعة الدخول'}</span>
+                    <strong style="color: white; font-size: 1.2rem;">${challengePrice} JD</strong>
+                </div>
+                <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.1);"></div>
+                <div style="text-align: left;" dir="ltr">
+                    <span style="display: block; color: var(--slate); font-size: 0.75rem;">${isEn ? 'Est. Reward Pool' : 'الجوائز المتوقعة'}</span>
+                    <strong style="color: #FFD700; font-size: 1.2rem; text-shadow: 0 0 10px rgba(255,215,0,0.4);">${142 * challengePrice} JD</strong>
+                </div>
+            </div>
+            ${actionBtnHtml}
+        </div>
+    `;
+}
+// 2. فتح نافذة كليك
+window.openCliqModal = function(challengeId, amount) {
+    window.currentPledgeChallenge = challengeId;
+    document.getElementById('cliq-amount-display').innerText = `المبلغ المطلوب: ${amount} JD`;
+    const modal = document.getElementById('cliq-payment-modal');
+    modal.classList.add('rga-apple-open');
+};
+
+// 3. إرسال طلب التحويل كليك مع الصورة
+document.addEventListener('DOMContentLoaded', () => {
+    const cliqForm = document.getElementById('cliq-submit-form');
+    if (cliqForm) {
+        cliqForm.onsubmit = async function(e) {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if(!user) return;
+
+            const name = document.getElementById('cliq-name').value.trim();
+            const phone = document.getElementById('cliq-phone').value.trim();
+            const alias = document.getElementById('cliq-alias').value.trim();
+            const fileInput = document.getElementById('cliq-receipt-file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showToast("الرجاء إرفاق صورة وصل التحويل!");
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-cliq');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب وتشفير البيانات...';
+
+            try {
+                // 1. رفع الصورة لفايربيس ستوريج
+                const cleanFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+                const receiptRef = storage.ref(`cliq_receipts/${user.uid}_${Date.now()}_${cleanFileName}`);
+                await receiptRef.put(file);
+                const receiptUrl = await receiptRef.getDownloadURL();
+
+                // 2. حفظ الطلب في الداتابيس
+                await db.collection('payment_requests').add({
+                    uid: user.uid,
+                    challengeId: window.currentPledgeChallenge,
+                    fullName: name,
+                    phone: phone,
+                    cliqAlias: alias,
+                    receiptUrl: receiptUrl,
+                    status: 'pending',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showToast("✅ تم إرسال إثبات الدفع للإدارة! سيتم مراجعته قريباً.");
+                document.getElementById('cliq-payment-modal').classList.remove('rga-apple-open');
+                cliqForm.reset();
+                
+                // تحديث الواجهة لتبين له أنه بوضع الانتظار
+                openIronPledgeHub();
+
+            } catch (error) {
+                console.error("Payment Submission Error:", error);
+                showToast("❌ حدث خطأ أثناء الإرسال! تأكد من الإنترنت.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+    }
+});
+window.loadAdminPayments = async function() {
+    const container = document.getElementById('admin-payments-container');
+    if(!container) return;
+    
+    try {
+        // شلنا الـ orderBy من هون عشان فايربيس ما يعطيك إيرور الـ Index
+        const snapshot = await db.collection('payment_requests').where('status', '==', 'pending').get();
+        
+        if(snapshot.empty) {
+            container.innerHTML = `<div class="empty-notif" style="margin-top:50px;"><i class="fa-solid fa-check-double" style="font-size:4rem; color:var(--slate);"></i><p style="margin-top:15px; color:white;">لا توجد حوالات معلقة حالياً.</p></div>`;
+            return;
+        }
+
+        // جلب البيانات وترتيبها برمجياً (عشان نتخطى قفل فايربيس)
+        let requestsArray = [];
+        snapshot.forEach(doc => {
+            requestsArray.push({ id: doc.id, ...doc.data() });
+        });
+        requestsArray.sort((a, b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
+        
+        requestsArray.forEach(data => {
+            html += `
+                <div class="glass-card" style="border-right: 4px solid #3498db; text-align: right;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: white; margin: 0; font-weight: 900;"><i class="fa-solid fa-user-astronaut" style="color: #3498db;"></i> ${data.fullName}</h3>
+                        <span style="background: rgba(52, 152, 219, 0.2); color: #3498db; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold;">CliQ: ${data.cliqAlias}</span>
+                    </div>
+                    <p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 15px;"><i class="fa-solid fa-phone"></i> ${data.phone}</p>
+                    
+                    <a href="${data.receiptUrl}" target="_blank" style="display: block; text-align: center; margin-bottom: 20px;">
+                        <img src="${data.receiptUrl}" style="max-width: 100%; height: 200px; object-fit: contain; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(0,0,0,0.5);">
+                    </a>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" onclick="approvePayment('${data.id}', '${data.uid}')" style="flex: 1; padding: 12px; font-size: 0.95rem; background: rgba(0, 242, 167, 0.15); border-color: #00f2a7; color: #00f2a7;">
+                            <i class="fa-solid fa-check"></i> اعتماد
+                        </button>
+                        <button class="btn-primary" onclick="rejectPayment('${data.id}', '${data.uid}')" style="flex: 1; padding: 12px; font-size: 0.95rem; background: rgba(255,77,77,0.1); color: #ff4d4d; border-color: #ff4d4d;">
+                            <i class="fa-solid fa-xmark"></i> رفض
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html + '</div>';
+    } catch(e) {
+        console.error(e);
+        container.innerHTML = `<p style="text-align:center; color:#ff4d4d;">حدث خطأ أثناء تحميل الحوالات</p>`;
+    }
+};
+window.approvePayment = async function(docId, userUid) {
+    if(!confirm("هل أنت متأكد من استلام الحوالة وإدخال اللاعب لتحدي ميثاق الأبطال؟")) return;
+    try {
+        const batch = db.batch();
+        
+        // 1. تغيير حالة الطلب لمقبول
+        batch.update(db.collection('payment_requests').doc(docId), { status: 'approved' });
+        
+        // 2. 🚨 تفعيل الميثاق في حساب اللاعب 🚨
+        batch.update(db.collection('users').doc(userUid), {
+            activePledge: 'PLEDGE_MAY', // اسم التحدي
+            pledgeStartDate: firebase.firestore.FieldValue.serverTimestamp() // وقت البدء
+        });
+
+        // 3. إرسال الإشعار
+        batch.set(db.collection('users').doc(userUid).collection('notifications').doc(), {
+            type: 'system_reward',
+            title: '🤝 تم اعتماد الميثاق!',
+            text: 'وصلتنا حوالتك. تم إدراج اسمك رسمياً في تحدي الالتزام. حان وقت الجلد!',
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        await batch.commit();
+        showToast("✅ تم إدخال اللاعب للتحدي بنجاح.");
+        loadAdminPayments();
+    } catch(e) {
+        console.error(e);
+        showToast("❌ خطأ في الاعتماد!");
+    }
+};
+window.rejectPayment = async function(docId, userUid) {
+    if(!confirm("هل أنت متأكد من رفض هذه الحوالة (مثلاً وصل مزيف أو بيانات خاطئة)؟")) return;
+    try {
+        await db.collection('payment_requests').doc(docId).update({ status: 'rejected' });
+        
+        await db.collection('users').doc(userUid).collection('notifications').add({
+            type: 'system_reward',
+            title: '❌ رفض الميثاق',
+            text: 'تم رفض طلب انضمامك للتحدي. يُرجى مراجعة بيانات الحوالة أو التواصل مع الدعم الفني.',
+            status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        showToast("🗑️ تم رفض الطلب.");
+        loadAdminPayments();
+    } catch(e) {
+        showToast("❌ خطأ في الرفض!");
+    }
+};
+// لوحة التحكم الخاصة بمن تم قبولهم (الشاشة الفخمة التفاعلية)
+window.renderActivePledgeDashboard = function(userData) {
+    const isEn = currentLang === 'en';
+    
+    // 1. حساب الأيام الحقيقية للاعب بناءً على تاريخ اعتماده من الإدارة
+    let daysPassed = 0;
+    if (userData.pledgeStartDate) {
+        // تحويل وقت فايربيس إلى وقت جافاسكريبت
+        const startMs = typeof userData.pledgeStartDate.toMillis === 'function' ? userData.pledgeStartDate.toMillis() : new Date(userData.pledgeStartDate).getTime();
+        const nowMs = Date.now();
+        const diffTime = nowMs - startMs;
+        daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+    }
+    
+    // حماية: إذا الأيام أقل من 0 خليها 0، وإذا أكثر من 30 خليها 30
+    if (daysPassed < 0) daysPassed = 0;
+    if (daysPassed > 30) daysPassed = 30;
+
+    const totalDays = 30;
+    const progressPct = (daysPassed / totalDays) * 100;
+
+    // 2. اقتصاديات التحدي (لعبة الأرقام الذكية المرتبطة بتقدم اللاعب)
+    const baseParticipants = 245; // رقم أساسي يوحي بالضخامة
+    const entryFee = 10;
+    const grossPool = baseParticipants * entryFee; // 2450 JD
+    
+    // نسبة الإدارة (أرباحك الصافية المخفية) - 40% 
+    const adminCut = 0.40;
+    
+    // 🔥 السحر هنا: نسبة الفاشلين تزيد كلما تقدم اللاعب في الأيام! 🔥
+    // في اليوم الأول 0% فشلوا، في اليوم 30 حوالي 60% يفشلون.
+    const failRate = (daysPassed / totalDays) * 0.60; 
+    const failedParticipants = Math.floor(baseParticipants * failRate); 
+    const survivingParticipants = baseParticipants - failedParticipants;
+    
+    // المبلغ الصافي الذي يوزع للناجين
+    const netPoolForWinners = grossPool * (1 - adminCut); 
+    
+    // الربح التقديري لكل لاعب ينجح (لا يظهر كربح عالي إلا في الأيام الأخيرة)
+    let estimatedPayout = entryFee; // البداية يسترد رأس ماله فقط
+    if (survivingParticipants > 0) {
+        estimatedPayout = (netPoolForWinners / survivingParticipants).toFixed(1);
+    }
+
+    // 3. توليد الأسماء الوهمية (Bots) وتحديد حالتهم بناءً على الأيام
+    const fakeNames = ["أحمد كمال", "Omar Fit", "خالد يوسف", "Beast99", "سالم رفاعي", "Mahmoud_X", "ليث الحديدي", "IronSam", "عبدالله م.", "طارق_90", "Faisal_Gym", "محمد القيسي", "Zyzz_Arab"];
+    let botsHtml = '';
+    
+    // دمج اللاعب الحقيقي في القائمة كـ "بطل صامد"
+    botsHtml += `
+        <div style="background: rgba(0, 242, 167, 0.1); border: 1px solid #00f2a7; padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 15px rgba(0,242,167,0.15);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="${userData.photoURL || '/Photos/adm.jpeg'}" style="width:35px; height:35px; border-radius:50%; object-fit:cover; border: 2px solid #00f2a7;">
+                <span style="color: white; font-weight: 900;">${userData.firstName} (أنت)</span>
+            </div>
+            <span style="color: #00f2a7; font-weight: bold; font-size: 0.8rem;"><i class="fa-solid fa-fire"></i> ${isEn ? 'Alive' : 'صامد'}</span>
+        </div>
+    `;
+
+    fakeNames.forEach((name, index) => {
+        // برمجة سقوط الـ Bots: إذا كان ترتيب البوت يقع ضمن نسبة السقوط، نسقطه!
+        // مثلاً: إذا failRate 30%، أول 30% من قائمة الأسماء تسقط.
+        let isFailed = (index / fakeNames.length) < failRate; 
+        
+        let statusColor = isFailed ? '#ff4d4d' : '#fff';
+        let statusIcon = isFailed ? '<i class="fa-solid fa-skull"></i> سقط' : '<i class="fa-solid fa-fire"></i> صامد';
+        let bgStyle = isFailed ? 'rgba(255,77,77,0.05)' : 'rgba(255,255,255,0.02)';
+        let borderStyle = isFailed ? 'rgba(255,77,77,0.2)' : 'rgba(255,255,255,0.05)';
+        
+        botsHtml += `
+            <div style="background: ${bgStyle}; border: 1px solid ${borderStyle}; padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width:35px; height:35px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; color:gray;"><i class="fa-solid fa-user"></i></div>
+                    <span style="color: ${isFailed ? 'gray' : 'white'}; font-weight: bold; text-decoration: ${isFailed ? 'line-through' : 'none'};">${name}</span>
+                </div>
+                <span style="color: ${statusColor}; font-size: 0.8rem; font-weight: bold;">${statusIcon}</span>
+            </div>
+        `;
+    });
+
+    // 4. رسم الواجهة
+    document.getElementById('pledge-main-view').innerHTML = `
+        <!-- كرت الخزنة المالية المباشرة -->
+        <div class="glass-card" style="border: 1px solid #FFD700; background: linear-gradient(145deg, rgba(255,215,0,0.1), rgba(0,0,0,0.8)); text-align: center; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(255,215,0,0.15);">
+            <p style="color: var(--slate); font-size: 0.85rem; margin-bottom: 5px;">${isEn ? 'Global Reward Pool' : 'الخزنة المتراكمة للناجين'}</p>
+            <h2 style="color: #FFD700; font-size: 2.8rem; font-family: monospace; font-weight: 900; margin: 0; text-shadow: 0 0 20px rgba(255,215,0,0.5);">
+                ${netPoolForWinners} <span style="font-size: 1.2rem;">JD</span>
+            </h2>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 20px; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px; border: 1px dashed rgba(255,215,0,0.3);">
+                <div>
+                    <span style="display:block; color: gray; font-size: 0.75rem;">حصتك المتوقعة (تزيد يومياً)</span>
+                    <strong style="color: #00f2a7; font-size: 1.1rem;">+${estimatedPayout} JD</strong>
+                </div>
+                <div style="text-align: left;" dir="ltr">
+                    <span style="display:block; color: gray; font-size: 0.75rem;">الذين سقطوا اليوم</span>
+                    <strong style="color: #ff4d4d; font-size: 1.1rem;">${failedParticipants} <i class="fa-solid fa-skull"></i></strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- كرت التقدم (Progress) الخاص باللاعب -->
+        <div class="glass-card" style="margin-bottom: 20px; border: 1px solid rgba(52,152,219,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="color: white; margin: 0; font-size: 1.1rem;"><i class="fa-solid fa-file-signature" style="color:#3498db;"></i> ${isEn ? 'Your Contract' : 'عقدك الزمني'}</h3>
+                <span style="color: #3498db; font-weight: bold; background: rgba(52,152,219,0.1); padding: 3px 8px; border-radius: 6px;">اليوم ${daysPassed} من ${totalDays}</span>
+            </div>
+            
+            <div style="width: 100%; height: 10px; background: rgba(0,0,0,0.5); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
+                <div style="width: ${progressPct}%; height: 100%; background: linear-gradient(90deg, #3498db, #00f2a7); box-shadow: 0 0 10px #00f2a7; transition: width 1s ease-in-out;"></div>
+            </div>
+
+            <p style="color: var(--slate); font-size: 0.85rem; margin: 0; text-align: center;"><i class="fa-solid fa-triangle-exclamation" style="color: #ff9f43;"></i> أثبت تمرينك يومياً لتضمن حصتك من أرباح المنسحبين!</p>
+        </div>
+
+        <!-- قائمة الأبطال (Live Arena) -->
+        <h3 style="color: white; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa-solid fa-earth-americas"></i> ساحة الميثاق العالمية</span>
+            <span style="font-size: 0.8rem; color: #00f2a7;">${survivingParticipants} صامدون</span>
+        </h3>
+        
+        <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+            ${botsHtml}
+        </div>
+    `;
 };

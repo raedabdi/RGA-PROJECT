@@ -55,6 +55,7 @@
         <i class="fa-solid fa-chart-line"></i>
     </button>
 
+
     <div class="hide-on-mobile">
         <h1>لوحة التحكم</h1>
         <p id="welcome-user">سعيد برؤيتك، كابتن</p>
@@ -82,8 +83,22 @@
             document.getElementById('portal-btn-text').innerText = 'Enter';
 
             document.getElementById('portal-arrow-icon').classList.replace('fa-arrow-left', 'fa-arrow-right');
+
         }
-    })();</script><div id="home-challenges-card" class="stat-card glass-card challenges-card-theme" style="cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:space-between;margin-top:20px" onclick="openGameSelection()"><div><h3 class="challenges-title-theme" style="font-weight:900;font-size:1.2rem;margin-bottom:5px"><i class="fa-solid fa-gamepad"></i><span data-translate="challenges_title">التحديات</span></h3><p style="font-size:.8rem;color:var(--slate)" data-translate="challenges_desc">العب، اجمع نقاط، ونافس الوحوش</p></div><i class="fa-solid fa-circle-play challenges-icon-theme" style="font-size:2.8rem;opacity:.9;transition:.3s"></i></div></section></div></main><nav class="bottom-nav hide-on-desktop"><a href="#" class="nav-item active" onclick="activateBottomNav(this),backToDashboard()"><i class="fa-solid fa-house"></i><span data-translate="nav_home">الرئيسية</span></a><a href="#" class="nav-item" onclick="activateBottomNav(this),openPerformanceCenter()"><i class="fa-solid fa-chart-simple"></i><span data-translate="nav_performance">الأداء</span></a><div class="nav-item-center"><button class="nav-fab" onclick="startLiveWorkout()"><i class="fa-solid fa-bolt"></i></button></div><a href="#" class="nav-item" onclick="activateBottomNav(this),openFriendsCenter()"><i class="fa-solid fa-user-group"></i><span data-translate="nav_community">مجتمع الأبطال</span></a><a href="#" class="nav-item" onclick="activateBottomNav(this),openProfile()"><i class="fa-solid fa-user"></i><span data-translate="nav_profile">بروفايل</span></a></nav></div><div id="cropper-modal"><h3 id="crop-title" style="color:#fff;margin-bottom:20px;font-family:var(--font-main);font-weight:900">تعديل الصورة الشخصية</h3><div class="cropper-container"><img id="image-to-crop" src=""></div><div class="cropper-actions"><button id="crop-save-btn" class="btn-primary">حفظ الصورة</button><button id="crop-cancel-btn" class="btn-primary" style="background:0 0;border-color:#ff4d4d;color:#ff4d4d;box-shadow:none">إلغاء</button></div></div><script>// مراقبة فتح النافذة لترجمتها فوراً
+    })();</script>
+    
+    
+    <!-- 🤝 بطاقة ميثاق الأبطال (عقود الالتزام) 🤝 -->
+<div class="stat-card glass-card" style="cursor:pointer; transition:.3s; display:flex; align-items:center; justify-content:space-between; margin-top:20px; border:1px solid #3498db; background: linear-gradient(145deg, rgba(52, 152, 219, 0.1), rgba(0, 0, 0, 0.4)); box-shadow: 0 5px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(52, 152, 219, 0.1);" onclick="openIronPledgeHub()" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(52,152,219,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.5)';">
+    <div>
+        <h3 style="color:#3498db; font-weight:900; font-size:1.2rem; margin-bottom:5px; text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);">
+            <i class="fa-solid fa-file-contract"></i> ميثاق الأبطال
+        </h3>
+        <p style="font-size:.85rem; color:var(--slate); margin:0;">ادفع عربونك، التزم بالتمرين، وضاعف أموالك!</p>
+    </div>
+    <i class="fa-solid fa-handshake-angle" style="font-size:2.8rem; color:#3498db; opacity:0.9; filter: drop-shadow(0 0 15px rgba(52, 152, 219, 0.6)); transition: .3s;"></i>
+</div>
+    <div id="home-challenges-card" class="stat-card glass-card challenges-card-theme" style="cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:space-between;margin-top:20px" onclick="openGameSelection()"><div><h3 class="challenges-title-theme" style="font-weight:900;font-size:1.2rem;margin-bottom:5px"><i class="fa-solid fa-gamepad"></i><span data-translate="challenges_title">التحديات</span></h3><p style="font-size:.8rem;color:var(--slate)" data-translate="challenges_desc">العب، اجمع نقاط، ونافس الوحوش</p></div><i class="fa-solid fa-circle-play challenges-icon-theme" style="font-size:2.8rem;opacity:.9;transition:.3s"></i></div></section></div></main><nav class="bottom-nav hide-on-desktop"><a href="#" class="nav-item active" onclick="activateBottomNav(this),backToDashboard()"><i class="fa-solid fa-house"></i><span data-translate="nav_home">الرئيسية</span></a><a href="#" class="nav-item" onclick="activateBottomNav(this),openPerformanceCenter()"><i class="fa-solid fa-chart-simple"></i><span data-translate="nav_performance">الأداء</span></a><div class="nav-item-center"><button class="nav-fab" onclick="startLiveWorkout()"><i class="fa-solid fa-bolt"></i></button></div><a href="#" class="nav-item" onclick="activateBottomNav(this),openFriendsCenter()"><i class="fa-solid fa-user-group"></i><span data-translate="nav_community">مجتمع الأبطال</span></a><a href="#" class="nav-item" onclick="activateBottomNav(this),openProfile()"><i class="fa-solid fa-user"></i><span data-translate="nav_profile">بروفايل</span></a></nav></div><div id="cropper-modal"><h3 id="crop-title" style="color:#fff;margin-bottom:20px;font-family:var(--font-main);font-weight:900">تعديل الصورة الشخصية</h3><div class="cropper-container"><img id="image-to-crop" src=""></div><div class="cropper-actions"><button id="crop-save-btn" class="btn-primary">حفظ الصورة</button><button id="crop-cancel-btn" class="btn-primary" style="background:0 0;border-color:#ff4d4d;color:#ff4d4d;box-shadow:none">إلغاء</button></div></div><script>// مراقبة فتح النافذة لترجمتها فوراً
         const originalCropperObserver = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.attributeName === "style") {
@@ -243,6 +258,46 @@
                     </button>
                 </div>
             </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 💰 نافذة دفع كليك (CliQ Payment Modal - Apple Glass) 💰 -->
+<div id="cliq-payment-modal" class="modal-overlay" style="z-index: 95000; background: rgba(5, 10, 20, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); padding: 15px;">
+    <div class="modal-content" style="max-width: 450px; padding: 0; background: transparent; border: none; box-shadow: none;">
+        <div class="apple-glass-panel" style="padding: 30px 25px; border-radius: 30px; background: rgba(15, 20, 35, 0.85); border: 1px solid rgba(52, 152, 219, 0.3); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); position: relative; overflow: hidden;">
+            
+            <button onclick="document.getElementById('cliq-payment-modal').classList.remove('rga-apple-open')" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.1); border: none; width: 35px; height: 35px; border-radius: 50%; color: #fff; font-size: 1.4rem; cursor: pointer; transition: 0.3s; z-index: 10;">&times;</button>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 3rem; color: #3498db; filter: drop-shadow(0 0 15px rgba(52, 152, 219, 0.5)); margin-bottom: 10px;">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <h2 style="color: white; font-weight: 900; letter-spacing: 1px;">إيداع الالتزام المالي</h2>
+                <p style="color: var(--slate); font-size: 0.85rem; margin-top: 5px;">أرسل المبلغ عبر كليك للرقم المعتمد ثم ارفع الإثبات لتأكيد التزامك.</p>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px dashed #3498db; text-align: center; margin-bottom: 20px;">
+                <p style="color: #4da6ff; font-size: 0.85rem; margin-bottom: 5px; font-weight: bold;">أرسل الحوالة إلى معرّف كليك (Alias):</p>
+                <h3 style="color: white; font-family: monospace; font-size: 1.5rem; letter-spacing: 2px; margin: 0;">RGAFIT</h3>
+                <p style="color: #FFD700; font-weight: bold; font-size: 0.9rem; margin-top: 10px;" id="cliq-amount-display">المبلغ المطلوب: 10 JD</p>
+            </div>
+
+            <form id="cliq-submit-form">
+                <input type="text" id="cliq-name" class="epic-input-premium" placeholder="اسمك الرباعي (المطابق لحساب البنك)" required style="border-color: rgba(52, 152, 219, 0.4);">
+                <input type="tel" id="cliq-phone" class="epic-input-premium" placeholder="رقم الموبايل" required style="border-color: rgba(52, 152, 219, 0.4);">
+                <input type="text" id="cliq-alias" class="epic-input-premium" placeholder="معرّف كليك الخاص بك (Alias)" required style="border-color: rgba(52, 152, 219, 0.4);">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: var(--slate); font-size: 0.85rem; margin-bottom: 8px; font-weight: bold;">صورة وصل التحويل (Screenshot):</label>
+                    <input type="file" id="cliq-receipt-file" accept="image/*" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(52, 152, 219, 0.4); border-radius: 12px; color: white;">
+                </div>
+
+                <button type="submit" id="btn-submit-cliq" class="btn-primary" style="width: 100%; padding: 15px; background: rgba(52, 152, 219, 0.15); color: #4da6ff; border-color: #3498db; font-size: 1.1rem; border-radius: 15px;">
+                    <i class="fa-solid fa-paper-plane"></i> إرسال الطلب للمراجعة
+                </button>
+            </form>
 
         </div>
     </div>
