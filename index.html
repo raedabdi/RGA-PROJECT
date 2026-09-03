@@ -1142,54 +1142,57 @@
 
     </div>
 </div>
-<!-- نافذة الشركاء (Partnership Modal) - مستقلة ومترجمة تلقائياً وتتكيف مع حجم الشاشة -->
-    <div id="partner-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 10, 20, 0.7); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+
+
+<!-- نافذة الشركاء (B2B Partnership Modal) - لغة تجارية عالمية بدون مصطلحات ألعاب -->
+    <div id="partner-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 10, 20, 0.75); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
         <div class="modal-content partner-modal-content">
             
             <button onclick="closePartnerModal()" class="partner-close-btn">&times;</button>
             
             <div class="partner-icon-wrapper">
-                <i class="fa-solid fa-gem partner-gem-icon"></i>
+                <i class="fa-solid fa-briefcase partner-gem-icon"></i>
             </div>
             
-            <h2 id="p-title">انضم إلى ثورة RGA</h2>
+            <h2 id="p-title">شراكة استراتيجية لنمو أعمالك</h2>
             <p id="p-desc">
-                هل أنت صاحب صالة رياضية، أو ممثل لعلامة تجارية رياضية؟ كن جزءاً من المنصة الأسرع نمواً في عالم اللياقة البدنية.
+                سواء كنت تدير صالة رياضية أو تمتلك علامة تجارية في المكملات والمعدات، نوفر لك منظومة نمو متكاملة تضمن وصولك لجمهور رياضي نوعي داخل مدينتك.
             </p>
             
             <div id="partner-info-box">
-                <h4 id="p-why">لماذا تنضم إلينا؟</h4>
+                <h4 id="p-why">مزايا الشراكة التجارية:</h4>
                 <ul>
                     <li>
-                        <i class="fa-solid fa-bolt"></i> 
+                        <i class="fa-solid fa-bullhorn"></i> 
                         <div>
-                            <strong id="p-b1t">جذب لاعبين جدد:</strong> 
-                            <span id="p-b1d">نظامنا يدفع الأبطال للتنافس داخل صالتك لكسر الأرقام.</span>
+                            <strong id="p-b1t">تسويق شامل على مستوى مدينتك:</strong> 
+                            <span id="p-b1d">حملات استهداف محلي موسعة داخل نطاق مدينتك بالكامل لتوجيه الرياضيين والمهتمين مباشرة إلى باب منشأتك.</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-users"></i> 
+                        <i class="fa-solid fa-chart-line"></i> 
                         <div>
-                            <strong id="p-b2t">ولاء المتدربين:</strong> 
-                            <span id="p-b2d">نظام النقاط والأوسمة يضمن استمرار المشتركين.</span>
+                            <strong id="p-b2t">زيادة المشتركين والمبيعات:</strong> 
+                            <span id="p-b2d">تدفق مستمر لاشتراكات جديدة للصالة، مع فتح منافذ ترويجية مباشرة لمنتجات المكملات والمعدات الرياضية.</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-map-location-dot"></i> 
+                        <i class="fa-solid fa-cubes"></i> 
                         <div>
-                            <strong id="p-b3t">رؤية تسويقية عالمية:</strong> 
-                            <span id="p-b3d">شعار ناديك سيظهر كـ 'ساحة قتال معتمدة' على الخريطة.</span>
+                            <strong id="p-b3t">تطوير المنشأة وتعزيز ولاء الأعضاء:</strong> 
+                            <span id="p-b3d">حلول عصرية تنقل صالتك إلى المستوى العالمي وترفع رضا المشتركين لضمان استمرارهم وتجديد اشتراكاتهم.</span>
                         </div>
                     </li>
                 </ul>
             </div>
             
-            <p id="p-footer">جاهز لنقل أعمالك إلى المستوى التالي؟ تواصل مع الإدارة:</p>
-            <a href="mailto:SUPPORT@RGA360.COM?subject=RGA Partnership Request" class="btn-primary partner-submit-btn">
+            <p id="p-footer">جاهز لتوسيع قاعدة عملائك؟ تواصل مباشرة مع إدارة الشراكات والتطوير:</p>
+            <a href="mailto:SUPPORT@RGA360.COM?subject=طلب شراكة استراتيجية - RGA Commercial Partnership" class="btn-primary partner-submit-btn">
                 <i class="fa-solid fa-envelope" style="margin-inline-end: 8px;"></i> SUPPORT@RGA360.COM
             </a>
         </div>
     </div>
+
 
 
 
@@ -1309,27 +1312,34 @@ window.addEventListener('beforeinstallprompt', (e) => {
     // كود نافذة الشركاء المدمج (لترجمة النصوص تلقائياً)
     // ==========================================
     
-    function translatePartnerModal() {
-        // قراءة لغة الموقع الحالية من التخزين المؤقت، الافتراضي عربي
+function translatePartnerModal() {
         const lang = localStorage.getItem('lang') || 'ar';
         const isEn = lang === 'en';
 
-        // قاموس الكلمات (عربي / إنجليزي) بكلمات احترافية تليق بشركة عالمية
         const dict = {
-            btn: isEn ? "Become a Partner" : "كن شريكاً للنجاح",
-            title: isEn ? "Join the RGA Revolution" : "انضم إلى ثورة RGA",
-            desc: isEn ? "Are you a gym owner or a fitness brand representative? Be part of the fastest-growing platform in the fitness world." : "هل أنت صاحب صالة رياضية، أو ممثل لعلامة تجارية رياضية؟ كن جزءاً من المنصة الأسرع نمواً في عالم اللياقة البدنية.",
-            why: isEn ? "Why partner with us?" : "لماذا تنضم إلينا؟",
-            b1t: isEn ? "Attract New Members:" : "جذب لاعبين جدد:",
-            b1d: isEn ? "Our system drives athletes to compete and break records at your facility." : "نظامنا يدفع الأبطال للتنافس داخل صالتك لكسر الأرقام.",
-            b2t: isEn ? "Boost Retention:" : "ولاء المتدربين:",
-            b2d: isEn ? "Our XP and badge system keeps members hooked to your gym." : "نظام النقاط والأوسمة يضمن استمرار المشتركين.",
-            b3t: isEn ? "Global Visibility:" : "رؤية تسويقية عالمية:",
-            b3d: isEn ? "Your gym will appear as an 'Approved Battleground' on the map." : "شعار ناديك سيظهر كـ 'ساحة قتال معتمدة' على الخريطة.",
-            footer: isEn ? "Ready to elevate your business? Contact us:" : "جاهز لنقل أعمالك إلى المستوى التالي؟ تواصل مع الإدارة:"
+            btn: isEn ? "Become a Strategic Partner" : "كن شريكاً للنجاح",
+            title: isEn ? "Strategic Partnerships for Growth" : "شراكة استراتيجية لنمو أعمالك",
+            desc: isEn 
+                ? "Whether you own a fitness facility or represent a sports supplement and equipment brand, we empower your business to capture highly engaged local athletes."
+                : "سواء كنت تدير صالة رياضية أو تمتلك علامة تجارية في المكملات والمعدات، نوفر لك منظومة نمو متكاملة تضمن وصولك لجمهور رياضي نوعي داخل مدينتك.",
+            why: isEn ? "Key Commercial Advantages:" : "مزايا الشراكة التجارية:",
+            b1t: isEn ? "City-Wide Targeted Exposure:" : "تسويق شامل على مستوى مدينتك:",
+            b1d: isEn 
+                ? "Direct local promotional campaigns across your entire city, funneling active athletes straight to your gym or retail shop."
+                : "حملات استهداف محلي موسعة داخل نطاق مدينتك بالكامل لتوجيه الرياضيين والمهتمين مباشرة إلى باب منشأتك.",
+            b2t: isEn ? "Drive Memberships & Retail Sales:" : "زيادة المشتركين والمبيعات:",
+            b2d: isEn 
+                ? "Steady acquisition of new gym members alongside dedicated high-conversion channels for sports nutrition and gear."
+                : "تدفق مستمر لاشتراكات جديدة للصالة، مع فتح منافذ ترويجية مباشرة لمنتجات المكملات والمعدات الرياضية.",
+            b3t: isEn ? "Facility Modernization & Member Loyalty:" : "تطوير المنشأة وتعزيز ولاء الأعضاء:",
+            b3d: isEn 
+                ? "Modern solutions that elevate your facility's value and significantly maximize customer retention and renewal rates."
+                : "حلول عصرية تنقل صالتك إلى المستوى العالمي وترفع رضا المشتركين لضمان استمرارهم وتجديد اشتراكاتهم.",
+            footer: isEn 
+                ? "Ready to scale your business? Contact our Commercial Partnership Team:"
+                : "جاهز لتوسيع قاعدة عملائك؟ تواصل مباشرة مع إدارة الشراكات والتطوير:"
         };
 
-        // استبدال النصوص في النافذة والزر
         if(document.getElementById('partner-btn-text')) document.getElementById('partner-btn-text').innerText = dict.btn;
         if(document.getElementById('p-title')) document.getElementById('p-title').innerText = dict.title;
         if(document.getElementById('p-desc')) document.getElementById('p-desc').innerText = dict.desc;
@@ -1342,7 +1352,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
         if(document.getElementById('p-b3d')) document.getElementById('p-b3d').innerText = dict.b3d;
         if(document.getElementById('p-footer')) document.getElementById('p-footer').innerText = dict.footer;
         
-        // تعديل اتجاه ومحاذاة المربع الداخلي ليتوافق مع اللغة
         const pBox = document.getElementById('partner-info-box');
         if (pBox) {
             pBox.style.textAlign = isEn ? 'left' : 'right';
