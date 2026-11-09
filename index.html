@@ -862,7 +862,7 @@
         <!-- تغيير الكبسة إلى كبسة "كن شريكاً للنجاح" -->
         <div class="reveal cta-buttons">
             <a href="#" class="btn-primary" onclick="openPartnerModal(); return false;" style="font-size: 1.1rem; padding: 15px 35px;">
-                <i class="fa-solid fa-handshake-angle" style="margin-inline-end: 8px;"></i> <span id="partner-btn-text">كن شريكاً للنجاح</span>
+                <i class="fa-solid fa-handshake-angle" style="margin-inline-end: 8px;"></i> <span id="partner-btn-text">Become a Strategic Partner</span>
             </a>
         </div>
     </div>
@@ -1252,39 +1252,47 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 
     function showPremiumInstallPrompt(os) {
-        if(document.getElementById('premium-install-prompt')) return;
+        if (document.getElementById('premium-install-prompt')) return;
 
+        const isEn = (localStorage.getItem('lang') || 'en') === 'en';
+        const copy = isEn ? {
+            title: 'The Ultimate RGA Fit Experience',
+            desc: 'Take your fitness to the next level. Install the app for quick access and a seamless experience.',
+            tap: 'Tap', then: 'then select', add: 'Add to Home Screen', install: 'Install App Now'
+        } : {
+            title: 'تجربة RGA Fit الأقوى',
+            desc: 'ارتقِ بمستواك وثبّت التطبيق للوصول السريع وتجربة أداء لا مثيل لها.',
+            tap: 'اضغط على', then: 'ثم اختر', add: 'إضافة للشاشة الرئيسية', install: 'تثبيت التطبيق الآن'
+        };
         let actionHTML = '';
-        
         if (os === 'ios') {
             actionHTML = `
-                <div class="ios-prompt-instructions">
-                    اضغط على 
+                <div class="ios-prompt-instructions" dir="${isEn ? 'ltr' : 'rtl'}">
+                    ${copy.tap}
                     <svg viewBox="0 0 50 50" width="22" height="22" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 4px; transform: translateY(2px);"><path d="M25 3v26M16 11l9-9 9 9M10 21v18a4 4 0 004 4h22a4 4 0 004-4V21"/></svg>
-                    ثم اختر 
-                    <span style="color: #00f2a7; margin: 0 4px;">"إضافة للشاشة الرئيسية"</span> 
+                    ${copy.then}
+                    <span style="color: #00f2a7; margin: 0 4px;">"${copy.add}"</span>
                     <i class="far fa-plus-square" style="font-size: 1.2rem;"></i>
                 </div>
             `;
         } else {
             actionHTML = `
                 <button onclick="triggerAndroidInstall()" style="width: 100%; padding: 12px; font-size: 1.05rem; font-family: 'Cairo', sans-serif; font-weight: 800; border-radius: 12px; background: #00f2a7; color: #0A1429; border: none; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 15px rgba(0, 242, 167, 0.4); transition: all 0.3s ease;">
-                    <i class="fas fa-download"></i> تثبيت التطبيق الآن
+                    <i class="fas fa-download"></i> ${copy.install}
                 </button>
             `;
         }
 
         const promptHTML = `
-            <div class="ios-prompt-overlay" id="premium-install-prompt">
+            <div class="ios-prompt-overlay" id="premium-install-prompt" data-install-os="${os}" dir="${isEn ? 'ltr' : 'rtl'}">
                 <button class="ios-prompt-close" onclick="closePremiumPrompt()">
                     <i class="fas fa-times"></i>
                 </button>
                 <div class="ios-prompt-header">
-
-<img src="/Photos/icon2.png" alt="RGA Fit" class="ios-prompt-icon">
+                    <img src="/Photos/icon2.png" alt="RGA Fit" class="ios-prompt-icon">
                     <div>
-                        <h3 class="ios-prompt-title">تجربة RGA Fit الأقوى</h3>
-                        <p class="ios-prompt-desc">ارتقِ بمستواك وثبّت التطبيق للوصول السريع وتجربة أداء لا مثيل لها.</p>
+                        <h3 class="ios-prompt-title">${copy.title}</h3>
+                        <p class="ios-prompt-desc">${copy.desc}</p>
                     </div>
                 </div>
                 ${actionHTML}
@@ -1293,6 +1301,14 @@ window.addEventListener('beforeinstallprompt', (e) => {
         document.body.insertAdjacentHTML('beforeend', promptHTML);
     }
 
+    // Update an already-visible install banner when visitors switch languages.
+    window.refreshPremiumInstallPrompt = function () {
+        const prompt = document.getElementById('premium-install-prompt');
+        if (!prompt) return;
+        const os = prompt.dataset.installOs || 'android';
+        prompt.remove();
+        showPremiumInstallPrompt(os);
+    };
 
     window.triggerAndroidInstall = async function() {
         if (deferredPrompt) {
@@ -1321,7 +1337,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     // ==========================================
     
 function translatePartnerModal() {
-        const lang = localStorage.getItem('lang') || 'ar';
+        const lang = localStorage.getItem('lang') || 'en';
         const isEn = lang === 'en';
 
         const dict = {
