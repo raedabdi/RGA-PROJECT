@@ -48,6 +48,8 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- The site has its own bilingual switcher; avoid duplicate browser auto-translation overlays. -->
+<meta name="google" content="notranslate">
 <title>Royal Gravitas Arena — منصة لياقة بنظام الألعاب | RGA Fitness</title>
 <meta name="description" content="Royal Gravitas Arena — تجربة لياقة فاخرة بأسلوب الألعاب. ارتقِ بمستواك، اجمع XP، نافس النخبة، وتصدر مدينتك عبر rga360.com">
 <meta name="keywords" content="Rgafit, rga360.com, rgafitness, rga, RGA Fit, Royal Gravitas Arena, Royal Gravitas Arena Company, fitness app, gym, تطبيق لياقة, جيم, بناء عضلات, تتبع الأداء, منصة الأبطال">
@@ -538,8 +540,8 @@
     flex-direction: column;
     gap: 12px;
     animation: iosSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    direction: rtl;
-    font-family: 'Cairo', sans-serif;
+    direction: ltr;
+    font-family: var(--font-main, 'Montserrat', 'Cairo', sans-serif);
     color: #ffffff;
 }
 
@@ -752,6 +754,110 @@
         opacity: 1;
         transform: scale(1) translateY(0); /* يستقر في حجمه ومكانه الطبيعي */
     }
+}
+
+/* RGA INSTALL CARD — visual layout fix (iPhone + Android + narrow screens) */
+.ios-prompt-overlay {
+    box-sizing: border-box;
+    width: min(420px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    padding: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    gap: 14px;
+    text-align: start;
+    overflow-wrap: anywhere;
+}
+.ios-prompt-overlay[dir="ltr"] { direction: ltr; }
+.ios-prompt-overlay[dir="rtl"] { direction: rtl; }
+.ios-prompt-header {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+    min-width: 0;
+    padding-inline-end: 44px; /* reserve a safe corner for the close button */
+}
+.ios-prompt-overlay[dir="rtl"] .ios-prompt-header {
+    grid-template-columns: 56px minmax(0, 1fr);
+}
+.ios-prompt-copy { min-width: 0; }
+.ios-prompt-icon { width: 56px; height: 56px; object-fit: cover; }
+.ios-prompt-title { font-size: 1.05rem; line-height: 1.35; margin: 0 0 7px; letter-spacing: 0; }
+.ios-prompt-desc { font-size: .85rem; line-height: 1.55; margin: 0; }
+.ios-prompt-close {
+    top: 10px;
+    width: 34px;
+    height: 34px;
+    z-index: 2;
+    font-size: 1rem;
+}
+.ios-prompt-overlay[dir="ltr"] .ios-prompt-close { inset-inline-end: 10px; inset-inline-start: auto; }
+.ios-prompt-overlay[dir="rtl"] .ios-prompt-close { inset-inline-end: 10px; inset-inline-start: auto; }
+.ios-prompt-instructions {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    gap: 8px;
+    line-height: 1.6;
+    font-size: .82rem;
+    text-wrap: pretty;
+}
+.ios-prompt-instructions svg, .ios-prompt-instructions i { flex: 0 0 auto; }
+.ios-prompt-install-action { width: 100%; }
+@media (max-width: 420px) {
+    .ios-prompt-overlay { padding: 16px; gap: 12px; border-radius: 18px; }
+    .ios-prompt-header { grid-template-columns: 46px minmax(0, 1fr); gap: 10px; padding-inline-end: 42px; }
+    .ios-prompt-overlay[dir="rtl"] .ios-prompt-header { grid-template-columns: 46px minmax(0, 1fr); }
+    .ios-prompt-icon { width: 46px; height: 46px; border-radius: 11px; }
+    .ios-prompt-title { font-size: .96rem; }
+    .ios-prompt-desc { font-size: .79rem; }
+    .ios-prompt-instructions { font-size: .79rem; padding: 10px; }
+}
+@keyframes iosSlideDown {
+    to { transform: translate(-50%, 130%); opacity: 0; }
+}
+.ios-prompt-overlay.is-dismissing { animation: iosSlideDown .28s ease-in both; pointer-events: none; }
+
+/* Landing page content layout fix for computer screens. */
+#comparison-section .comparison-column,
+#comparison-section .comparison-card,
+#comparison-section .comp-text,
+#interactive-features .features-wrapper,
+#interactive-features .features-list,
+#interactive-features .feature-item,
+#corporate-info .corp-column { min-width: 0; }
+#comparison-section .comparison-card { align-items: flex-start; }
+#comparison-section .comp-text { flex: 1 1 0; }
+#comparison-section .comp-text h4 { line-height: 1.4; margin-bottom: 8px; }
+#comparison-section .comp-text p { line-height: 1.65; overflow-wrap: break-word; }
+#interactive-features .section-title { line-height: 1.25; text-wrap: balance; }
+#interactive-features .section-subtitle { line-height: 1.6; max-width: 690px; margin-inline: auto; }
+#interactive-features .feature-item { overflow-wrap: break-word; }
+#interactive-features .feature-item h3 { line-height: 1.3; }
+#interactive-features .feature-item p { line-height: 1.65; }
+#interactive-features .features-visual img { display: block; }
+#interactive-features, #corporate-info, #comparison-section { scroll-margin-top: 95px; }
+@media (min-width: 992px) {
+    #interactive-features .features-wrapper { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
+    #interactive-features .features-list { gap: 24px; }
+    #interactive-features .feature-item { padding: 26px; }
+    #interactive-features .features-visual { top: 110px; height: min(68vh, 620px); min-height: 360px; }
+    #interactive-features .features-visual img {
+        width: 100%; height: 100%; object-fit: cover; object-position: center;
+        border-radius: 20px; border: 1px solid rgba(0,242,167,.2);
+        box-shadow: 0 18px 55px rgba(0,0,0,.3);
+    }
+}
+@media (max-width: 991px) {
+    #interactive-features .features-list { gap: 22px; }
+    #interactive-features .feature-item { padding: 22px; }
+    #comparison-section .comparison-column { padding: 16px; }
+}
+#corporate-info .corporate-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)) !important; }
+@media (max-width: 767px) {
+    #corporate-info .corporate-grid { gap: 30px !important; }
+    #interactive-features .section-title { font-size: clamp(1.75rem, 7vw, 2.4rem); }
+    #interactive-features .section-subtitle { margin-bottom: 2rem; }
 }
     </style>
 
@@ -967,25 +1073,25 @@
         <div class="features-wrapper">
             <div class="features-list">
 
-                <div class="feature-item" data-img="/Photos/feat1.png">
+                <div class="feature-item" data-img="Photos/des1.png">
                     <div class="icon"><i class="fa-solid fa-brain fa-2x"></i></div>
                     <h3 data-translate="feat1_title">المدرب الذكي (AI Coach)</h3>
                     <p data-translate="feat1_desc">خوارزميات ذكاء اصطناعي متطورة تحلل كل تمرين، تقرأ مستوى الإرهاق العصبي (TSB)، وتخبرك باللحظة المثالية لكسر رقمك القياسي مع رادار يراقب توازن عضلاتك.</p>
                 </div>
 
-                <div class="feature-item" data-img="/Photos/feat2.png">
+                <div class="feature-item" data-img="Photos/cr1.png">
                     <div class="icon"><i class="fa-solid fa-shield-halved fa-2x"></i></div>
                     <h3 data-translate="feat2_title">حروب العصابات (Iron Guilds)</h3>
                     <p data-translate="feat2_desc">الذئاب المنفردة لا تنجو هنا. أسس عصابتك أو انضم لكلان، جهز مقاتليك، وأعلن الحرب الطاحنة ضد العصابات الأخرى لسحق الخصوم وغنم الجوائز الملحمية.</p>
                 </div>
 
-                <div class="feature-item" data-img="/Photos/feat3.png">
+                <div class="feature-item" data-img="Photos/cr3.png">
                     <div class="icon"><i class="fa-solid fa-gem fa-2x"></i></div>
                     <h3 data-translate="feat3_title">نظام وحش المدينة والمكافآت</h3>
                     <p data-translate="feat3_desc">سجل أعلى وزن، ارفع فيديو الإثبات، واجلس على عرش مدينتك. احصل على 'ضريبة الملك' اليومية، واجمع أوسمة وإطارات نادرة من المتجر تثبت فخامتك.</p>
                 </div>
 
-                <div class="feature-item" data-img="/Photos/feat4.png">
+                <div class="feature-item" data-img="Photos/cr12.png">
                     <div class="icon"><i class="fa-solid fa-gamepad fa-2x"></i></div>
                     <h3 data-translate="feat4_title">ألعاب القوة والتسجيل المباشر</h3>
                     <p data-translate="feat4_desc">سجل تمرينك بالوقت الفعلي مع مؤقت راحة ذكي. وفي وقت الفراغ؟ العب تحديات الديدليفت والسكوات وصائد الأوزان على إيقاع الموسيقى لتضاعف نقاطك.</p>
@@ -993,7 +1099,7 @@
             </div>
             <div class="features-visual">
 
-                <img id="feature-image" src="/Photos/feat1.png" alt="Feature Visual">
+                <img id="feature-image" src="Photos/des1.png" alt="RGA fitness technology and training experience" loading="lazy" onerror="this.style.display='none'">
             </div>
         </div>
     </div>
@@ -1232,17 +1338,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     function checkIOS() {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-
-
-        if (isIOS && !isStandalone) {
-            setTimeout(() => showPremiumInstallPrompt('ios'), 1000);
-        }
-    }
-
-
-    function checkIOS() {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
         const hasSeenPrompt = localStorage.getItem('premium_prompt_dismissed');
 
         if (isIOS && !isStandalone && !hasSeenPrompt) {
@@ -1277,7 +1372,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
             `;
         } else {
             actionHTML = `
-                <button onclick="triggerAndroidInstall()" style="width: 100%; padding: 12px; font-size: 1.05rem; font-family: 'Cairo', sans-serif; font-weight: 800; border-radius: 12px; background: #00f2a7; color: #0A1429; border: none; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 15px rgba(0, 242, 167, 0.4); transition: all 0.3s ease;">
+                <button class="ios-prompt-install-action" onclick="triggerAndroidInstall()" style="width: 100%; padding: 12px; font-size: 1.05rem; font-family: 'Cairo', sans-serif; font-weight: 800; border-radius: 12px; background: #00f2a7; color: #0A1429; border: none; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 15px rgba(0, 242, 167, 0.4); transition: all 0.3s ease;">
                     <i class="fas fa-download"></i> ${copy.install}
                 </button>
             `;
@@ -1285,12 +1380,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
         const promptHTML = `
             <div class="ios-prompt-overlay" id="premium-install-prompt" data-install-os="${os}" dir="${isEn ? 'ltr' : 'rtl'}">
-                <button class="ios-prompt-close" onclick="closePremiumPrompt()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="ios-prompt-close" onclick="closePremiumPrompt()" type="button" aria-label="Close installation instructions">&times;</button>
                 <div class="ios-prompt-header">
                     <img src="/Photos/icon2.png" alt="RGA Fit" class="ios-prompt-icon">
-                    <div>
+                    <div class="ios-prompt-copy">
                         <h3 class="ios-prompt-title">${copy.title}</h3>
                         <p class="ios-prompt-desc">${copy.desc}</p>
                     </div>
@@ -1323,9 +1416,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
     window.closePremiumPrompt = function() {
         const prompt = document.getElementById('premium-install-prompt');
         if (prompt) {
-            prompt.style.transform = 'translate(-50%, 150%)';
-            prompt.style.opacity = '0';
-            setTimeout(() => prompt.remove(), 600);
+            prompt.classList.add('is-dismissing');
+            setTimeout(() => prompt.remove(), 300);
         }
         localStorage.setItem('premium_prompt_dismissed', 'true');
     };
