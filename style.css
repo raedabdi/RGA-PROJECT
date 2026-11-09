@@ -1314,3 +1314,47 @@ html, body, .main-content, .perf-tab-content, .chat-messages-area {
 .rga-apple-close > .modal-content {
     animation: rgaApplePopOut 0.3s ease-in forwards !important;
 }
+
+/* Desktop layout polish — keeps mobile layout untouched. */
+@media (min-width: 769px) {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { width: 100%; max-width: 100%; }
+  .dashboard-layout { width: 100%; min-width: 0; }
+  .main-content {
+    min-width: 0;
+    max-width: 100%;
+    padding: clamp(20px, 2.6vw, 44px);
+  }
+  #main-content-area {
+    width: 100%;
+    max-width: 1500px;
+    min-width: 0;
+    margin-inline: auto;
+  }
+  .top-bar .header-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    min-width: 0;
+  }
+  .top-bar .header-row > div {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .top-bar h1 { overflow-wrap: anywhere; }
+  .stats-grid, .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+  }
+  .stat-card, .glass-card, .feature-card { min-width: 0; }
+  .container { width: 100%; max-width: 1200px; }
+  img, video, canvas { max-width: 100%; }
+  .table-responsive { max-width: 100%; overflow-x: auto; }
+}
+/* Mid-size laptop screens: prevent the action buttons in the dashboard header from colliding. */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .main-content { padding: 20px; }
+  .top-bar .header-row { gap: 10px; }
+  .top-bar .header-row > div[style*="display:flex"] { gap: 8px !important; }
+}

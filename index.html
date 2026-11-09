@@ -1,6 +1,14 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
+<script>
+(function () {
+  var preferred = localStorage.getItem('lang') === 'ar' ? 'ar' : 'en';
+  document.documentElement.lang = preferred;
+  document.documentElement.dir = preferred === 'ar' ? 'rtl' : 'ltr';
+})();
+</script>
+
 <link rel="canonical" href="https://www.rga360.com/" />
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBXH91DWNN"></script>
