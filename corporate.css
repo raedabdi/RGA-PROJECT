@@ -95,3 +95,29 @@ html.language-fade body {opacity:.25}
   .modal:not([hidden]) .modal-backdrop,.modal:not([hidden]) .modal-card {animation:none!important}
   .site-nav,.site-nav a,.nav-toggle span,.focus-card,.btn,.header-contact,.language-options button,body {transition:none!important}
 }
+
+
+/* Mobile touch refinements: prevent accidental double-tap zoom while preserving
+   pinch-to-zoom for accessibility and normal touch scrolling. */
+@media (max-width: 900px) and (pointer: coarse) {
+  html {
+    touch-action: manipulation;
+    scrollbar-width: none; /* Firefox + modern browsers */
+    -ms-overflow-style: none;
+  }
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  a, button, .nav-toggle, .language-options button {
+    touch-action: manipulation;
+  }
+  /* Avoid iOS Safari focus auto-zoom if a form field is added later. */
+  input, select, textarea { font-size: max(16px, 1rem); }
+}
