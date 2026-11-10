@@ -99,11 +99,28 @@
     storeLang(valid);
     closeMenu();
   }
+  // Return visitors to the beginning of the newly selected language, without a full page reload.
+  function returnToTop() {
+    if (prefersReducedMotion.matches) {
+      // Override CSS smooth scrolling for users who prefer less motion.
+      const root = document.documentElement;
+      const previous = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      root.style.scrollBehavior = previous;
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  }
   function switchLanguage(nextLang) {
     const valid = nextLang === 'ar' ? 'ar' : 'en';
     const root = document.documentElement;
     if (root.lang === valid || languageSwitchPending) return;
-    if (prefersReducedMotion.matches) { applyLanguage(valid); return; }
+    if (prefersReducedMotion.matches) {
+      applyLanguage(valid);
+      returnToTop();
+      return;
+    }
     languageSwitchPending = true;
     root.classList.add(valid === 'ar' ? 'switching-to-ar' : 'switching-to-en');
     if (typeof document.startViewTransition === 'function') {
@@ -112,12 +129,14 @@
         const finishSwitch = () => {
           root.classList.remove('switching-to-ar', 'switching-to-en');
           languageSwitchPending = false;
+          returnToTop();
         };
         transition.finished.then(finishSwitch, finishSwitch);
       } catch (_) {
         applyLanguage(valid);
         root.classList.remove('switching-to-ar', 'switching-to-en');
         languageSwitchPending = false;
+        returnToTop();
       }
       return;
     }
@@ -127,7 +146,10 @@
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
           root.classList.remove('language-fade', 'switching-to-ar', 'switching-to-en');
-          window.setTimeout(() => { languageSwitchPending = false; }, 190);
+          window.setTimeout(() => {
+            languageSwitchPending = false;
+            returnToTop();
+          }, 190);
         });
       });
     }, 180);
