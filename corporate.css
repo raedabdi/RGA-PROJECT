@@ -13,3 +13,85 @@ html[lang=ar] .section-title,html[lang=ar] .partner-copy h2,html[lang=ar] h1,htm
 @media(max-width:690px){.container{width:min(100% - 38px,560px)}.site-header{height:72px}.header-inner{gap:10px}.brand-logo{width:45px;height:45px}.brand-name{font-size:9px;letter-spacing:.11em}.nav-toggle{display:block;flex-shrink:0}.site-nav{position:absolute;top:calc(100% + 1px);inset-inline:0;display:none;flex-direction:column;align-items:stretch;padding:19px 20px 24px;gap:0;background:#0d1927;border-bottom:1px solid #314151;box-shadow:0 20px 30px rgba(0,0,0,.28)}.site-nav.is-open{display:flex}.site-nav a{font-size:14px;padding:12px 8px}.hero-layout{display:block;min-height:auto;padding-block:85px 54px}.hero-copy{max-width:550px}.hero-art{max-width:300px;margin:45px auto -5px;opacity:.83}.eyebrow{font-size:9px;letter-spacing:.1em;margin-bottom:21px}.eyebrow-line{width:18px;flex-basis:18px}h1{font-size:clamp(36px,9.2vw,54px);letter-spacing:-.045em}.hero-description{font-size:14px;line-height:1.85}.hero-actions{gap:22px}.btn{padding:15px 18px;gap:22px}.hero-footer{height:auto;padding-block:20px;flex-wrap:wrap;gap:8px}.section{padding-block:78px}.section-heading{margin-bottom:30px}.about-layout{grid-template-columns:1fr;gap:12px}.about-copy p{font-size:14px}.section-lead{display:block}.section-lead .section-title{margin-bottom:12px}.section-intro{max-width:490px}.focus-grid{grid-template-columns:1fr;gap:13px}.focus-card{min-height:0;padding:25px 23px 0}.card-top{margin-bottom:22px}.focus-card p{margin-bottom:30px}.partner-panel{padding:27px 24px}.partner-copy h2{font-size:31px}.partner-copy p{font-size:14px}.footer-main{grid-template-columns:1fr;gap:30px}.footer-language{grid-column:1}.footer-bottom{display:block}.footer-bottom p+p{margin-top:8px}.modal-card{padding:29px 24px}.modal{padding:14px}}
 @media(max-width:390px){.hero-actions{align-items:stretch}.hero-actions .btn{width:100%}.hero-art{max-width:260px}.brand-name{font-size:8px}.section-title{font-size:32px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* 2026 refinement: vector icons, smooth interactions, and true mirrored layouts. */
+.ui-icon {display:block;width:20px;height:20px;flex:none;stroke:currentColor;vector-effect:non-scaling-stroke}
+.icon-wrap {display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:transform .25s ease}
+.card-symbol {display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px}
+.card-symbol .ui-icon {width:30px;height:30px}
+html[dir="rtl"] .icon-up-right {transform:scaleX(-1)}
+html[dir="rtl"] .brand,html[dir="rtl"] .footer-brand,html[dir="rtl"] .card-top {direction:rtl}
+html[dir="rtl"] .brand-name,html[dir="rtl"] .footer-brand strong {direction:ltr;unicode-bidi:isolate;text-align:start}
+html[dir="rtl"] .hero-art {direction:ltr}
+html[dir="rtl"] .art-caption {direction:ltr;unicode-bidi:isolate}
+html[dir="rtl"] .footer-brand p {text-align:start}
+html[dir="rtl"] .hero-copy,html[dir="rtl"] .about-copy,html[dir="rtl"] .focus-card,html[dir="rtl"] .partner-copy,html[dir="rtl"] .partner-action,html[dir="rtl"] .modal-card {text-align:start}
+html[dir="rtl"] .contact-email,html[dir="rtl"] .modal-info a {direction:ltr;unicode-bidi:isolate}
+
+/* Deliberate, small interactions without game-like bounce effects. */
+.btn,.header-contact,.language-options button,.modal-close,.nav-toggle {transition:background-color .26s ease,border-color .26s ease,color .26s ease,transform .26s ease,box-shadow .26s ease}
+.btn:hover,.header-contact:hover {transform:translateY(-2px)}
+.btn:hover .icon-wrap,.header-contact:hover .icon-wrap {transform:translate(2px,-2px)}
+html[dir="rtl"] .btn:hover .icon-wrap,html[dir="rtl"] .header-contact:hover .icon-wrap {transform:translate(-2px,-2px)}
+.btn:active,.header-contact:active,.language-options button:active,.nav-toggle:active {transform:scale(.975)}
+.language-options button:hover {border-color:var(--gold);color:var(--gold-soft);background:rgba(209,179,122,.075)}
+.language-options button[aria-pressed="true"] {box-shadow:inset 0 -2px 0 rgba(209,179,122,.45)}
+.site-nav a,.footer-links a,.text-link {transition:color .25s ease,opacity .25s ease}
+.site-nav a {position:relative}
+.site-nav a::after {content:"";position:absolute;inset-inline:0;bottom:6px;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left center;transition:transform .26s ease}
+.site-nav a:hover::after,.site-nav a:focus-visible::after {transform:scaleX(1)}
+html[dir="rtl"] .site-nav a::after {transform-origin:right center}
+.focus-card {transition:background .32s ease,border-color .32s ease,transform .32s ease,box-shadow .32s ease}
+.focus-card:hover,html.motion-ready .scroll-reveal.is-in-view.focus-card:hover {transform:translateY(-4px);box-shadow:0 17px 42px rgba(0,0,0,.13)}
+.focus-card:hover .card-line {width:73px}
+.card-line {transition:width .35s ease}
+
+/* Hamburger transitions between a menu and a close icon. */
+.nav-toggle span {transform-origin:center;transition:transform .3s ease,opacity .2s ease,background-color .3s ease}
+.nav-toggle[aria-expanded="true"] span:nth-child(1) {transform:translateY(7px) rotate(45deg)}
+.nav-toggle[aria-expanded="true"] span:nth-child(2) {opacity:0;transform:scaleX(.25)}
+.nav-toggle[aria-expanded="true"] span:nth-child(3) {transform:translateY(-7px) rotate(-45deg)}
+
+/* Show the menu with a subtle fade/drop, not display:none -> display:flex. */
+@media (max-width:690px) {
+  .site-nav,
+  .site-nav.is-open {display:flex}
+  .site-nav {visibility:hidden;pointer-events:none;opacity:0;transform:translateY(-9px);transition:visibility .28s,opacity .28s ease,transform .28s ease}
+  .site-nav.is-open {visibility:visible;pointer-events:auto;opacity:1;transform:translateY(0)}
+  .site-nav a {opacity:0;transform:translateY(-6px);transition:color .25s,opacity .28s ease,transform .28s ease}
+  .site-nav.is-open a {opacity:1;transform:translateY(0)}
+  .site-nav.is-open a:nth-child(1) {transition-delay:45ms}
+  .site-nav.is-open a:nth-child(2) {transition-delay:75ms}
+  .site-nav.is-open a:nth-child(3) {transition-delay:105ms}
+}
+
+/* A short, controlled entrance for the partnership dialog. */
+.modal:not([hidden]) .modal-backdrop {animation:rga-backdrop-in .28s ease-out both}
+.modal:not([hidden]) .modal-card {animation:rga-modal-in .36s cubic-bezier(.2,.75,.3,1) both}
+@keyframes rga-backdrop-in {from {opacity:0}to {opacity:1}}
+@keyframes rga-modal-in {from {opacity:0;transform:translateY(16px) scale(.985)}to {opacity:1;transform:translateY(0) scale(1)}}
+
+/* Enter-on-scroll for important page sections, never hiding content without JS. */
+html.motion-ready .scroll-reveal {opacity:0;transform:translateY(17px);transition:opacity .65s ease,transform .65s cubic-bezier(.18,.75,.33,1)}
+html.motion-ready .scroll-reveal.is-in-view {opacity:1;transform:translateY(0)}
+
+/* Animated language switching: slide from the opposite edge as layout mirrors. */
+@keyframes rga-lang-old-to-ar {to {opacity:0;transform:translateX(-18px)}}
+@keyframes rga-lang-new-to-ar {from {opacity:0;transform:translateX(18px)}to {opacity:1;transform:translateX(0)}}
+@keyframes rga-lang-old-to-en {to {opacity:0;transform:translateX(18px)}}
+@keyframes rga-lang-new-to-en {from {opacity:0;transform:translateX(-18px)}to {opacity:1;transform:translateX(0)}}
+html.switching-to-ar::view-transition-old(root) {animation:rga-lang-old-to-ar .24s ease-in both}
+html.switching-to-ar::view-transition-new(root) {animation:rga-lang-new-to-ar .36s ease-out both}
+html.switching-to-en::view-transition-old(root) {animation:rga-lang-old-to-en .24s ease-in both}
+html.switching-to-en::view-transition-new(root) {animation:rga-lang-new-to-en .36s ease-out both}
+body {transition:opacity .18s ease}
+html.language-fade body {opacity:.25}
+
+@media (prefers-reduced-motion:reduce) {
+  html.motion-ready .scroll-reveal {opacity:1!important;transform:none!important}
+  html.switching-to-ar::view-transition-old(root),html.switching-to-ar::view-transition-new(root),
+  html.switching-to-en::view-transition-old(root),html.switching-to-en::view-transition-new(root) {animation-duration:0.01ms!important}
+  .modal:not([hidden]) .modal-backdrop,.modal:not([hidden]) .modal-card {animation:none!important}
+  .site-nav,.site-nav a,.nav-toggle span,.focus-card,.btn,.header-contact,.language-options button,body {transition:none!important}
+}

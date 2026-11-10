@@ -70,6 +70,9 @@
   const dialog = document.getElementById('partner-modal');
   const dialogClose = dialog.querySelector('.modal-close');
   let previousFocus = null;
+  let languageSwitchPending = false;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
   function closeMenu() {
     nav.classList.remove('is-open');
     toggle.setAttribute('aria-expanded', 'false');
@@ -96,6 +99,39 @@
     storeLang(valid);
     closeMenu();
   }
+  function switchLanguage(nextLang) {
+    const valid = nextLang === 'ar' ? 'ar' : 'en';
+    const root = document.documentElement;
+    if (root.lang === valid || languageSwitchPending) return;
+    if (prefersReducedMotion.matches) { applyLanguage(valid); return; }
+    languageSwitchPending = true;
+    root.classList.add(valid === 'ar' ? 'switching-to-ar' : 'switching-to-en');
+    if (typeof document.startViewTransition === 'function') {
+      try {
+        const transition = document.startViewTransition(() => applyLanguage(valid));
+        const finishSwitch = () => {
+          root.classList.remove('switching-to-ar', 'switching-to-en');
+          languageSwitchPending = false;
+        };
+        transition.finished.then(finishSwitch, finishSwitch);
+      } catch (_) {
+        applyLanguage(valid);
+        root.classList.remove('switching-to-ar', 'switching-to-en');
+        languageSwitchPending = false;
+      }
+      return;
+    }
+    root.classList.add('language-fade');
+    window.setTimeout(() => {
+      applyLanguage(valid);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          root.classList.remove('language-fade', 'switching-to-ar', 'switching-to-en');
+          window.setTimeout(() => { languageSwitchPending = false; }, 190);
+        });
+      });
+    }, 180);
+  }
   function openModal() {
     previousFocus = document.activeElement;
     closeMenu();
@@ -111,13 +147,19 @@
   }
   document.querySelectorAll('[data-open-partner]').forEach(el => el.addEventListener('click', openModal));
   document.querySelectorAll('[data-close-partner]').forEach(el => el.addEventListener('click', closeModal));
-  document.querySelectorAll('[data-language]').forEach(el => el.addEventListener('click', () => applyLanguage(el.dataset.language)));
+  document.querySelectorAll('[data-language]').forEach(el => el.addEventListener('click', () => switchLanguage(el.dataset.language)));
   toggle.addEventListener('click', () => {
     const open = nav.classList.toggle('is-open');
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', copy[document.documentElement.lang]?.[open ? 'nav_close' : 'nav_open'] || 'Navigation');
   });
   nav.querySelectorAll('a').forEach(el => el.addEventListener('click', closeMenu));
+  document.addEventListener('pointerdown', (event) => {
+    if (nav.classList.contains('is-open') && !nav.contains(event.target) && !toggle.contains(event.target)) closeMenu();
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 690 && nav.classList.contains('is-open')) closeMenu();
+  });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') { if (!dialog.hidden) closeModal(); else closeMenu(); }
     if (event.key === 'Tab' && !dialog.hidden) {
@@ -130,4 +172,18 @@
   });
   document.getElementById('year').textContent = String(new Date().getFullYear());
   applyLanguage(getStoredLang());
+  // Safe enhancement: content stays visible if the observer is unavailable.
+  if ('IntersectionObserver' in window && !prefersReducedMotion.matches) {
+    const targets = document.querySelectorAll('.section-heading, .section-lead, .about-layout, .focus-card, .partner-panel');
+    const onEnter = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.07, rootMargin: '0px 0px -20px 0px' });
+    targets.forEach(el => { el.classList.add('scroll-reveal'); onEnter.observe(el); });
+    document.documentElement.classList.add('motion-ready');
+  }
 })();
