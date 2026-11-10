@@ -1,8 +1,11 @@
-const CACHE_NAME = 'rga-fit-v15'; 
+const CACHE_NAME = 'rga-fit-v16-corporate'; 
  
 const ASSETS =[
   '/',
   '/index.html',
+  '/corporate.css',
+  '/corporate.js',
+  '/Photos/Logo2.png',
   '/dashboard.html',
   '/style.css',
   '/main.js',
@@ -10,8 +13,7 @@ const ASSETS =[
   '/body.png',
   '/Photos/icon1.JPEG',
   '/Photos/icon2.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/chart.js'
+  '/Photos/icon11.png'
 ];
 
 
@@ -46,11 +48,18 @@ self.addEventListener('fetch', (e) => {
       return;
   }
   
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
-    })
-  );
+  // Always try the latest HTML first; serve cached pages only while offline.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(fetch(e.request).then((response) => {
+      if (response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, copy));
+      }
+      return response;
+    }).catch(() => caches.match(e.request).then(response => response || caches.match('/index.html'))));
+    return;
+  }
+  e.respondWith(caches.match(e.request).then(response => response || fetch(e.request)));
 });
 
 

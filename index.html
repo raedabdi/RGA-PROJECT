@@ -1,1592 +1,196 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
 <head>
-<script>
-(function () {
-  var preferred = localStorage.getItem('lang') === 'ar' ? 'ar' : 'en';
-  document.documentElement.lang = preferred;
-  document.documentElement.dir = preferred === 'ar' ? 'rtl' : 'ltr';
-})();
-</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1321">
+  <meta name="google" content="notranslate">
+  <meta name="author" content="Royal Gravitas Arena">
+  <meta name="description" content="Royal Gravitas Arena is a sports technology venture exploring the future of competitive fitness, connected experiences, and strategic partnerships.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.rga360.com/">
+  <link rel="icon" type="image/png" href="Photos/icon11.png">
+  <link rel="apple-touch-icon" href="Photos/icon2.png">
+  <title>Royal Gravitas Arena | Sports Technology & Partnerships</title>
 
-<link rel="canonical" href="https://www.rga360.com/" />
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBXH91DWNN"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-GBXH91DWNN');
-    </script>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Royal Gravitas Arena",
-  "alternateName": "RGA Fit",
-  "url": "https://www.rga360.com/",
-  "applicationCategory": "HealthAndFitnessApplication",
-  "operatingSystem": "Web, Android, iOS",
-  "description": "منصة لياقة بدنية بنظام الألعاب. ارتقِ بمستواك، اجمع XP، نافس النخبة، وتصدر مدينتك.",
-  "image":[
-    "https://www.rga360.com/Photos/des1.png",
-    "https://www.rga360.com/Photos/des2.png"
-  ],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "ratingCount": "184"
-  },
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  }
-}
-</script>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- The site has its own bilingual switcher; avoid duplicate browser auto-translation overlays. -->
-<meta name="google" content="notranslate">
-<title>Royal Gravitas Arena — منصة لياقة بنظام الألعاب | RGA Fitness</title>
-<meta name="description" content="Royal Gravitas Arena — تجربة لياقة فاخرة بأسلوب الألعاب. ارتقِ بمستواك، اجمع XP، نافس النخبة، وتصدر مدينتك عبر rga360.com">
-<meta name="keywords" content="Rgafit, rga360.com, rgafitness, rga, RGA Fit, Royal Gravitas Arena, Royal Gravitas Arena Company, fitness app, gym, تطبيق لياقة, جيم, بناء عضلات, تتبع الأداء, منصة الأبطال">
-<meta name="author" content="Royal Gravitas Arena">
-<link rel="manifest" href="manifest.json">
-
-<!-- 1. أيقونة المتصفح (جوجل وتابات الكروم) -->
-<link rel="icon" href="/Photos/icon11.png" sizes="96x96" type="image/png">
-
-<!-- 2. أيقونة التطبيق (شاشة الآيفون والأندرويد) -->
-<link rel="apple-touch-icon" href="/Photos/icon2.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="RGA Fit">
-<meta name="mobile-web-app-capable" content="yes">
-
-<!-- 3. صورة الروابط (واتساب، فيسبوك، تويتر) - هنا استدعينا الصورة المستطيلة -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Royal Gravitas Arena | منصة الأبطال">
-<meta property="og:description" content="Level up your power. انضم إلى ثورة اللياقة البدنية، تنافس مع الأصدقاء، وسيطر على مدينتك.">
-<meta property="og:image" content="https://www.rga360.com/Photos/social-cover.jpg"> 
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="https://www.rga360.com/">
-<meta property="og:site_name" content="Royal Gravitas Arena">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<!-- ستايل حركة الإغلاق والتكيّف مع كل شاشات الموبايل بدون سكرول -->
-    <style>
-        .modal-overlay.closing {
-            display: flex !important; 
-            animation: fadeOutOverlay 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
-        }
-        .modal-overlay.closing .modal-content {
-            animation: popOutModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-        }
-
-        @keyframes fadeOutOverlay {
-            0% { opacity: 1; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-            100% { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
-        }
-        @keyframes popOutModal {
-            0% { opacity: 1; transform: scale(1) translateY(0); }
-            100% { opacity: 0; transform: scale(0.85) translateY(30px); }
-        }
-
-        /* ستايلات النافذة للديسك توب والتابلت */
-        .partner-modal-content {
-            width: 90%;
-            max-width: 530px;
-            padding: 2.2rem;
-            text-align: center;
-            background: linear-gradient(145deg, rgba(17, 34, 64, 0.4), rgba(10, 20, 41, 0.6));
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(0, 242, 167, 0.3);
-            border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden !important; /* منع التمرير نهائياً */
-        }
-        .partner-close-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            color: var(--slate);
-            cursor: pointer;
-            transition: 0.3s;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .partner-close-btn:hover {
-            background: rgba(255, 77, 77, 0.2);
-            color: #ff4d4d;
-        }
-        .partner-icon-wrapper {
-            margin-bottom: 12px;
-            margin-top: 12px;
-            animation: pulse 2s infinite;
-        }
-        .partner-gem-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            filter: drop-shadow(0 0 15px var(--primary-color));
-        }
-        .partner-modal-content h2 {
-            color: var(--white);
-            font-weight: 900;
-            margin-bottom: 8px;
-            font-size: 1.6rem;
-            text-shadow: 0 0 10px rgba(255,255,255,0.1);
-        }
-        .partner-modal-content p#p-desc {
-            color: var(--slate);
-            font-size: 0.88rem;
-            margin-bottom: 18px;
-            line-height: 1.5;
-        }
-        .partner-modal-content #partner-info-box {
-            text-align: start;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 18px;
-            border: 1px dashed rgba(0, 242, 167, 0.3);
-        }
-        .partner-modal-content #partner-info-box h4 {
-            color: var(--primary-color);
-            margin-bottom: 12px;
-            font-weight: 800;
-            text-align: center;
-            font-size: 1.05rem;
-        }
-        .partner-modal-content #partner-info-box ul {
-            list-style: none;
-            color: var(--white);
-            font-size: 0.82rem;
-            line-height: 1.5;
-            margin: 0;
-            padding: 0;
-        }
-        .partner-modal-content #partner-info-box ul li {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .partner-modal-content #partner-info-box ul li i {
-            color: var(--primary-color);
-            margin-top: 3px;
-        }
-        .partner-modal-content p#p-footer {
-            color: var(--slate);
-            font-size: 0.78rem;
-            margin-bottom: 10px;
-        }
-        .partner-modal-content .partner-submit-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            font-size: 0.95rem;
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 242, 167, 0.2);
-        }
-
-        /* ============================================== */
-        /* تعديلات الموبايل: تقليص احترافي يتناسب مع حجم الشاشة تماماً */
-        /* ============================================== */
-        @media (max-width: 576px) {
-            .partner-modal-content {
-                padding: 1.2rem 1rem !important;
-            }
-            .partner-icon-wrapper {
-                margin-bottom: 6px !important;
-                margin-top: 4px !important;
-            }
-            .partner-gem-icon {
-                font-size: 2.2rem !important;
-            }
-            .partner-modal-content h2 {
-                font-size: 1.25rem !important;
-                margin-bottom: 4px !important;
-            }
-            .partner-modal-content p#p-desc {
-                font-size: 0.72rem !important;
-                margin-bottom: 10px !important;
-                line-height: 1.4 !important;
-            }
-            .partner-modal-content #partner-info-box {
-                padding: 10px !important;
-                margin-bottom: 10px !important;
-                border-radius: 10px !important;
-            }
-            .partner-modal-content #partner-info-box h4 {
-                margin-bottom: 6px !important;
-                font-size: 0.88rem !important;
-            }
-            .partner-modal-content #partner-info-box ul li {
-                font-size: 0.7rem !important;
-                margin-bottom: 5px !important;
-                gap: 6px !important;
-            }
-            .partner-modal-content #partner-info-box ul li i {
-                margin-top: 2px !important;
-                font-size: 0.75rem !important;
-            }
-            .partner-modal-content p#p-footer {
-                font-size: 0.7rem !important;
-                margin-bottom: 6px !important;
-            }
-            .partner-modal-content .partner-submit-btn {
-                padding: 10px !important;
-                font-size: 0.82rem !important;
-                border-radius: 10px !important;
-            }
-            .partner-close-btn {
-                width: 28px !important;
-                height: 28px !important;
-                font-size: 1.1rem !important;
-                top: 8px !important;
-                left: 8px !important;
-            }
-        }
-    </style>
-
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Royal Gravitas Arena">
+  <meta property="og:title" content="Royal Gravitas Arena | Sports Technology & Partnerships">
+  <meta property="og:description" content="A long-term vision for competitive fitness, sports technology and strategic collaboration.">
+  <meta property="og:url" content="https://www.rga360.com/">
+  <meta property="og:image" content="https://www.rga360.com/Photos/Logo2.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Royal Gravitas Arena | Sports Technology & Partnerships">
+  <meta name="twitter:description" content="A long-term vision for competitive fitness, sports technology and strategic collaboration.">
+  <meta name="twitter:image" content="https://www.rga360.com/Photos/Logo2.png">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"Royal Gravitas Arena","alternateName":"RGA","url":"https://www.rga360.com/","logo":"https://www.rga360.com/Photos/Logo2.png","email":"SUPPORT@RGA360.COM","description":"A sports technology venture focused on future opportunities in competitive fitness and strategic partnerships."}
+  </script>
+  <script>
+    (function () {
+      try {
+        var lng = localStorage.getItem('lang') === 'ar' ? 'ar' : 'en';
+        document.documentElement.lang = lng;
+        document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+      } catch (e) { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="corporate.css?v=1">
+  <script defer src="corporate.js?v=1"></script>
 </head>
-
-    <style>
-
-
-
-
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Montserrat:wght@400;700;900&display=swap');
-
-        :root {
-            --primary-color: #00f2a7;
-            --secondary-color: #0A1429;
-            --light-navy: #112240;
-            --slate: #8892b0;
-            --white: #e6f1ff;
-            --font-main: 'Montserrat', 'Cairo', sans-serif; 
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: var(--font-main);
-            background-color: var(--secondary-color);
-            color: var(--slate);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        
-        #stardust-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        .container { max-width: 1100px; margin: auto; padding: 0 1rem; position: relative; z-index: 2; }
-        
-        .glass-card {
-            position: relative;
-            background: linear-gradient(145deg, rgba(17, 34, 64, 0.7), rgba(17, 34, 64, 0.4));
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            transition: all 0.4s ease;
-            overflow: hidden;
-        }
-        .glass-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); }
-
-        #main-header { position: fixed; width: 100%; top: 0; z-index: 1000; padding: 0.75rem 0; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        #main-header .container { display: flex; justify-content: space-between; align-items: center; }
-        /* --- إعدادات الشعار الرسمي الجديد --- */
-#main-header .logo { 
-    display: flex; 
-    align-items: center; 
-    text-decoration: none; 
-}
-.official-logo {
-    height: 70px; /* تم التكبير للشاشات العادية */
-    width: auto;
-    object-fit: contain;
-    transition: all 0.3s ease-in-out;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1)); 
-}
-
-/* لمسة فخامة: الشعار يلمع ويتحرك قليلاً عند تأشير الماوس عليه */
-.official-logo:hover {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 15px var(--primary-color)); 
-}
-
-/* الحجم الخاص بشاشات الموبايل */
-@media (max-width: 768px) {
-    .official-logo {
-        height: 55px; /* تم تكبيره ليكون واضحاً وبارزاً في الموبايل */
-        margin-top: 4px; 
-    }
-}
-        #main-header .logo { font-weight: 700; font-size: 1.4rem; color: var(--white); text-decoration: none; }
-        #main-header .logo span { color: var(--primary-color); }
-        .main-nav { display: flex; align-items: center; gap: 5px; }
-        .main-nav a { color: var(--slate); text-decoration: none; padding: 5px 8px; font-weight: 700; transition: color 0.3s ease; white-space: nowrap; font-size: 0.8rem; border-radius: 6px; }
-        .main-nav a:hover { color: var(--primary-color); }
-
-        .btn-primary { display: inline-block; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent; background-color: var(--primary-color); color: var(--secondary-color); border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 242, 167, 0.3); }
-        .btn-primary:hover { background-color: transparent; color: var(--primary-color); box-shadow: 0 0 25px rgba(0, 242, 167, 0.5); transform: translateY(-3px); }
-
-        #hero { padding: 180px 0 120px; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }
-        #hero .container > * { opacity: 0; transform: translateY(20px); animation: fadeIn 0.8s ease-out forwards; }
-        #hero h1 { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; color: var(--white); line-height: 1.2; margin-bottom: 1rem; animation-delay: 0.2s; }
-        #hero h1 span { color: var(--primary-color); display: block; }
-        #hero .subtitle { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; animation-delay: 0.4s; }
-        #hero .cta-buttons { animation-delay: 0.6s; }
-        
-        #stats { padding: 80px 0; background: transparent; }
-        .stats-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        .stat-item { text-align: center; }
-        .stat-item:nth-child(3) { grid-column: 1 / -1; }
-        .stat-number { font-size: 2.8rem; font-weight: 900; color: var(--primary-color); }
-        .stat-label { font-size: 1rem; color: var(--slate); letter-spacing: 1px; }
-
-        .section { padding: 100px 0; }
-        .section-title { text-align: center; font-size: 2.5rem; font-weight: 900; color: var(--white); margin-bottom: 1rem; }
-        .section-title span { color: var(--primary-color); }
-        .section-subtitle { text-align: center; font-size: 1.1rem; margin-bottom: 4rem; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; }
-        .feature-card .icon { color: var(--primary-color); margin-bottom: 1rem; }
-        .feature-card .icon svg { width: 48px; height: 48px; filter: drop-shadow(0 0 5px var(--primary-color)); }
-        .feature-card h3 { color: var(--white); font-size: 1.5rem; margin-bottom: 0.5rem; }
-        
-        /* --- الكود الجديد للفوتر (شفاف ليظهر الفيديو تحته) --- */
-#main-footer { 
-    padding: 4rem 0; 
-    background: rgba(10, 20, 41, 0.75); /* لون كحلي شفاف */
-    backdrop-filter: blur(15px); /* تغبيش الفيديو تحته */
-    -webkit-backdrop-filter: blur(15px);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    text-align: center; 
-}
-        .copyright { margin-top: 2rem; font-size: 0.9rem; }
-        .accordion { max-width: 700px; margin: 0 auto 2rem; text-align: right; }
-        .accordion-item { border-bottom: 1px solid var(--light-navy); }
-        .accordion-header { background: none; border: none; width: 100%; padding: 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; color: var(--white); font-family: var(--font-main); font-size: 1.1rem; cursor: pointer; }
-        .accordion-header .arrow { width: 24px; height: 24px; color: var(--primary-color); transition: transform 0.4s ease; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        .accordion-content p { padding: 0 1rem 1.5rem 1rem; }
-        .accordion-item.active .accordion-header .arrow { transform: rotate(180deg); }
-        .accordion-item.active .accordion-content { max-height: 200px; }
-        
-        .language-switcher { position: relative; display: inline-block; margin-bottom: 2rem; }
-        .lang-button { background: var(--light-navy); border: 1px solid var(--slate); color: var(--white); padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-family: var(--font-main); }
-        .lang-options { position: absolute; bottom: calc(100% + 10px); left: 50%; background: var(--light-navy); border: 1px solid var(--primary-color); border-radius: 8px; padding: 0.5rem; width: 150px; display: flex; flex-direction: column; gap: 5px; opacity: 0; visibility: hidden; transition: all 0.3s ease; transform: translate(-50%, 10px); }
-        .lang-options.active { opacity: 1; visibility: visible; transform: translateX(-50%); }
-        .lang-options a { color: var(--slate); text-decoration: none; padding: 10px; border-radius: 6px; transition: background-color 0.3s, color 0.3s; text-align: center; }
-        .lang-options a:hover { background-color: var(--primary-color); color: var(--secondary-color); }
-        .lang-button.active .arrow { transform: rotate(180deg); }
-
-
-        #auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
-        #auth-modal.active { display: flex; opacity: 1; }
-        .modal-content { width: 100%; max-width: 420px; background: linear-gradient(145deg, rgba(17, 34, 64, 0.8), rgba(17, 34, 64, 0.5)); border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.4s ease; }
-        #auth-modal.active .modal-content { transform: scale(1); }
-        .close-modal-btn { position: absolute; top: 15px; left: 20px; background: none; border: none; font-size: 2rem; color: var(--slate); cursor: pointer; }
-        .tab-switcher { display: flex; border-bottom: 1px solid var(--light-navy); margin-bottom: 2rem; }
-        .tab-btn { background: none; border: none; color: var(--slate); font-size: 1.2rem; font-family: var(--font-main); padding: 0.5rem 1rem; cursor: pointer; flex: 1; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-        .input-group { margin-bottom: 1.5rem; }
-        .input-field { width: 100%; padding: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--slate); border-radius: 8px; color: var(--white); font-family: var(--font-main); font-size: 1rem; text-align: right; }
-        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0, 242, 167, 0.4); }
-        .form-container.hidden { display: none; }
-
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        #help-modal, #legal-modal {
-            display: none !important; /* إخفاء إجباري في البداية */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(10, 20, 41, 0.9);
-            z-index: 99999; /* عشان تطلع فوق كل شي */
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        
-        #help-modal.active, #legal-modal.active {
-            display: flex !important; 
-        }
-
-        #help-modal .modal-content, #legal-modal .modal-content {
-            background: linear-gradient(145deg, rgba(17, 34, 64, 0.98), rgba(10, 20, 41, 0.98));
-            border: 1px solid var(--primary-color);
-            border-radius: 15px;
-            width: 90%;
-            position: relative;
-        }
-        
-        #faq-container .accordion-header {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            margin-bottom: 5px;
-            transition: 0.3s;
-            cursor: pointer;
-            width: 100%;
-            text-align: right;
-            border: none;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        #faq-container .accordion-item .accordion-content {
-            display: none;
-        }
-        
-        #faq-container .accordion-item.active .accordion-content {
-            display: block;
-        }
-
-        /* --- ستايلات الفوتر والنافذة القانونية --- */
-        .corporate-footer-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 40px;
-            align-items: center;
-        }
-        
-        .corporate-footer-links a {
-            color: var(--slate);
-            text-decoration: none;
-            font-family: var(--font-main);
-            font-size: 1rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-        
-        .corporate-footer-links a:hover {
-            color: var(--primary-color);
-            transform: translateX(-5px);
-        }
-
-        [dir="ltr"] .corporate-footer-links a:hover {
-            transform: translateX(5px);
-        }
-
-        .legal-text-body h3 {
-            color: white;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-            font-weight: 900;
-        }
-
-        .legal-text-body p {
-            color: var(--slate);
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        .legal-text-body ul {
-            padding-inline-start: 20px;
-            margin-bottom: 20px;
-            color: var(--slate);
-        }
-
-        .legal-text-body li {
-            margin-bottom: 8px;
-        }
-
-/* =========================================
-   📱 Premium iOS Install Prompt (Fixed Position)
-========================================= */
-.ios-prompt-overlay {
-    position: fixed;
-    /* السر هنا: رفعناها 90 بكسل عشان ما تغطي ع الشريط السفلي، مع احترام حافة الآيفون */
-    bottom: calc(90px + env(safe-area-inset-bottom)); 
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 380px; /* صغرنا العرض شوي لتكون ألم وتوسطها أحلى */
-    background: rgba(10, 20, 41, 0.85); /* لون كحلي أغمق شوي لتباين أفضل */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 242, 167, 0.25); /* إطار نيون واضح */
-    border-radius: 20px; /* حواف أنعم */
-    padding: 18px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 167, 0.1);
-    z-index: 9999999;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    animation: iosSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    direction: ltr;
-    font-family: var(--font-main, 'Montserrat', 'Cairo', sans-serif);
-    color: #ffffff;
-}
-
-@keyframes iosSlideUp {
-    0% { transform: translate(-50%, 150%); opacity: 0; }
-    100% { transform: translate(-50%, 0); opacity: 1; }
-}
-
-.ios-prompt-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.ios-prompt-icon {
-    width: 55px;
-    height: 55px;
-    border-radius: 14px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-.ios-prompt-title {
-    font-weight: 800;
-    font-size: 1.1rem;
-    margin: 0 0 2px 0;
-    color: #00f2a7;
-    letter-spacing: 0.5px;
-}
-
-.ios-prompt-desc {
-    font-size: 0.8rem;
-    margin: 0;
-    color: #a0aec0;
-    line-height: 1.4;
-}
-
-.ios-prompt-instructions {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    text-align: center;
-    font-weight: 700;
-}
-
-.ios-prompt-close {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: #fff;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.ios-prompt-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-}
-
-#stats { background: transparent !important; }
-
-
-#comparison-section {
-    background: transparent;
-    padding-top: 60px;
-    padding-bottom: 80px;
-}
-.comparison-grid {
-    position: relative; display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 3rem;
-}
-@media (min-width: 992px) {
-    .comparison-grid { grid-template-columns: 1fr 1fr; gap: 3rem; }
-}
-.comparison-column {
-    padding: 1.5rem; border-radius: 20px; display: flex; flex-direction: column; gap: 1.5rem;
-}
-.comparison-column > h3 {
-    text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;
-}
-/* --- الكود الجديد لقسم المقارنة (فخامة الزجاج) --- */
-.comparison-column {
-    padding: 1.5rem; 
-    border-radius: 20px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 1.5rem;
-    backdrop-filter: blur(15px); /* التغبيش القوي اللي بيعزل الفيديو */
-    -webkit-backdrop-filter: blur(15px);
-}
-/* الطريقة القديمة */
-.old-way { 
-    background: rgba(15, 20, 30, 0.6); /* لون كحلي غامق شفاف */
-    border: 1px solid rgba(255, 255, 255, 0.05); 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-.old-way > h3 { color: #8892b0; }
-.old-way .comparison-card { filter: grayscale(1); opacity: 0.8; }
-.old-way .comp-icon { color: #777; }
-
-/* طريقة RGA */
-.rga-way { 
-    background: rgba(0, 242, 167, 0.05); 
-    border: 1px solid rgba(0, 242, 167, 0.2); 
-    box-shadow: 0 10px 30px rgba(0, 242, 167, 0.1);
-}
-.rga-way > h3 { color: var(--primary-color); }
-.rga-way .comp-icon { color: var(--primary-color); }
-
-/* الكروت الداخلية */
-.comparison-card { 
-    display: flex; 
-    align-items: center; 
-    gap: 1rem; 
-    background: rgba(0, 0, 0, 0.5); /* تغميق الكرت الداخلي لبروز النص */
-    padding: 1rem; 
-    border-radius: 12px; 
-    border: 1px solid rgba(255, 255, 255, 0.03);
-}
-.comp-icon { font-size: 1.8rem; min-width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.05); }
-.comp-text h4 { color: white; font-weight: bold; margin-bottom: 5px; }
-.comp-text p { font-size: 0.85rem; color: var(--slate); margin: 0; }
-
-
-.features-wrapper { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: flex-start; }
-@media (min-width: 992px) { .features-wrapper { grid-template-columns: 1fr 1fr; } }
-.features-list { display: flex; flex-direction: column; gap: 4rem; }
-/* --- الكود الجديد لكروت الميزات --- */
-.feature-item { 
-    padding: 1.5rem; 
-    border-radius: 15px; 
-    border-left: 4px solid rgba(0, 242, 167, 0.2); 
-    transition: all 0.4s ease; 
-    background: rgba(10, 20, 41, 0.5); /* خلفية معتمة قليلاً */
-    backdrop-filter: blur(12px); /* تغبيش */
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.03); 
-}
-[dir="ltr"] .feature-item { border-left: none; border-right: 4px solid rgba(0, 242, 167, 0.2); }
-.feature-item.is-visible { 
-    background: rgba(10, 20, 41, 0.85); /* تعتيم أكثر عند تفعيل الكرت */
-    border-left-color: var(--primary-color); 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-}
-[dir="ltr"] .feature-item.is-visible { border-right-color: var(--primary-color); }
-.feature-item .icon { color: var(--primary-color); margin-bottom: 1rem; font-size: 1.5rem; }
-.feature-item h3 { color: var(--white); font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 900; }
-.feature-item p { color: var(--slate); line-height: 1.7; }
-.features-visual { position: sticky; top: 120px; height: 70vh; display: none; }
-@media (min-width: 992px) { .features-visual { display: block; } }
-.features-visual img { width: 100%; height: 100%; object-fit: contain; border-radius: 20px; transition: opacity 0.4s ease-in-out; }
-/* =========================================
-   ✨ RGA WORLD-CLASS MODAL ANIMATIONS ✨
-   ========================================= */
-
-/* 1. أنيميشن للخلفية المظلمة (ظهور ناعم مع تغبيش) */
-.modal-overlay.active,
-#auth-modal.active,
-#help-modal.active,
-#legal-modal.active {
-    display: flex !important;
-    animation: smoothOverlayFade 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
-}
-
-/* 2. أنيميشن للنافذة نفسها (تأثير ارتداد فخم وصعود من الأسفل) */
-.modal-overlay.active .modal-content,
-#auth-modal.active .modal-content,
-#help-modal.active .modal-content,
-#legal-modal.active .modal-content {
-    animation: smoothModalPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-}
-
-/* 3. تعريف الحركات (Keyframes) */
-
-/* حركة الخلفية */
-@keyframes smoothOverlayFade {
-    0% {
-        opacity: 0;
-        backdrop-filter: blur(0px);
-        -webkit-backdrop-filter: blur(0px);
-    }
-    100% {
-        opacity: 1;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-}
-
-/* حركة المربع الداخلي (البطاقة) */
-@keyframes smoothModalPop {
-    0% {
-        opacity: 0;
-        transform: scale(0.85) translateY(30px); /* يبدأ أصغر قليلاً ومن الأسفل */
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0); /* يستقر في حجمه ومكانه الطبيعي */
-    }
-}
-
-/* RGA INSTALL CARD — visual layout fix (iPhone + Android + narrow screens) */
-.ios-prompt-overlay {
-    box-sizing: border-box;
-    width: min(420px, calc(100vw - 32px));
-    max-width: calc(100vw - 32px);
-    padding: 20px;
-    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-    gap: 14px;
-    text-align: start;
-    overflow-wrap: anywhere;
-}
-.ios-prompt-overlay[dir="ltr"] { direction: ltr; }
-.ios-prompt-overlay[dir="rtl"] { direction: rtl; }
-.ios-prompt-header {
-    display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
-    align-items: start;
-    gap: 14px;
-    min-width: 0;
-    padding-inline-end: 44px; /* reserve a safe corner for the close button */
-}
-.ios-prompt-overlay[dir="rtl"] .ios-prompt-header {
-    grid-template-columns: 56px minmax(0, 1fr);
-}
-.ios-prompt-copy { min-width: 0; }
-.ios-prompt-icon { width: 56px; height: 56px; object-fit: cover; }
-.ios-prompt-title { font-size: 1.05rem; line-height: 1.35; margin: 0 0 7px; letter-spacing: 0; }
-.ios-prompt-desc { font-size: .85rem; line-height: 1.55; margin: 0; }
-.ios-prompt-close {
-    top: 10px;
-    width: 34px;
-    height: 34px;
-    z-index: 2;
-    font-size: 1rem;
-}
-.ios-prompt-overlay[dir="ltr"] .ios-prompt-close { inset-inline-end: 10px; inset-inline-start: auto; }
-.ios-prompt-overlay[dir="rtl"] .ios-prompt-close { inset-inline-end: 10px; inset-inline-start: auto; }
-.ios-prompt-instructions {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 12px;
-    gap: 8px;
-    line-height: 1.6;
-    font-size: .82rem;
-    text-wrap: pretty;
-}
-.ios-prompt-instructions svg, .ios-prompt-instructions i { flex: 0 0 auto; }
-.ios-prompt-install-action { width: 100%; }
-@media (max-width: 420px) {
-    .ios-prompt-overlay { padding: 16px; gap: 12px; border-radius: 18px; }
-    .ios-prompt-header { grid-template-columns: 46px minmax(0, 1fr); gap: 10px; padding-inline-end: 42px; }
-    .ios-prompt-overlay[dir="rtl"] .ios-prompt-header { grid-template-columns: 46px minmax(0, 1fr); }
-    .ios-prompt-icon { width: 46px; height: 46px; border-radius: 11px; }
-    .ios-prompt-title { font-size: .96rem; }
-    .ios-prompt-desc { font-size: .79rem; }
-    .ios-prompt-instructions { font-size: .79rem; padding: 10px; }
-}
-@keyframes iosSlideDown {
-    to { transform: translate(-50%, 130%); opacity: 0; }
-}
-.ios-prompt-overlay.is-dismissing { animation: iosSlideDown .28s ease-in both; pointer-events: none; }
-
-/* Landing page content layout fix for computer screens. */
-#comparison-section .comparison-column,
-#comparison-section .comparison-card,
-#comparison-section .comp-text,
-#interactive-features .features-wrapper,
-#interactive-features .features-list,
-#interactive-features .feature-item,
-#corporate-info .corp-column { min-width: 0; }
-#comparison-section .comparison-card { align-items: flex-start; }
-#comparison-section .comp-text { flex: 1 1 0; }
-#comparison-section .comp-text h4 { line-height: 1.4; margin-bottom: 8px; }
-#comparison-section .comp-text p { line-height: 1.65; overflow-wrap: break-word; }
-#interactive-features .section-title { line-height: 1.25; text-wrap: balance; }
-#interactive-features .section-subtitle { line-height: 1.6; max-width: 690px; margin-inline: auto; }
-#interactive-features .feature-item { overflow-wrap: break-word; }
-#interactive-features .feature-item h3 { line-height: 1.3; }
-#interactive-features .feature-item p { line-height: 1.65; }
-#interactive-features .features-visual img { display: block; }
-#interactive-features, #corporate-info, #comparison-section { scroll-margin-top: 95px; }
-@media (min-width: 992px) {
-    #interactive-features .features-wrapper { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
-    #interactive-features .features-list { gap: 24px; }
-    #interactive-features .feature-item { padding: 26px; }
-    #interactive-features .features-visual { top: 110px; height: min(68vh, 620px); min-height: 360px; }
-    #interactive-features .features-visual img {
-        width: 100%; height: 100%; object-fit: cover; object-position: center;
-        border-radius: 20px; border: 1px solid rgba(0,242,167,.2);
-        box-shadow: 0 18px 55px rgba(0,0,0,.3);
-    }
-}
-@media (max-width: 991px) {
-    #interactive-features .features-list { gap: 22px; }
-    #interactive-features .feature-item { padding: 22px; }
-    #comparison-section .comparison-column { padding: 16px; }
-}
-#corporate-info .corporate-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)) !important; }
-@media (max-width: 767px) {
-    #corporate-info .corporate-grid { gap: 30px !important; }
-    #interactive-features .section-title { font-size: clamp(1.75rem, 7vw, 2.4rem); }
-    #interactive-features .section-subtitle { margin-bottom: 2rem; }
-
-
-} /* End mobile-only styles. The following rules apply to all viewport widths. */
-
-/* RGA | clean, balanced, image-free feature cards */
-#interactive-features .features-wrapper--clean {
-    display: block !important;
-    width: 100%;
-    max-width: 1160px;
-    margin-inline: auto;
-}
-#interactive-features .features-list--clean {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 20px;
-    align-items: stretch;
-}
-#interactive-features .features-list--clean > .feature-item {
-    min-width: 0;
-    height: 100%;
-    padding: clamp(22px, 2.5vw, 30px);
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 18px;
-    background: rgba(10, 20, 41, .76);
-    box-shadow: none;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
-}
-#interactive-features .features-list--clean > .feature-item.is-visible {
-    background: rgba(10, 20, 41, .76);
-    border-color: rgba(255,255,255,.09);
-    box-shadow: none;
-}
-#interactive-features .features-list--clean > .feature-item:hover {
-    border-color: rgba(0,242,167,.36);
-    background: rgba(14,29,51,.85);
-    transform: translateY(-2px);
-}
-#interactive-features .features-list--clean > .feature-item .icon {
-    margin-bottom: 16px;
-    font-size: 1.18rem;
-}
-#interactive-features .features-list--clean > .feature-item h3 {
-    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
-    margin-bottom: 12px;
-    line-height: 1.3;
-}
-#interactive-features .features-list--clean > .feature-item p {
-    font-size: .95rem;
-    line-height: 1.7;
-    margin: 0;
-}
-@media (min-width: 800px) {
-    #interactive-features .features-list--clean {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: clamp(18px, 2.5vw, 30px);
-    }
-}
-@media (max-width: 799px) {
-    #interactive-features .features-list--clean {
-        gap: 16px;
-    }
-}
-    </style>
-
-
-
-<!-- ستايل حركة الإغلاق الفخمة (Closing Animation) -->
-    <style>
-        .modal-overlay.closing {
-            display: flex !important; 
-            animation: fadeOutOverlay 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
-        }
-        .modal-overlay.closing .modal-content {
-            animation: popOutModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-        }
-
-        @keyframes fadeOutOverlay {
-            0% { opacity: 1; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-            100% { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
-        }
-        @keyframes popOutModal {
-            0% { opacity: 1; transform: scale(1) translateY(0); }
-            100% { opacity: 0; transform: scale(0.85) translateY(30px); }
-        }
-    </style>
-</head> <!-- الكلمة التي بحثت عنها -->
 <body>
+  <a class="skip-link" href="#main-content" data-i18n="skip_link">Skip to content</a>
 
-
-<!-- خلفية الفيديو الثابتة لكل الموقع -->
-<div id="global-video-bg" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; background-color: var(--secondary-color);">
-    
-    <!-- الفيديو الأول -->
-    <video id="bg-vid-1" muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.5s ease-in-out; opacity: 1;">
-        <source src="/Photos/bg-video.mp4" type="video/mp4">
-    </video>
-
-    <!-- الفيديو الثاني (مخفي في البداية) -->
-    <video id="bg-vid-2" muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.5s ease-in-out; opacity: 0;">
-        <source src="/Photos/bg-video.mp4" type="video/mp4">
-    </video>
-
-    <!-- الطبقة الكحلية الشفافة (مهمة لبروز النصوص) -->
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 20, 41, 0.85);"></div>
-</div>
-
-<!-- السكربت السحري لدمج الفيديوهين (Crossfade Illusion) -->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const v1 = document.getElementById('bg-vid-1');
-        const v2 = document.getElementById('bg-vid-2');
-        let activeVid = v1;
-        let nextVid = v2;
-        const fadeTime = 1.5; // مدة التداخل ثانية ونصف (لجعل الركض متصل كالسحر)
-
-        // تشغيل الفيديو الأول
-        v1.play();
-
-        function checkVideoLoop() {
-            // إذا اقترب الفيديو من النهاية بثانية ونصف
-            if (activeVid.duration > 0 && (activeVid.duration - activeVid.currentTime) <= fadeTime) {
-                // شغل الفيديو الثاني من البداية
-                nextVid.currentTime = 0;
-                nextVid.play();
-                
-                // أظهر الثاني وأخفِ الأول ببطء (تداخل سينمائي)
-                nextVid.style.opacity = '1';
-                activeVid.style.opacity = '0';
-                
-                // تبديل الأدوار للدورة القادمة
-                let temp = activeVid;
-                activeVid = nextVid;
-                nextVid = temp;
-                
-                // إيقاف مؤقت حتى ينتهي التداخل ثم نعاود المراقبة
-                setTimeout(checkVideoLoop, fadeTime * 1000 + 100);
-            } else {
-                // استمر بالمراقبة
-                requestAnimationFrame(checkVideoLoop);
-            }
-        }
-        
-        // بدء المراقبة
-        requestAnimationFrame(checkVideoLoop);
-    });
-</script>
-
-    <canvas id="stardust-canvas"></canvas>
-
- <header id="main-header">
-    <div class="container">
-        <!-- كود الشعار -->
-        <a href="#" class="logo">
-            <img src="/Photos/Logo2.png" alt="Royal Gravitas Arena Logo" class="official-logo">
-        </a>
-        
-        <nav class="main-nav">
-                <a href="#features" data-translate="nav_features">الميزات</a>
-                <a href="#stats" data-translate="nav_stats">الإحصائيات</a>
-                <a href="#" onclick="openHelpModal(); return false;" data-translate="nav_help">المساعدة</a>
-            </nav>
-        </div>
-    </header>
-<section id="hero" style="background: transparent; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-    <div class="container" style="position: relative; z-index: 2; width: 100%;">
-        <h1 class="reveal"><span data-translate="hero_subtitle">حوّل لياقتك إلى لعبة</span><div data-translate="hero_title">ارتقِ بقوتك</div></h1>
-        <p class="reveal subtitle" data-translate="hero_desc">انضم إلى ثورة اللياقة البدنية. اكتسب نقاط خبرة، تنافس مع الأصدقاء، وحقق أهدافك بطريقة لم تتخيلها من قبل.</p>
-
-        <!-- تغيير الكبسة إلى كبسة "كن شريكاً للنجاح" -->
-        <div class="reveal cta-buttons">
-            <a href="#" class="btn-primary" onclick="openPartnerModal(); return false;" style="font-size: 1.1rem; padding: 15px 35px;">
-                <i class="fa-solid fa-handshake-angle" style="margin-inline-end: 8px;"></i> <span id="partner-btn-text">Become a Strategic Partner</span>
-            </a>
-        </div>
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Royal Gravitas Arena home" data-i18n-aria="logo_home">
+        <img src="Photos/Logo2.png" class="brand-logo" alt="RGA" width="58" height="58">
+        <span class="brand-name">ROYAL GRAVITAS <strong>ARENA</strong></span>
+      </a>
+      <nav id="site-nav" class="site-nav" aria-label="Main navigation" data-i18n-aria="nav_aria">
+        <a href="#about" data-i18n="nav_company">Company</a>
+        <a href="#focus" data-i18n="nav_focus">Our focus</a>
+        <a href="#partnerships" data-i18n="nav_partnerships">Partnerships</a>
+      </nav>
+      <button class="header-contact" type="button" data-open-partner>
+        <span data-i18n="header_contact">Get in touch</span><span aria-hidden="true">↗</span>
+      </button>
+      <button class="nav-toggle" type="button" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation" data-i18n-aria="nav_open">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-</section>
+  </header>
 
-    <section id="stats" class="reveal">
-        <div class="container stats-container">
-            <div class="stat-item">
-                <div style="display: flex; justify-content: center; align-items: center; direction: ltr;">
-                    <span style="color: var(--primary-color); font-size: 2rem; font-weight: bold; margin-right: 3px;">+</span><div class="stat-number" data-target="1000">1000</div>
-                </div>
-                <div class="stat-label" data-translate="stat_active" style="white-space: nowrap; font-size: 1rem;">عضو نشط</div>
-            </div>
-            <div class="stat-item">
-                <div style="display: flex; justify-content: center; align-items: center; direction: ltr;">
-                    <span style="color: var(--primary-color); font-size: 2rem; font-weight: bold; margin-right: 3px;">+</span><div class="stat-number" data-target="500000">500,000</div>
-                </div>
-                <div class="stat-label" data-translate="stat_weight" style="white-space: nowrap; font-size: 1rem;">كجم تم رفعه</div>
-            </div>
-            <div class="stat-item">
-                <div style="display: flex; justify-content: center; align-items: center; direction: ltr;">
-                    <span style="color: var(--primary-color); font-size: 2rem; font-weight: bold; margin-right: 3px;">+</span><div class="stat-number" data-target="34000">34,000</div>
-                </div>
-                <div class="stat-label" data-translate="stat_challenges" style="white-space: nowrap; font-size: 1rem;">تحدي مكتمل</div>
-            </div>
+  <main id="main-content">
+    <section class="hero" id="top" aria-labelledby="hero-heading">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="hero_eyebrow">SPORTS TECHNOLOGY · LONG-TERM VISION</span></p>
+          <h1 id="hero-heading"><span data-i18n="hero_line1">The future of fitness</span><span class="serif-accent" data-i18n="hero_line2">is more connected.</span></h1>
+          <p class="hero-description" data-i18n="hero_desc">Royal Gravitas Arena is a sports technology venture exploring new ways to connect athletic performance, digital competition, and the wider fitness community.</p>
+          <div class="hero-actions">
+            <button class="btn btn-gold" type="button" data-open-partner><span data-i18n="hero_cta">Explore partnerships</span><span aria-hidden="true">↗</span></button>
+            <a class="text-link" href="#about"><span data-i18n="hero_secondary">Discover RGA</span><span aria-hidden="true">↓</span></a>
+          </div>
         </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-outer"></div>
+          <div class="orbit orbit-inner"></div>
+          <div class="orbit-axis axis-x"></div>
+          <div class="orbit-axis axis-y"></div>
+          <div class="brand-halo"><img src="Photos/Logo2.png" alt="" width="265" height="265"></div>
+          <div class="art-caption">RGA <span> / </span> 360°</div>
+          <div class="art-corner art-corner-a"></div><div class="art-corner art-corner-b"></div>
+        </div>
+      </div>
+      <div class="container hero-footer"><span data-i18n="hero_bottom">A considered approach to sport and technology.</span><span aria-hidden="true">01 / 03</span></div>
     </section>
 
-<section id="comparison-section" class="section reveal" style="background: transparent !important; border: none !important;">
-    <div class="container">
-        <h2 class="section-title" data-translate="comparison_title">
-            توقف عن التدريب، وابدأ <span style="color: var(--primary-color);">السيطرة</span>
-        </h2>
-        <p class="section-subtitle" data-translate="comparison_desc">
-            هناك طريقتان للتمرين. الطريقة التقليدية، وطريقة الأبطال.
-        </p>
-
-        <div class="comparison-grid">
-
-            <div class="comparison-column old-way">
-                <h3 data-translate="old_way_title">الطريقة القديمة</h3>
-                <div class="comparison-card reveal">
-                    <div class="comp-icon"><i class="fa-solid fa-book-dead"></i></div>
-                    <div class="comp-text">
-                        <h4 data-translate="old_way_1_title">تدريب عشوائي</h4>
-                        <p data-translate="old_way_1_desc">تمرين بدون خطة واضحة، أوزان منسية، وتقدم بطيء.</p>
-                    </div>
-                </div>
-                <div class="comparison-card reveal">
-                    <div class="comp-icon"><i class="fa-solid fa-bed"></i></div>
-                    <div class="comp-text">
-                        <h4 data-translate="old_way_2_title">ملل وفقدان شغف</h4>
-                        <p data-translate="old_way_2_desc">تكرار نفس الروتين يؤدي حتماً إلى فقدان الحماس والتوقف.</p>
-                    </div>
-                </div>
-                <div class="comparison-card reveal">
-                    <div class="comp-icon"><i class="fa-solid fa-user-slash"></i></div>
-                    <div class="comp-text">
-                        <h4 data-translate="old_way_3_title">رحلة فردية</h4>
-                        <p data-translate="old_way_3_desc">لا يوجد مجتمع يدعمك، لا منافسة تحفزك، ولا أحد يعترف بك.</p>
-                    </div>
-                </div>
+    <section class="section about-section" id="about" aria-labelledby="about-heading">
+      <div class="container">
+        <div class="section-heading"><span class="section-number">01</span><span class="section-kicker" data-i18n="about_kicker">WHO WE ARE</span><span class="heading-rule"></span></div>
+        <div class="about-layout">
+          <h2 class="section-title" id="about-heading" data-i18n="about_title">A long-term view of sport and technology.</h2>
+          <div class="about-copy">
+            <p data-i18n="about_p1">Royal Gravitas Arena (RGA) was created around the belief that sport can offer more than isolated workouts. We see potential in experiences that make progress meaningful and competition more accessible.</p>
+            <p data-i18n="about_p2">Our direction is to explore thoughtful digital products and collaborations that could connect athletes, fitness businesses, and communities in new ways.</p>
+            <div class="current-note">
+              <span class="note-marker" aria-hidden="true"></span>
+              <div><strong data-i18n="about_note_title">Our current priority</strong><p data-i18n="about_note_desc">Strategic development and conversations with potential partners.</p></div>
             </div>
-
-
-            <div class="comparison-column rga-way">
-                <h3 data-translate="rga_way_title">طريقة RGA</h3>
-                <div class="comparison-card reveal">
-                    <div class="comp-icon"><i class="fa-solid fa-microchip"></i></div>
-                    <div class="comp-text">
-                        <h4 data-translate="rga_way_1_title">مدرب ذكي (AI) يراقبك</h4>
-                        <p data-translate="rga_way_1_desc">نظام ذكاء اصطناعي يحلل أداءك، يتوقع أقصى وزن لك، ويحذرك من الإرهاق.</p>
-                    </div>
-                </div>
-                <div class="comparison-card reveal">
-                    <div class="comp-icon"><i class="fa-solid fa-khanda"></i></div>
-                    <div class="comp-text">
-                        <h4 data-translate="rga_way_2_title">عصابات، حروب، وجوائز</h4>
-                        <p data-translate="rga_way_2_desc">أسس عصابتك، أعلن الحرب على الأندية الأخرى، واغنموا نقاط الخبرة.</p>
-                    </div>
-                </div>
-                <div class="comparison-card reveal">
-                    <div class="comp-icon"><i class="fa-solid fa-crown"></i></div>
-                    <div class="comp-text">
-                        <h4 data-translate="rga_way_3_title">العب وسيطر على مدينتك</h4>
-                        <p data-translate="rga_way_3_desc">حطم الأرقام، تربع على عرش مدينتك، واجمع أوسمة نادرة تثبت فخامتك.</p>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
-</section>
-
-<section id="interactive-features" class="section reveal" style="background: transparent !important; border: none !important;">
-    <div class="container">
-        <h2 class="section-title">
-            <span data-translate="feat_main_1">أطلق</span>
-            <span style="color: var(--primary-color);" data-translate="feat_main_2">العنان لقدراتك</span>
-        </h2>
-        <p class="section-subtitle" data-translate="feat_subtitle">كل ما تحتاجه للوصول إلى القمة في منصة واحدة متكاملة.</p>
-        
-        <div class="features-wrapper features-wrapper--clean">
-            <div class="features-list features-list--clean">
-
-                <div class="feature-item">
-                    <div class="icon"><i class="fa-solid fa-brain fa-2x"></i></div>
-                    <h3 data-translate="feat1_title">المدرب الذكي (AI Coach)</h3>
-                    <p data-translate="feat1_desc">خوارزميات ذكاء اصطناعي متطورة تحلل كل تمرين، تقرأ مستوى الإرهاق العصبي (TSB)، وتخبرك باللحظة المثالية لكسر رقمك القياسي مع رادار يراقب توازن عضلاتك.</p>
-                </div>
-
-                <div class="feature-item">
-                    <div class="icon"><i class="fa-solid fa-shield-halved fa-2x"></i></div>
-                    <h3 data-translate="feat2_title">حروب العصابات (Iron Guilds)</h3>
-                    <p data-translate="feat2_desc">الذئاب المنفردة لا تنجو هنا. أسس عصابتك أو انضم لكلان، جهز مقاتليك، وأعلن الحرب الطاحنة ضد العصابات الأخرى لسحق الخصوم وغنم الجوائز الملحمية.</p>
-                </div>
-
-                <div class="feature-item">
-                    <div class="icon"><i class="fa-solid fa-gem fa-2x"></i></div>
-                    <h3 data-translate="feat3_title">نظام وحش المدينة والمكافآت</h3>
-                    <p data-translate="feat3_desc">سجل أعلى وزن، ارفع فيديو الإثبات، واجلس على عرش مدينتك. احصل على 'ضريبة الملك' اليومية، واجمع أوسمة وإطارات نادرة من المتجر تثبت فخامتك.</p>
-                </div>
-
-                <div class="feature-item">
-                    <div class="icon"><i class="fa-solid fa-gamepad fa-2x"></i></div>
-                    <h3 data-translate="feat4_title">ألعاب القوة والتسجيل المباشر</h3>
-                    <p data-translate="feat4_desc">سجل تمرينك بالوقت الفعلي مع مؤقت راحة ذكي. وفي وقت الفراغ؟ العب تحديات الديدليفت والسكوات وصائد الأوزان على إيقاع الموسيقى لتضاعف نقاطك.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-    <section id="corporate-info" class="section reveal" style="background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05);">
-        <div class="container">
-            <div class="corporate-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
-                
-                <div class="corp-column">
-                    <h3 style="color: var(--white); margin-bottom: 20px; font-weight: 900;" data-translate="corp_about_title">عن Royal Gravitas Arena</h3>
-                    <p style="font-size: 0.95rem; color: var(--slate); line-height: 1.8;" data-translate="corp_about_desc">
-                        نحن لسنا مجرد تطبيق للياقة البدنية؛ نحن مؤسسة رائدة في تكنولوجيا الأداء الرياضي. هدفنا هو دمج العلم مع الألعاب لخلق تجربة تدريبية فريدة تدفع بالبشر إلى أقصى قدراتهم البدنية والذهنية.
-                    </p>
-                </div>
-
-                <div class="corp-column">
-                    <h3 style="color: var(--white); margin-bottom: 20px; font-weight: 900;" data-translate="corp_values_title">قيمنا الأساسية</h3>
-                    <ul style="list-style: none; color: var(--slate); font-size: 0.95rem;">
-                        <li style="margin-bottom: 10px;"><i class="fa-solid fa-shield-halved" style="color: var(--primary-color); margin-left: 10px;"></i> <strong data-translate="val1_t">النزاهة:</strong> <span data-translate="val1_d">نظام التحقق بالفيديو يضمن منافسة شريفة للجميع.</span></li>
-                        <li style="margin-bottom: 10px;"><i class="fa-solid fa-microchip" style="color: var(--primary-color); margin-left: 10px;"></i> <strong data-translate="val2_t">الابتكار:</strong> <span data-translate="val2_d">استخدام خوارزميات الـ TSB والرادار العضلي المتقدمة.</span></li>
-                        <li style="margin-bottom: 10px;"><i class="fa-solid fa-earth-americas" style="color: var(--primary-color); margin-left: 10px;"></i> <strong data-translate="val3_t">الشمولية:</strong> <span data-translate="val3_d">مجتمع عالمي يضم أبطالاً من كافة أنحاء العالم.</span></li>
-                    </ul>
-                </div>
-
-                <div class="corp-column">
-                    <h3 style="color: var(--white); margin-bottom: 20px; font-weight: 900;" data-translate="corp_contact_title">المراسلات الرسمية</h3>
-                    <p style="font-size: 0.95rem; color: var(--slate); margin-bottom: 15px;" data-translate="corp_contact_desc">للاستفسارات التجارية، الشراكات، أو الدعم الفني المتقدم، يرجى التواصل معنا عبر القنوات الرسمية:</p>
-                    <div style="background: rgba(0,242,167,0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary-color);">
-                        <p style="color: var(--white); font-weight: bold; margin-bottom: 5px;"><i class="fa-solid fa-envelope" style="color: var(--primary-color); margin-left: 10px;"></i> SUPPORT@RGA360.COM</p>
-                        <p style="color: var(--slate); font-size: 0.8rem;" data-translate="corp_response_time">وقت الاستجابة المتوقع: خلال 24 ساعة عمل.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+      </div>
     </section>
 
-
-<footer id="main-footer">
-    <div class="container">
-        
-        <!-- إضافة الشعار في الفوتر -->
-        <div style="margin-bottom: 30px;">
-            <img src="/Photos/Logo2.png" alt="RGA Logo" style="height: 60px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1));">
+    <section class="section focus-section" id="focus" aria-labelledby="focus-heading">
+      <div class="container">
+        <div class="section-heading"><span class="section-number">02</span><span class="section-kicker" data-i18n="focus_kicker">THE DIRECTION</span><span class="heading-rule"></span></div>
+        <div class="section-lead">
+          <h2 class="section-title" id="focus-heading" data-i18n="focus_title">Where we're looking ahead.</h2>
+          <p class="section-intro" data-i18n="focus_intro">Three areas guide our thinking as we consider the possibilities ahead.</p>
         </div>
-
-        <div class="corporate-footer-links">
-                <a href="#" onclick="openLegalModal('privacy'); return false;" data-translate="ft_privacy">سياسة الخصوصية</a>
-                <a href="#" onclick="openLegalModal('terms'); return false;" data-translate="ft_terms">شروط الخدمة</a>
-                <a href="#" onclick="openLegalModal('refund'); return false;" data-translate="ft_refund">سياسة الاسترجاع </a>
-                <a href="#" onclick="openLegalModal('community'); return false;" data-translate="ft_community">سياسات مجتمع الأبطال</a>
-            </div>
-
-            <div class="language-switcher">
-                <div class="lang-options" id="footer-lang-options">
-                    <a href="#" onclick="selectLanguage('ar'); document.getElementById('footer-lang-options').classList.remove('active'); return false;">العربية</a>
-                    <a href="#" onclick="selectLanguage('en'); document.getElementById('footer-lang-options').classList.remove('active'); return false;">English</a>
-                </div>
-                <button class="lang-button" onclick="document.getElementById('footer-lang-options').classList.toggle('active')">
-                    <span data-translate="language_btn">اللغة</span><i class="fa-solid fa-chevron-up arrow"></i>
-                </button>
-            </div>
-
-            <p class="copyright">&copy; 2026 Royal Gravitas Arena. <span data-translate="footer_rights">جميع الحقوق محفوظة.</span></p>
+        <div class="focus-grid">
+          <article class="focus-card">
+            <span class="card-top"><span class="card-index">01</span><span class="card-symbol" aria-hidden="true">↗</span></span>
+            <h3 data-i18n="focus_1_title">Performance technology</h3>
+            <p data-i18n="focus_1_desc">Exploring tools that help athletes understand their progress and approach training with greater purpose.</p>
+            <span class="card-line" aria-hidden="true"></span>
+          </article>
+          <article class="focus-card">
+            <span class="card-top"><span class="card-index">02</span><span class="card-symbol" aria-hidden="true">◎</span></span>
+            <h3 data-i18n="focus_2_title">Digital competition</h3>
+            <p data-i18n="focus_2_desc">Considering how well-designed challenges could make fitness more engaging, measurable, and connected.</p>
+            <span class="card-line" aria-hidden="true"></span>
+          </article>
+          <article class="focus-card">
+            <span class="card-top"><span class="card-index">03</span><span class="card-symbol" aria-hidden="true">◇</span></span>
+            <h3 data-i18n="focus_3_title">Connected communities</h3>
+            <p data-i18n="focus_3_desc">Imagining better ways for people, gyms, and organizations to take part in a shared sporting culture.</p>
+            <span class="card-line" aria-hidden="true"></span>
+          </article>
         </div>
-    </footer>
+      </div>
+    </section>
 
-
-
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 600px; max-height: 85vh; overflow-y: auto; padding: 2rem;">
-            <button class="close-modal-btn" onclick="closeHelpModal()">&times;</button>
-            <h2 style="color: var(--primary-color); font-weight: 900; margin-bottom: 20px; text-align: center;" data-translate="help_title">مركز المساعدة </h2>
-            
-            <div class="tab-switcher" style="margin-bottom: 20px;">
-                <button class="tab-btn active" id="faq-tab-btn" onclick="switchHelpTab('faq')" data-translate="faq_tab">الأسئلة الشائعة</button>
-                <button class="tab-btn" id="contact-tab-btn" onclick="switchHelpTab('contact')" data-translate="contact_tab">تواصل معنا</button>
-            </div>
-
-            <div id="faq-section">
-                <div id="faq-container" class="accordion"></div>
-            </div>
-
-            <div id="contact-section" style="display: none;">
-                <p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 20px; text-align: center;" data-translate="contact_desc">عندك مشكلة أو اقتراح؟ ابعث للإدارة مباشرة!</p>
-                <form id="contact-us-form">
-                    <div class="input-group">
-                        <input type="email" id="contact-email" class="input-field" placeholder="بريدك الإلكتروني" required>
-                    </div>
-                    <div class="input-group">
-                        <textarea id="contact-message" class="input-field" placeholder="اكتب رسالتك هنا..." rows="4" required style="resize: none;"></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary" style="width: 100%;" id="contact-submit-btn" data-translate="send_msg">إرسال الرسالة</button>
-                </form>
-            </div>
+    <section class="section partners-section" id="partnerships" aria-labelledby="partner-heading">
+      <div class="container">
+        <div class="section-heading"><span class="section-number">03</span><span class="section-kicker" data-i18n="partner_kicker">STRATEGIC PARTNERSHIPS</span><span class="heading-rule"></span></div>
+        <div class="partner-panel">
+          <div class="partner-copy">
+            <span class="partner-overline" data-i18n="partner_overline">OPEN TO CONVERSATIONS</span>
+            <h2 id="partner-heading" data-i18n="partner_title">Good partnerships start with a conversation.</h2>
+            <p data-i18n="partner_desc">We welcome discussions with fitness businesses, sports brands, and technology organizations interested in exploring what could come next.</p>
+          </div>
+          <div class="partner-action">
+            <p class="action-label" data-i18n="partner_action_label">BUSINESS & PARTNERSHIP INQUIRIES</p>
+            <button class="btn btn-gold" type="button" data-open-partner><span data-i18n="partner_button">Start a conversation</span><span aria-hidden="true">↗</span></button>
+            <a class="contact-email" href="mailto:SUPPORT@RGA360.COM?subject=Partnership%20Inquiry%20-%20Royal%20Gravitas%20Arena">SUPPORT@RGA360.COM</a>
+          </div>
         </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-main">
+      <div class="footer-brand">
+        <img src="Photos/Logo2.png" alt="RGA" width="52" height="52">
+        <div><strong>ROYAL GRAVITAS ARENA</strong><p data-i18n="footer_tagline">Sports technology. A long-term vision.</p></div>
+      </div>
+      <div class="footer-links">
+        <a href="#about" data-i18n="nav_company">Company</a>
+        <a href="#focus" data-i18n="nav_focus">Our focus</a>
+        <a href="#partnerships" data-i18n="nav_partnerships">Partnerships</a>
+        <a href="mailto:SUPPORT@RGA360.COM?subject=RGA%20Business%20Inquiry" data-i18n="footer_contact">Contact</a>
+      </div>
+      <div class="footer-language" aria-label="Website language" data-i18n-aria="language_label">
+        <span data-i18n="language_label">Language</span>
+        <div class="language-options" role="group" aria-label="Language" data-i18n-aria="language_label">
+          <button type="button" data-language="en" aria-pressed="true">English</button>
+          <button type="button" data-language="ar" aria-pressed="false">العربية</button>
+        </div>
+      </div>
     </div>
+    <div class="container footer-bottom"><p>© <span id="year">2026</span> Royal Gravitas Arena. <span data-i18n="footer_rights">All rights reserved.</span></p><p data-i18n="footer_closing">Built with purpose. Looking ahead.</p></div>
+  </footer>
 
-    <div id="legal-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 800px; max-height: 85vh; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-            <div style="padding: 20px 25px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
-                <h2 id="legal-modal-title" style="color: var(--primary-color); font-weight: 900; margin: 0;">العنوان</h2>
-                <button onclick="closeLegalModal()" style="background: none; border: none; color: var(--slate); font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
-            </div>
-            <div id="legal-modal-body" class="legal-text-body" style="padding: 25px; overflow-y: auto; flex: 1; color: var(--white); font-size: 0.95rem; line-height: 1.8;">
-                </div>
-        </div>
+  <div class="modal" id="partner-modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" hidden>
+    <div class="modal-backdrop" data-close-partner></div>
+    <div class="modal-card" role="document">
+      <button type="button" class="modal-close" data-close-partner aria-label="Close" data-i18n-aria="modal_close"><span aria-hidden="true">×</span></button>
+      <div class="modal-monogram">RGA<span class="modal-monogram-line"></span></div>
+      <span class="modal-kicker" data-i18n="modal_kicker">STRATEGIC PARTNERSHIPS</span>
+      <h2 id="dialog-title" data-i18n="modal_title">Let's start a conversation.</h2>
+      <p id="dialog-description" data-i18n="modal_desc">If you have a collaboration idea, we'd be glad to hear from you. Share a little about your organization and what you'd like to explore.</p>
+      <div class="modal-info"><span data-i18n="modal_email_label">OUR BUSINESS CONTACT</span><a href="mailto:SUPPORT@RGA360.COM?subject=Partnership%20Inquiry%20-%20Royal%20Gravitas%20Arena">SUPPORT@RGA360.COM</a></div>
+      <a class="btn btn-gold modal-mail" href="mailto:SUPPORT@RGA360.COM?subject=Partnership%20Inquiry%20-%20Royal%20Gravitas%20Arena"><span data-i18n="modal_send">Email the RGA team</span><span aria-hidden="true">↗</span></a>
+      <p class="modal-footnote" data-i18n="modal_note">Please include your name, organization, and a brief outline of your proposal.</p>
     </div>
-
-
-
-    <!-- Auth Modal -->
-<div id="toast-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;"></div>
-
-
-
-<div id="auth-modal">
-    <div class="modal-content">
-        <button class="close-modal-btn">&times;</button>
-        <div class="tab-switcher">
-            <button class="tab-btn active" data-form="login" data-translate="auth_login_tab">تسجيل الدخول</button>
-            <button class="tab-btn" data-form="signup" data-translate="auth_signup_tab">تسجيل جديد</button>
-        </div>
-        
-        <div class="form-container" id="login-form">
-            <form id="real-login-form">
-                <div class="input-group">
-                    <input type="email" id="login-email" class="input-field" placeholder="البريد الإلكتروني" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="login-password" class="input-field" placeholder="كلمة المرور" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;" data-translate="auth_login_btn">الدخول</button>
-                <a href="#" id="forgot-password-link" style="color: var(--slate); font-size: 0.8rem; display: block; margin-top: 10px; text-align: center; text-decoration: none;" data-translate="auth_forgot_pass">نسيت كلمة المرور؟</a>
-            </form>
-        </div>
-
-<div class="form-container hidden" id="signup-form">
-    <form id="real-signup-form">
-        <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
-            <input type="text" id="signup-firstname" class="input-field" placeholder="الاسم الأول" required>
-            <input type="text" id="signup-lastname" class="input-field" placeholder="الاسم الأخير" required>
-        </div>
-        <div class="input-group">
-            <input type="email" id="signup-email" class="input-field" placeholder="البريد الإلكتروني" required>
-        </div>
-        <div class="input-group">
-            <input type="password" id="signup-password" class="input-field" placeholder="كلمة المرور" required>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%;" data-translate="auth_signup_btn">إنشاء حساب</button>
-    </form>
-</div>
-
-    </div>
-</div>
-
-
-<!-- نافذة الشركاء (B2B Partnership Modal) - لغة تجارية عالمية بدون مصطلحات ألعاب -->
-    <div id="partner-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 10, 20, 0.75); z-index: 999999; align-items: center; justify-content: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
-        <div class="modal-content partner-modal-content">
-            
-            <button onclick="closePartnerModal()" class="partner-close-btn">&times;</button>
-            
-            <div class="partner-icon-wrapper">
-                <i class="fa-solid fa-briefcase partner-gem-icon"></i>
-            </div>
-            
-            <h2 id="p-title">شراكة استراتيجية لنمو أعمالك</h2>
-            <p id="p-desc">
-                سواء كنت تدير صالة رياضية أو تمتلك علامة تجارية في المكملات والمعدات، نوفر لك منظومة نمو متكاملة تضمن وصولك لجمهور رياضي نوعي داخل مدينتك.
-            </p>
-            
-            <div id="partner-info-box">
-                <h4 id="p-why">مزايا الشراكة التجارية:</h4>
-                <ul>
-                    <li>
-                        <i class="fa-solid fa-bullhorn"></i> 
-                        <div>
-                            <strong id="p-b1t">تسويق شامل على مستوى مدينتك:</strong> 
-                            <span id="p-b1d">حملات استهداف محلي موسعة داخل نطاق مدينتك بالكامل لتوجيه الرياضيين والمهتمين مباشرة إلى باب منشأتك.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <i class="fa-solid fa-chart-line"></i> 
-                        <div>
-                            <strong id="p-b2t">زيادة المشتركين والمبيعات:</strong> 
-                            <span id="p-b2d">تدفق مستمر لاشتراكات جديدة للصالة، مع فتح منافذ ترويجية مباشرة لمنتجات المكملات والمعدات الرياضية.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <i class="fa-solid fa-cubes"></i> 
-                        <div>
-                            <strong id="p-b3t">تطوير المنشأة وتعزيز ولاء الأعضاء:</strong> 
-                            <span id="p-b3d">حلول عصرية تنقل صالتك إلى المستوى العالمي وترفع رضا المشتركين لضمان استمرارهم وتجديد اشتراكاتهم.</span>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            
-            <p id="p-footer">جاهز لتوسيع قاعدة عملائك؟ تواصل مباشرة مع إدارة الشراكات والتطوير:</p>
-            <a href="mailto:SUPPORT@RGA360.COM?subject=طلب شراكة استراتيجية - RGA Commercial Partnership" class="btn-primary partner-submit-btn">
-                <i class="fa-solid fa-envelope" style="margin-inline-end: 8px;"></i> SUPPORT@RGA360.COM
-            </a>
-        </div>
-    </div>
-
-
-
-
-
-
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
-
-    <script src="main.js"></script>
-
-    <script>
-    let deferredPrompt;
-
-
-window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-
-        setTimeout(() => showPremiumInstallPrompt('android'), 1000);
-    });
-
-    function checkIOS() {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-        const hasSeenPrompt = localStorage.getItem('premium_prompt_dismissed');
-
-        if (isIOS && !isStandalone && !hasSeenPrompt) {
-            setTimeout(() => showPremiumInstallPrompt('ios'), 1500);
-        }
-    }
-
-
-    function showPremiumInstallPrompt(os) {
-        if (document.getElementById('premium-install-prompt')) return;
-
-        const isEn = (localStorage.getItem('lang') || 'en') === 'en';
-        const copy = isEn ? {
-            title: 'The Ultimate RGA Fit Experience',
-            desc: 'Take your fitness to the next level. Install the app for quick access and a seamless experience.',
-            tap: 'Tap', then: 'then select', add: 'Add to Home Screen', install: 'Install App Now'
-        } : {
-            title: 'تجربة RGA Fit الأقوى',
-            desc: 'ارتقِ بمستواك وثبّت التطبيق للوصول السريع وتجربة أداء لا مثيل لها.',
-            tap: 'اضغط على', then: 'ثم اختر', add: 'إضافة للشاشة الرئيسية', install: 'تثبيت التطبيق الآن'
-        };
-        let actionHTML = '';
-        if (os === 'ios') {
-            actionHTML = `
-                <div class="ios-prompt-instructions" dir="${isEn ? 'ltr' : 'rtl'}">
-                    ${copy.tap}
-                    <svg viewBox="0 0 50 50" width="22" height="22" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 4px; transform: translateY(2px);"><path d="M25 3v26M16 11l9-9 9 9M10 21v18a4 4 0 004 4h22a4 4 0 004-4V21"/></svg>
-                    ${copy.then}
-                    <span style="color: #00f2a7; margin: 0 4px;">"${copy.add}"</span>
-                    <i class="far fa-plus-square" style="font-size: 1.2rem;"></i>
-                </div>
-            `;
-        } else {
-            actionHTML = `
-                <button class="ios-prompt-install-action" onclick="triggerAndroidInstall()" style="width: 100%; padding: 12px; font-size: 1.05rem; font-family: 'Cairo', sans-serif; font-weight: 800; border-radius: 12px; background: #00f2a7; color: #0A1429; border: none; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 15px rgba(0, 242, 167, 0.4); transition: all 0.3s ease;">
-                    <i class="fas fa-download"></i> ${copy.install}
-                </button>
-            `;
-        }
-
-        const promptHTML = `
-            <div class="ios-prompt-overlay" id="premium-install-prompt" data-install-os="${os}" dir="${isEn ? 'ltr' : 'rtl'}">
-                <button class="ios-prompt-close" onclick="closePremiumPrompt()" type="button" aria-label="Close installation instructions">&times;</button>
-                <div class="ios-prompt-header">
-                    <img src="/Photos/icon2.png" alt="RGA Fit" class="ios-prompt-icon">
-                    <div class="ios-prompt-copy">
-                        <h3 class="ios-prompt-title">${copy.title}</h3>
-                        <p class="ios-prompt-desc">${copy.desc}</p>
-                    </div>
-                </div>
-                ${actionHTML}
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', promptHTML);
-    }
-
-    // Update an already-visible install banner when visitors switch languages.
-    window.refreshPremiumInstallPrompt = function () {
-        const prompt = document.getElementById('premium-install-prompt');
-        if (!prompt) return;
-        const os = prompt.dataset.installOs || 'android';
-        prompt.remove();
-        showPremiumInstallPrompt(os);
-    };
-
-    window.triggerAndroidInstall = async function() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            closePremiumPrompt();
-        }
-    };
-
-
-    window.closePremiumPrompt = function() {
-        const prompt = document.getElementById('premium-install-prompt');
-        if (prompt) {
-            prompt.classList.add('is-dismissing');
-            setTimeout(() => prompt.remove(), 300);
-        }
-        localStorage.setItem('premium_prompt_dismissed', 'true');
-    };
-
-    document.addEventListener('DOMContentLoaded', checkIOS);
-
-    // ==========================================
-    // كود نافذة الشركاء المدمج (لترجمة النصوص تلقائياً)
-    // ==========================================
-    
-function translatePartnerModal() {
-        const lang = localStorage.getItem('lang') || 'en';
-        const isEn = lang === 'en';
-
-        const dict = {
-            btn: isEn ? "Become a Strategic Partner" : "كن شريكاً للنجاح",
-            title: isEn ? "Strategic Partnerships for Growth" : "شراكة استراتيجية لنمو أعمالك",
-            desc: isEn 
-                ? "Whether you own a fitness facility or represent a sports supplement and equipment brand, we empower your business to capture highly engaged local athletes."
-                : "سواء كنت تدير صالة رياضية أو تمتلك علامة تجارية في المكملات والمعدات، نوفر لك منظومة نمو متكاملة تضمن وصولك لجمهور رياضي نوعي داخل مدينتك.",
-            why: isEn ? "Key Commercial Advantages:" : "مزايا الشراكة التجارية:",
-            b1t: isEn ? "City-Wide Targeted Exposure:" : "تسويق شامل على مستوى مدينتك:",
-            b1d: isEn 
-                ? "Direct local promotional campaigns across your entire city, funneling active athletes straight to your gym or retail shop."
-                : "حملات استهداف محلي موسعة داخل نطاق مدينتك بالكامل لتوجيه الرياضيين والمهتمين مباشرة إلى باب منشأتك.",
-            b2t: isEn ? "Drive Memberships & Retail Sales:" : "زيادة المشتركين والمبيعات:",
-            b2d: isEn 
-                ? "Steady acquisition of new gym members alongside dedicated high-conversion channels for sports nutrition and gear."
-                : "تدفق مستمر لاشتراكات جديدة للصالة، مع فتح منافذ ترويجية مباشرة لمنتجات المكملات والمعدات الرياضية.",
-            b3t: isEn ? "Facility Modernization & Member Loyalty:" : "تطوير المنشأة وتعزيز ولاء الأعضاء:",
-            b3d: isEn 
-                ? "Modern solutions that elevate your facility's value and significantly maximize customer retention and renewal rates."
-                : "حلول عصرية تنقل صالتك إلى المستوى العالمي وترفع رضا المشتركين لضمان استمرارهم وتجديد اشتراكاتهم.",
-            footer: isEn 
-                ? "Ready to scale your business? Contact our Commercial Partnership Team:"
-                : "جاهز لتوسيع قاعدة عملائك؟ تواصل مباشرة مع إدارة الشراكات والتطوير:"
-        };
-
-        if(document.getElementById('partner-btn-text')) document.getElementById('partner-btn-text').innerText = dict.btn;
-        if(document.getElementById('p-title')) document.getElementById('p-title').innerText = dict.title;
-        if(document.getElementById('p-desc')) document.getElementById('p-desc').innerText = dict.desc;
-        if(document.getElementById('p-why')) document.getElementById('p-why').innerText = dict.why;
-        if(document.getElementById('p-b1t')) document.getElementById('p-b1t').innerText = dict.b1t;
-        if(document.getElementById('p-b1d')) document.getElementById('p-b1d').innerText = dict.b1d;
-        if(document.getElementById('p-b2t')) document.getElementById('p-b2t').innerText = dict.b2t;
-        if(document.getElementById('p-b2d')) document.getElementById('p-b2d').innerText = dict.b2d;
-        if(document.getElementById('p-b3t')) document.getElementById('p-b3t').innerText = dict.b3t;
-        if(document.getElementById('p-b3d')) document.getElementById('p-b3d').innerText = dict.b3d;
-        if(document.getElementById('p-footer')) document.getElementById('p-footer').innerText = dict.footer;
-        
-        const pBox = document.getElementById('partner-info-box');
-        if (pBox) {
-            pBox.style.textAlign = isEn ? 'left' : 'right';
-            pBox.style.direction = isEn ? 'ltr' : 'rtl';
-        }
-    }
-
-    // استدعاء الترجمة فور تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', translatePartnerModal);
-
-// دوال فتح وإغلاق النافذة
-    function openPartnerModal() {
-        translatePartnerModal(); // تحديث اللغة
-        const modal = document.getElementById('partner-modal');
-        modal.style.display = 'flex'; // نعرضها أولاً
-        modal.classList.remove('closing'); // نحذف كلاس الإغلاق إذا كان موجوداً
-        modal.classList.add('active'); // نضيف كلاس الدخول
-        document.body.style.overflow = 'hidden'; // نوقف سكرول الموقع
-    }
-
-    function closePartnerModal() {
-        const modal = document.getElementById('partner-modal');
-        
-        // 1. نشيل كلاس الدخول ونحط كلاس الخروج (الأنيميشن العكسي)
-        modal.classList.remove('active');
-        modal.classList.add('closing');
-        
-        // 2. نرجع سكرول الموقع يشتغل
-        document.body.style.overflow = 'auto'; 
-        
-        // 3. ننتظر 400 ملي ثانية (نفس مدة الأنيميشن) وبعدين نخفيها نهائياً
-        setTimeout(() => {
-            modal.style.display = 'none';
-            modal.classList.remove('closing');
-        }, 400);
-    }
-
-    // إغلاق النافذة عند الضغط على الخلفية الشفافة
-    window.addEventListener('click', function(e) {
-        const pModal = document.getElementById('partner-modal');
-        if (e.target === pModal) {
-            closePartnerModal();
-        }
-    });
-
-
-    </script>
-    
-    <!-- RGA Custom Alert/Confirm Modal -->
-<div id="rga-custom-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 20, 41, 0.9); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-    <div style="background: linear-gradient(145deg, rgba(17, 34, 64, 0.98), rgba(10, 20, 41, 0.98)); border: 1px solid var(--primary-color); border-radius: 15px; width: 90%; max-width: 400px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,242,167,0.2); animation: popEpic 0.3s ease-out;">
-        <h3 id="rga-modal-title" style="color: var(--primary-color); font-weight: 900; margin-bottom: 15px;">تنبيه</h3>
-        <p id="rga-modal-text" style="color: white; font-size: 1rem; margin-bottom: 25px; line-height: 1.5;"></p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <button id="rga-modal-confirm" class="btn-primary" style="flex: 1; padding: 10px;">نعم</button>
-            <button id="rga-modal-cancel" class="btn-primary" style="flex: 1; padding: 10px; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: #ff4d4d;">إلغاء</button>
-        </div>
-    </div>
-</div>
+  </div>
 </body>
 </html>
