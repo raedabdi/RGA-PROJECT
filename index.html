@@ -858,6 +858,40 @@
     #corporate-info .corporate-grid { gap: 30px !important; }
     #interactive-features .section-title { font-size: clamp(1.75rem, 7vw, 2.4rem); }
     #interactive-features .section-subtitle { margin-bottom: 2rem; }
+
+
+/* Clean corporate layout for the interactive features section */
+#interactive-features .features-wrapper,
+#interactive-features .features-wrapper--clean {
+    display: block !important;
+}
+#interactive-features .features-list,
+#interactive-features .features-list--clean {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 22px;
+    align-items: stretch;
+}
+#interactive-features .feature-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+    min-height: 100%;
+}
+#interactive-features .features-visual {
+    display: none !important;
+}
+@media (min-width: 992px) {
+    #interactive-features .features-list,
+    #interactive-features .features-list--clean {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 24px;
+    }
+    #interactive-features .feature-item {
+        padding: 26px;
+    }
+}
 }
     </style>
 
@@ -1070,36 +1104,32 @@
         </h2>
         <p class="section-subtitle" data-translate="feat_subtitle">كل ما تحتاجه للوصول إلى القمة في منصة واحدة متكاملة.</p>
         
-        <div class="features-wrapper">
-            <div class="features-list">
+        <div class="features-wrapper features-wrapper--clean">
+            <div class="features-list features-list--clean">
 
-                <div class="feature-item" data-img="Photos/des1.png">
+                <div class="feature-item">
                     <div class="icon"><i class="fa-solid fa-brain fa-2x"></i></div>
                     <h3 data-translate="feat1_title">المدرب الذكي (AI Coach)</h3>
                     <p data-translate="feat1_desc">خوارزميات ذكاء اصطناعي متطورة تحلل كل تمرين، تقرأ مستوى الإرهاق العصبي (TSB)، وتخبرك باللحظة المثالية لكسر رقمك القياسي مع رادار يراقب توازن عضلاتك.</p>
                 </div>
 
-                <div class="feature-item" data-img="Photos/cr1.png">
+                <div class="feature-item">
                     <div class="icon"><i class="fa-solid fa-shield-halved fa-2x"></i></div>
                     <h3 data-translate="feat2_title">حروب العصابات (Iron Guilds)</h3>
                     <p data-translate="feat2_desc">الذئاب المنفردة لا تنجو هنا. أسس عصابتك أو انضم لكلان، جهز مقاتليك، وأعلن الحرب الطاحنة ضد العصابات الأخرى لسحق الخصوم وغنم الجوائز الملحمية.</p>
                 </div>
 
-                <div class="feature-item" data-img="Photos/cr3.png">
+                <div class="feature-item">
                     <div class="icon"><i class="fa-solid fa-gem fa-2x"></i></div>
                     <h3 data-translate="feat3_title">نظام وحش المدينة والمكافآت</h3>
                     <p data-translate="feat3_desc">سجل أعلى وزن، ارفع فيديو الإثبات، واجلس على عرش مدينتك. احصل على 'ضريبة الملك' اليومية، واجمع أوسمة وإطارات نادرة من المتجر تثبت فخامتك.</p>
                 </div>
 
-                <div class="feature-item" data-img="Photos/cr12.png">
+                <div class="feature-item">
                     <div class="icon"><i class="fa-solid fa-gamepad fa-2x"></i></div>
                     <h3 data-translate="feat4_title">ألعاب القوة والتسجيل المباشر</h3>
                     <p data-translate="feat4_desc">سجل تمرينك بالوقت الفعلي مع مؤقت راحة ذكي. وفي وقت الفراغ؟ العب تحديات الديدليفت والسكوات وصائد الأوزان على إيقاع الموسيقى لتضاعف نقاطك.</p>
                 </div>
-            </div>
-            <div class="features-visual">
-
-                <img id="feature-image" src="Photos/des1.png" alt="RGA fitness technology and training experience" loading="lazy" onerror="this.style.display='none'">
             </div>
         </div>
     </div>
